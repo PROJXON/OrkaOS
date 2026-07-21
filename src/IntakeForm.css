@@ -440,3 +440,15 @@ fieldset.intake-field > legend { padding: 0; }
   color: var(--ai-text); background: var(--ai-tint-strong);
   border-color: var(--ai-border-strong);
 }
+
+.intake-turnstile {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  margin-top: 1rem;
+}
+
+.intake-turnstile > div:first-child {
+  width: 100%;
+  max-width: 100%;
+}

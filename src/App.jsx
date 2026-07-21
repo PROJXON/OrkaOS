@@ -324,6 +324,33 @@ export default function App() {
   const [brandSwatch, setBrandSwatch] = useState('ocean');
   const [activeRailSection, setActiveRailSection] = useState('top');
 
+  async function submitIntakeForm(payload) {
+    const response = await fetch('/api/intake', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    let result = null;
+
+    try {
+      result = await response.json();
+    } catch {
+      // The generic error below handles invalid responses.
+    }
+
+    if (!response.ok || !result?.ok) {
+      throw new Error(
+        result?.error ||
+        'Unable to submit the form. Please try again.'
+      );
+    }
+
+    return result;
+  }
+
   // Keep the root data attribute and localStorage in sync after a theme change.
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -1792,7 +1819,7 @@ export default function App() {
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}
           defaultIntent={formIntent}
-          onSubmitData={handleIntakeSubmit}
+          onSubmitData={submitIntakeForm}
         />
       </div>
     </>

@@ -240,6 +240,9 @@ export default function IntakeForm({
   const id = useId();
   const dialogRef = useRef(null);
   const previouslyFocusedRef = useRef(null);
+  const turnstileContainerRef = useRef(null);
+  const turnstileWidgetIdRef = useRef(null);
+  const turnstileTokenRef = useRef('');
   const mappedIntent = INTENT_MAPPING[defaultIntent] || '';
   const resolvedIntent = ENABLED_GOALS.includes(mappedIntent) ? mappedIntent : '';
 
@@ -250,6 +253,7 @@ export default function IntakeForm({
     reset,
     setFocus,
     setError,
+    clearErrors,
     watch,
     formState: { errors, isSubmitting }
   } = useForm({
@@ -332,6 +336,208 @@ export default function IntakeForm({
     };
   }, [isOpen, onClose, reset, resolvedIntent, setFocus]);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const siteKey =
+      import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
+    if (!siteKey) {
+      setError('root.server', {
+        type: 'configuration',
+        message:
+          'Human verification is not configured.'
+      });
+
+      return undefined;
+    }
+
+    let cancelled = false;
+    let retryTimer;
+
+    const renderTurnstile = () => {
+      if (
+        cancelled ||
+        !turnstileContainerRef.current
+      ) {
+        return;
+      }
+
+      /*
+       * The external Turnstile script loads asynchronously.
+       * Wait until its global API is available.
+       */
+      if (!window.turnstile) {
+        retryTimer = window.setTimeout(
+          renderTurnstile,
+          100
+        );
+        return;
+      }
+
+      turnstileTokenRef.current = '';
+
+      turnstileWidgetIdRef.current =
+        window.turnstile.render(
+          turnstileContainerRef.current,
+          {
+            sitekey: siteKey,
+            theme: 'auto',
+            size: 'flexible',
+            action: 'orkaos_intake',
+
+            callback: (token) => {
+              turnstileTokenRef.current = token;
+              clearErrors('root.server');
+            },
+
+            'expired-callback': () => {
+              turnstileTokenRef.current = '';
+
+              setError('root.server', {
+                type: 'verification',
+                message:
+                  'Human verification expired. Complete it again.'
+              });
+            },
+
+            'error-callback': () => {
+              turnstileTokenRef.current = '';
+
+              setError('root.server', {
+                type: 'verification',
+                message:
+                  'Human verification could not load. Refresh and try again.'
+              });
+            }
+          }
+        );
+    };
+
+    renderTurnstile();
+
+    return () => {
+      cancelled = true;
+
+      if (retryTimer) {
+        window.clearTimeout(retryTimer);
+      }
+
+      if (
+        window.turnstile &&
+        turnstileWidgetIdRef.current !== null
+      ) {
+        window.turnstile.remove(
+          turnstileWidgetIdRef.current
+        );
+      }
+
+      turnstileWidgetIdRef.current = null;
+      turnstileTokenRef.current = '';
+    };
+  }, [clearErrors, isOpen, setError]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const siteKey =
+      import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
+    if (!siteKey) {
+      setError('root.server', {
+        type: 'configuration',
+        message:
+          'Human verification is not configured.'
+      });
+
+      return undefined;
+    }
+
+    let cancelled = false;
+    let retryTimer;
+
+    const renderTurnstile = () => {
+      if (
+        cancelled ||
+        !turnstileContainerRef.current
+      ) {
+        return;
+      }
+
+      /*
+       * The external Turnstile script loads asynchronously.
+       * Wait until its global API is available.
+       */
+      if (!window.turnstile) {
+        retryTimer = window.setTimeout(
+          renderTurnstile,
+          100
+        );
+        return;
+      }
+
+      turnstileTokenRef.current = '';
+
+      turnstileWidgetIdRef.current =
+        window.turnstile.render(
+          turnstileContainerRef.current,
+          {
+            sitekey: siteKey,
+            theme: 'auto',
+            size: 'flexible',
+            action: 'orkaos_intake',
+
+            callback: (token) => {
+              turnstileTokenRef.current = token;
+              clearErrors('root.server');
+            },
+
+            'expired-callback': () => {
+              turnstileTokenRef.current = '';
+
+              setError('root.server', {
+                type: 'verification',
+                message:
+                  'Human verification expired. Complete it again.'
+              });
+            },
+
+            'error-callback': () => {
+              turnstileTokenRef.current = '';
+
+              setError('root.server', {
+                type: 'verification',
+                message:
+                  'Human verification could not load. Refresh and try again.'
+              });
+            }
+          }
+        );
+    };
+
+    renderTurnstile();
+
+    return () => {
+      cancelled = true;
+
+      if (retryTimer) {
+        window.clearTimeout(retryTimer);
+      }
+
+      if (
+        window.turnstile &&
+        turnstileWidgetIdRef.current !== null
+      ) {
+        window.turnstile.remove(
+          turnstileWidgetIdRef.current
+        );
+      }
+
+      turnstileWidgetIdRef.current = null;
+      turnstileTokenRef.current = '';
+    };
+  }, [clearErrors, isOpen, setError]);
+
   // Validate the intake path defensively, enrich the payload with metadata, then
   // hand it to the caller. The alert is a development fallback until a webhook is wired.
   const submitForm = async (data) => {
@@ -340,26 +546,61 @@ export default function IntakeForm({
         type: 'validate',
         message: 'Choose an available intake path.'
       });
+
+      return;
+    }
+
+    const turnstileToken =
+      turnstileTokenRef.current;
+
+    if (!turnstileToken) {
+      setError('root.server', {
+        type: 'verification',
+        message:
+          'Complete the human verification before submitting.'
+      });
+
       return;
     }
 
     const payload = {
       ...data,
       intakeVersion: 'orkaos-v4-complete',
-      submittedAt: new Date().toISOString()
+      submittedAt: new Date().toISOString(),
+      turnstileToken
     };
 
-    if (onSubmitData) {
-      await onSubmitData(payload);
-    } else {
-      console.log('Form Submitted:', payload);
-      window.alert(
-        `Data ready for App Script webhook:\n${JSON.stringify(payload, null, 2)}`
-      );
-    }
+    try {
+      if (!onSubmitData) {
+        throw new Error(
+          'The intake submission service is not connected.'
+        );
+      }
 
-    reset(getEmptyForm());
-    onClose();
+      await onSubmitData(payload);
+
+      reset(getEmptyForm());
+      onClose();
+    } catch (error) {
+      setError('root.server', {
+        type: 'server',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Unable to submit the form. Please try again.'
+      });
+
+      turnstileTokenRef.current = '';
+
+      if (
+        window.turnstile &&
+        turnstileWidgetIdRef.current !== null
+      ) {
+        window.turnstile.reset(
+          turnstileWidgetIdRef.current
+        );
+      }
+    }
   };
 
   // Do not leave a hidden dialog in the tab order; unmount it completely instead.
@@ -1057,6 +1298,18 @@ export default function IntakeForm({
                 </div>
               )}
             </section>
+            <div className="intake-turnstile">
+              <div ref={turnstileContainerRef} />
+
+              {errors.root?.server && (
+                <p
+                  className="intake-field__error"
+                  role="alert"
+                >
+                  {errors.root.server.message}
+                </p>
+              )}
+            </div>
           </form>
         </div>
 

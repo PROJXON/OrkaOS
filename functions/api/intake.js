@@ -1,12 +1,47 @@
-const MAX_BODY_BYTES = 64_000;
-
-const ALLOWED_GOALS = new Set([
+const ALLOWED_GOALS = [
   'Join the Pod',
   'Join Alpha Testing',
   'Partner with PROJXON'
-]);
+];
 
-function json(data, status = 200) {
+const FORM_FIELDS = [
+  'submittedAt',
+  'intakeVersion',
+  'firstName',
+  'lastName',
+  'email',
+  'primaryGoal',
+  'icp',
+  'workspace',
+  'profession',
+  'workplace',
+  'university',
+  'expertise',
+  'teamSize',
+  'purposeOptions',
+  'orkaUseReasons',
+  'orkaUseReasonDetails',
+  'purposeDetails',
+  'interests',
+  'projxonFamiliarity',
+  'momentumFamiliarity',
+  'growthAdvisoryFamiliarity',
+  'orkaFamiliarity',
+  'involvementNotes',
+  'discoverySource',
+  'discoveryDetails',
+  'currentTools',
+  'priorTesting',
+  'testingAvailability',
+  'testingAvailabilityNotes',
+  'timezone',
+  'communicationMethods',
+  'phone'
+];
+
+const MAX_REQUEST_LENGTH = 65536;
+
+function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -16,214 +51,272 @@ function json(data, status = 200) {
   });
 }
 
-function isNonEmptyString(value) {
-  return (
-    typeof value === 'string' &&
-    value.trim().length > 0
-  );
-}
-
-export async function onRequestPost({
-  request,
-  env
-}) {
-  if (
-    !env.GOOGLE_SCRIPT_URL ||
-    !env.FORM_WEBHOOK_SECRET
-  ) {
-    console.error(
-      'Missing GOOGLE_SCRIPT_URL or FORM_WEBHOOK_SECRET.'
-    );
-
-    return json(
-      {
-        ok: false,
-        error: 'Form service is not configured.'
-      },
-      500
-    );
-  }
-
-  // Browser requests should originate from the site itself.
-  const requestOrigin = request.headers.get('Origin');
-  const pageOrigin = new URL(request.url).origin;
-
-  if (
-    requestOrigin &&
-    requestOrigin !== pageOrigin
-  ) {
-    return json(
-      {
-        ok: false,
-        error: 'Origin not allowed.'
-      },
-      403
-    );
-  }
-
-  const contentType =
-    request.headers.get('Content-Type') || '';
-
-  if (!contentType.includes('application/json')) {
-    return json(
-      {
-        ok: false,
-        error: 'Expected JSON.'
-      },
-      415
-    );
-  }
-
-  const declaredLength = Number(
-    request.headers.get('Content-Length') || 0
-  );
-
-  if (declaredLength > MAX_BODY_BYTES) {
-    return json(
-      {
-        ok: false,
-        error: 'Submission is too large.'
-      },
-      413
-    );
-  }
-
-  let payload;
-
+export async function onRequestPost({ request, env }) {
   try {
-    payload = await request.json();
-  } catch {
-    return json(
-      {
-        ok: false,
-        error: 'Invalid JSON.'
-      },
-      400
-    );
-  }
+    if (
+      !env.GOOGLE_APPS_SCRIPT_URL ||
+      !env.INTAKE_SHARED_SECRET ||
+      !env.TURNSTILE_SECRET_KEY
+    ) {
+      console.error(
+        'Required intake environment variables are missing.'
+      );
 
-  if (
-    !payload ||
-    typeof payload !== 'object' ||
-    Array.isArray(payload)
-  ) {
-    return json(
-      {
-        ok: false,
-        error: 'Invalid submission.'
-      },
-      400
-    );
-  }
+      return jsonResponse(
+        {
+          ok: false,
+          error: 'The intake service is not configured.'
+        },
+        500
+      );
+    }
 
-  const actualLength = new TextEncoder()
-    .encode(JSON.stringify(payload))
-    .length;
+    const rawBody = await request.text();
 
-  if (actualLength > MAX_BODY_BYTES) {
-    return json(
-      {
-        ok: false,
-        error: 'Submission is too large.'
-      },
-      413
-    );
-  }
+    if (!rawBody || rawBody.length > MAX_REQUEST_LENGTH) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: 'Invalid submission size.'
+        },
+        413
+      );
+    }
 
-  if (
-    !isNonEmptyString(payload.firstName) ||
-    !isNonEmptyString(payload.lastName) ||
-    !isNonEmptyString(payload.email) ||
-    !ALLOWED_GOALS.has(payload.primaryGoal)
-  ) {
-    return json(
-      {
-        ok: false,
-        error:
-          'Required fields are missing or invalid.'
-      },
-      400
-    );
-  }
+    let body;
 
-  try {
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return jsonResponse(
+        {
+          ok: false,
+          error: 'Invalid submission format.'
+        },
+        400
+      );
+    }
+
+    const validationError = validateBody(body);
+
+    if (validationError) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: validationError
+        },
+        400
+      );
+    }
+
+    const submissionId = crypto.randomUUID();
+
+    const turnstileResult = await verifyTurnstile({
+      token: body.turnstileToken,
+      secret: env.TURNSTILE_SECRET_KEY,
+      remoteIp: request.headers.get('CF-Connecting-IP'),
+      idempotencyKey: submissionId
+    });
+
+    if (
+      !turnstileResult.success ||
+      turnstileResult.action !== 'orkaos_intake'
+    ) {
+      console.warn('Turnstile validation failed:', {
+        errors: turnstileResult['error-codes'],
+        action: turnstileResult.action,
+        hostname: turnstileResult.hostname
+      });
+
+      return jsonResponse(
+        {
+          ok: false,
+          error:
+            'Human verification failed. Refresh it and try again.'
+        },
+        400
+      );
+    }
+
+    /*
+     * Only forward known form fields. Do not forward arbitrary
+     * properties supplied by the browser.
+     */
+    const forwardedPayload = {};
+
+    for (const field of FORM_FIELDS) {
+      if (Object.hasOwn(body, field)) {
+        forwardedPayload[field] = body[field];
+      }
+    }
+
+    forwardedPayload.submissionId = submissionId;
+    forwardedPayload.receivedAt = new Date().toISOString();
+    forwardedPayload.sharedSecret =
+      env.INTAKE_SHARED_SECRET;
+
     const googleResponse = await fetch(
-      env.GOOGLE_SCRIPT_URL,
+      env.GOOGLE_APPS_SCRIPT_URL,
       {
         method: 'POST',
         headers: {
-          'Content-Type':
-            'application/json; charset=utf-8'
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          secret: env.FORM_WEBHOOK_SECRET,
-          submission: {
-            ...payload,
-            receivedAt: new Date().toISOString()
-          }
-        }),
+        body: JSON.stringify(forwardedPayload),
         redirect: 'follow'
       }
     );
 
-    const responseText =
-      await googleResponse.text();
+    const responseText = await googleResponse.text();
 
-    let result;
+    let googleResult;
 
     try {
-      result = JSON.parse(responseText);
+      googleResult = JSON.parse(responseText);
     } catch {
       console.error(
-        'Google Apps Script returned non-JSON:',
-        responseText.slice(0, 500)
+        'Apps Script returned a non-JSON response:',
+        responseText
       );
 
-      return json(
+      return jsonResponse(
         {
           ok: false,
-          error:
-            'Submission service returned an invalid response.'
+          error: 'The response could not be saved.'
         },
         502
       );
     }
 
-    if (!googleResponse.ok || !result.ok) {
+    if (!googleResponse.ok || !googleResult?.ok) {
       console.error(
-        'Google Apps Script rejected the submission:',
-        result
+        'Apps Script rejected the intake submission:',
+        {
+          status: googleResponse.status,
+          result: googleResult
+        }
       );
 
-      return json(
+      return jsonResponse(
         {
           ok: false,
-          error:
-            result.error ||
-            'Could not save the submission.'
+          error: 'The response could not be saved.'
         },
         502
       );
     }
 
-    return json({
+    if (googleResult.emailSent === false) {
+      console.error(
+        'The response was saved, but notification email failed:',
+        googleResult.emailError
+      );
+    }
+
+    return jsonResponse({
       ok: true,
-      submissionId: result.submissionId,
-      emailSent: result.emailSent !== false
+      submissionId,
+      emailSent: googleResult.emailSent !== false
     });
   } catch (error) {
-    console.error(
-      'Submission forwarding failed:',
-      error
-    );
+    console.error('Intake function failed:', error);
 
-    return json(
+    return jsonResponse(
       {
         ok: false,
         error:
-          'Could not reach the submission service.'
+          'Unable to submit the form. Please try again.'
       },
-      502
+      500
     );
   }
+}
+
+export function onRequestGet() {
+  return jsonResponse(
+    {
+      ok: false,
+      error: 'Method not allowed.'
+    },
+    405
+  );
+}
+
+function validateBody(body) {
+  if (
+    !body ||
+    typeof body !== 'object' ||
+    Array.isArray(body)
+  ) {
+    return 'Invalid submission.';
+  }
+
+  const requiredFields = [
+    'firstName',
+    'lastName',
+    'email',
+    'primaryGoal',
+    'turnstileToken'
+  ];
+
+  for (const field of requiredFields) {
+    if (!String(body[field] || '').trim()) {
+      return `Missing required field: ${field}`;
+    }
+  }
+
+  if (!ALLOWED_GOALS.includes(body.primaryGoal)) {
+    return 'Invalid intake path.';
+  }
+
+  if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      String(body.email)
+    )
+  ) {
+    return 'Enter a valid email address.';
+  }
+
+  for (const value of Object.values(body)) {
+    if (
+      typeof value === 'string' &&
+      value.length > 10000
+    ) {
+      return 'One or more responses are too long.';
+    }
+  }
+
+  return '';
+}
+
+async function verifyTurnstile({
+  token,
+  secret,
+  remoteIp,
+  idempotencyKey
+}) {
+  const response = await fetch(
+    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        secret,
+        response: token,
+        remoteip: remoteIp || undefined,
+        idempotency_key: idempotencyKey
+      })
+    }
+  );
+
+  if (!response.ok) {
+    return {
+      success: false,
+      'error-codes': ['siteverify-request-failed']
+    };
+  }
+
+  return response.json();
 }
