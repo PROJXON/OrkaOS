@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import './IntakeForm.css';
+import { getTimeZoneGroups, US_TIME_ZONES } from './timezones.js';
 
 /**
  * Intake dialog developer map
@@ -161,6 +162,9 @@ function getBrowserTimezone() {
   }
 }
 
+const DETECTED_TIMEZONE = getBrowserTimezone();
+const WORLD_TIME_ZONE_GROUPS = getTimeZoneGroups(DETECTED_TIMEZONE);
+
 // Return a fresh object for every reset; arrays must not be shared between opens.
 function getEmptyForm(primaryGoal = '') {
   return {
@@ -191,7 +195,7 @@ function getEmptyForm(primaryGoal = '') {
     priorTesting: '',
     testingAvailability: [],
     testingAvailabilityNotes: '',
-    timezone: getBrowserTimezone(),
+    timezone: DETECTED_TIMEZONE,
     communicationMethods: [],
     phone: ''
   };
@@ -1251,15 +1255,35 @@ export default function IntakeForm({
                 <label className="intake-field__label" htmlFor={`${id}-timezone`}>
                   Timezone <span className="intake-field__required">*</span>
                 </label>
-                <input
-                  id={`${id}-timezone`}
-                  className="intake-field__control"
-                  type="text"
-                  placeholder="For example: America/New_York or Eastern Time"
-                  aria-invalid={Boolean(errors.timezone)}
-                  {...register('timezone', { required: 'Enter your timezone.' })}
-                />
-                <p className="intake-field__hint">We prefilled your browser timezone when available. You can edit it.</p>
+                <div className="intake-select-wrap">
+                  <select
+                    id={`${id}-timezone`}
+                    className="intake-field__select"
+                    aria-invalid={Boolean(errors.timezone)}
+                    {...register('timezone', { required: 'Choose your timezone.' })}
+                  >
+                    <option value="">Select a timezone</option>
+                    <optgroup label="United States and territories">
+                      {US_TIME_ZONES.map(({ value, label }) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </optgroup>
+                    {WORLD_TIME_ZONE_GROUPS.map(({ label, options }) => (
+                      <optgroup key={label} label={label}>
+                        {options.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
+                <p className="intake-field__hint">
+                  U.S. zones use familiar labels such as EST, CST, MST, and PST. Global choices use precise IANA zones for daylight-saving accuracy.
+                </p>
                 {errors.timezone && <p className="intake-field__error">{errors.timezone.message}</p>}
               </div>
 
