@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import './IntakeForm.css';
 import { getTimeZoneGroups, US_TIME_ZONES } from './timezones.js';
@@ -130,6 +130,15 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])'
 ].join(',');
 
+const RESIZE_BREAKPOINT = 640;
+const RESIZE_VIEWPORT_GUTTER = 32;
+const MIN_RESIZED_WIDTH = 560;
+const MIN_RESIZED_HEIGHT = 420;
+
+function clamp(value, minimum, maximum) {
+  return Math.min(Math.max(value, minimum), maximum);
+}
+
 // Timezone detection is best-effort because some privacy modes can block Intl.
 function getBrowserTimezone() {
   try {
@@ -220,10 +229,12 @@ export default function IntakeForm({
   // ever mounted on the same page.
   const id = useId();
   const dialogRef = useRef(null);
+  const resizeSessionRef = useRef(null);
   const previouslyFocusedRef = useRef(null);
   const turnstileContainerRef = useRef(null);
   const turnstileWidgetIdRef = useRef(null);
   const turnstileTokenRef = useRef('');
+  const [dialogSize, setDialogSize] = useState(null);
   const mappedIntent = INTENT_MAPPING[defaultIntent] || '';
   const resolvedIntent = ENABLED_GOALS.includes(mappedIntent) ? mappedIntent : '';
 
@@ -275,6 +286,7 @@ export default function IntakeForm({
     document.body.style.overflow = 'hidden';
 
     reset(getEmptyForm(resolvedIntent));
+    setDialogSize(null);
 
     const focusFrame = window.requestAnimationFrame(() => {
       setFocus('firstName');
@@ -316,6 +328,47 @@ export default function IntakeForm({
       previouslyFocusedRef.current?.focus?.();
     };
   }, [isOpen, onClose, reset, resolvedIntent, setFocus]);
+
+  // Keep a user-resized dialog inside the viewport, and return to the native
+  // bottom-sheet layout whenever the screen enters the mobile breakpoint.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const constrainDialogToViewport = () => {
+      if (window.innerWidth <= RESIZE_BREAKPOINT) {
+        resizeSessionRef.current = null;
+        setDialogSize(null);
+        return;
+      }
+
+      const maxWidth = Math.max(1, window.innerWidth - RESIZE_VIEWPORT_GUTTER);
+      const maxHeight = Math.max(1, window.innerHeight - RESIZE_VIEWPORT_GUTTER);
+
+      setDialogSize((currentSize) => {
+        if (!currentSize) return currentSize;
+
+        const nextSize = {
+          width: Math.min(currentSize.width, maxWidth),
+          height: Math.min(currentSize.height, maxHeight)
+        };
+
+        if (
+          nextSize.width === currentSize.width &&
+          nextSize.height === currentSize.height
+        ) {
+          return currentSize;
+        }
+
+        return nextSize;
+      });
+    };
+
+    window.addEventListener('resize', constrainDialogToViewport);
+
+    return () => {
+      window.removeEventListener('resize', constrainDialogToViewport);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -620,6 +673,105 @@ export default function IntakeForm({
       'Choose at least one testing window.'
   });
 
+  const getResizeBounds = () => {
+    const maxWidth = Math.max(1, window.innerWidth - RESIZE_VIEWPORT_GUTTER);
+    const maxHeight = Math.max(1, window.innerHeight - RESIZE_VIEWPORT_GUTTER);
+
+    return {
+      maxWidth,
+      maxHeight,
+      minWidth: Math.min(MIN_RESIZED_WIDTH, maxWidth),
+      minHeight: Math.min(MIN_RESIZED_HEIGHT, maxHeight)
+    };
+  };
+
+  const beginDialogResize = (event) => {
+    if (
+      event.button !== 0 ||
+      window.innerWidth <= RESIZE_BREAKPOINT ||
+      !dialogRef.current
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const dialogRect = dialogRef.current.getBoundingClientRect();
+    resizeSessionRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startWidth: dialogRect.width,
+      startHeight: dialogRect.height,
+      ...getResizeBounds()
+    };
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const continueDialogResize = (event) => {
+    const resizeSession = resizeSessionRef.current;
+
+    if (!resizeSession || resizeSession.pointerId !== event.pointerId) return;
+
+    setDialogSize({
+      width: clamp(
+        resizeSession.startWidth + event.clientX - resizeSession.startX,
+        resizeSession.minWidth,
+        resizeSession.maxWidth
+      ),
+      height: clamp(
+        resizeSession.startHeight + event.clientY - resizeSession.startY,
+        resizeSession.minHeight,
+        resizeSession.maxHeight
+      )
+    });
+  };
+
+  const endDialogResize = (event) => {
+    const resizeSession = resizeSessionRef.current;
+
+    if (!resizeSession || resizeSession.pointerId !== event.pointerId) return;
+
+    resizeSessionRef.current = null;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const resizeDialogWithKeyboard = (event) => {
+    if (!dialogRef.current || window.innerWidth <= RESIZE_BREAKPOINT) return;
+
+    const direction = {
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1]
+    }[event.key];
+
+    if (!direction) return;
+
+    event.preventDefault();
+
+    const step = event.shiftKey ? 64 : 24;
+    const dialogRect = dialogRef.current.getBoundingClientRect();
+    const bounds = getResizeBounds();
+
+    setDialogSize({
+      width: clamp(
+        dialogRect.width + direction[0] * step,
+        bounds.minWidth,
+        bounds.maxWidth
+      ),
+      height: clamp(
+        dialogRect.height + direction[1] * step,
+        bounds.minHeight,
+        bounds.maxHeight
+      )
+    });
+  };
+
   return (
     /* Clicking the shaded overlay closes the dialog; clicks inside the panel do not. */
     <div
@@ -635,6 +787,10 @@ export default function IntakeForm({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
+        style={dialogSize ? {
+          width: `${dialogSize.width}px`,
+          height: `${dialogSize.height}px`
+        } : undefined}
       >
         {/* Dialog header: brand mark, intent-specific copy, and close control. */}
         <header className="intake-modal__head">
@@ -1339,6 +1495,23 @@ export default function IntakeForm({
             </button>
           </div>
         </footer>
+
+        <button
+          type="button"
+          className="intake-modal__resize-handle"
+          aria-label="Resize intake survey"
+          title="Drag to resize. Use arrow keys when focused."
+          onPointerDown={beginDialogResize}
+          onPointerMove={continueDialogResize}
+          onPointerUp={endDialogResize}
+          onPointerCancel={endDialogResize}
+          onKeyDown={resizeDialogWithKeyboard}
+          onDoubleClick={() => setDialogSize(null)}
+        >
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M5 16 16 5M10 16l6-6M15 16l1-1" />
+          </svg>
+        </button>
       </section>
     </div>
   );
