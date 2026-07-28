@@ -423,20 +423,20 @@ fieldset.intake-field > legend { padding: 0; }
 }
 /* AI options receive a distinct treatment while retaining the standard card markup. */
 
-.intake-check--card:has(input[value="OrkaAI"]), .intake-check--card:has(input[value="OrkaAutomation"]) {
+.intake-check--card:has(input[value="OrkaAI"]), .intake-check--card:has(input[value="OrkaAutomation"]), .intake-check--card:has(input[value="OrkaPrompt"]), .intake-check--card:has(input[value="OrkaFin"]) {
   background: var(--ai-tint); border-color: var(--ai-border);
 }
 
-.intake-check--card:has(input[value="OrkaAI"]:hover), .intake-check--card:has(input[value="OrkaAutomation"]:hover), .intake-check--card:has(input[value="OrkaAI"]:checked), .intake-check--card:has(input[value="OrkaAutomation"]:checked), .intake-check--card:has(input[value="Explore AI-assisted workflows"]:checked) {
+.intake-check--card:has(input[value="OrkaAI"]:hover), .intake-check--card:has(input[value="OrkaAutomation"]:hover), .intake-check--card:has(input[value="OrkaPrompt"]:hover), .intake-check--card:has(input[value="OrkaFin"]:hover), .intake-check--card:has(input[value="OrkaAI"]:checked), .intake-check--card:has(input[value="OrkaAutomation"]:checked), .intake-check--card:has(input[value="OrkaPrompt"]:checked), .intake-check--card:has(input[value="OrkaFin"]:checked), .intake-check--card:has(input[value="Explore AI-assisted workflows"]:checked) {
   background: var(--ai-tint-strong); border-color: var(--ai-border-strong);
   box-shadow: var(--ai-glow);
 }
 
-.intake-check--card:has(input[value="OrkaAI"]) .intake-check__title, .intake-check--card:has(input[value="OrkaAutomation"]) .intake-check__title {
+.intake-check--card:has(input[value="OrkaAI"]) .intake-check__title, .intake-check--card:has(input[value="OrkaAutomation"]) .intake-check__title, .intake-check--card:has(input[value="OrkaPrompt"]) .intake-check__title, .intake-check--card:has(input[value="OrkaFin"]) .intake-check__title {
   color: var(--ai-text);
 }
 
-.intake-check--card:has(input[value="OrkaAI"]) .intake-status-badge, .intake-check--card:has(input[value="OrkaAutomation"]) .intake-status-badge {
+.intake-check--card:has(input[value="OrkaAI"]) .intake-status-badge, .intake-check--card:has(input[value="OrkaAutomation"]) .intake-status-badge, .intake-check--card:has(input[value="OrkaPrompt"]) .intake-status-badge, .intake-check--card:has(input[value="OrkaFin"]) .intake-status-badge {
   color: var(--ai-text); background: var(--ai-tint-strong);
   border-color: var(--ai-border-strong);
 }

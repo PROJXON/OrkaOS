@@ -2,6 +2,7 @@ import React, { useEffect, useId, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import './IntakeForm.css';
 import { getTimeZoneGroups, US_TIME_ZONES } from './timezones.js';
+import { ORKA_PRODUCTS } from './products.js';
 
 /**
  * Intake dialog developer map
@@ -51,40 +52,16 @@ const INTENT_COPY = {
   }
 };
 
-// App option lists power the two interest groups in step 04. Tuples keep the
-// displayed name and short status/description next to each other.
-const DEVELOPMENT_APPS = [
-  ['OrkaMPS-Learn', 'Live · courses and curriculum'],
-  ['OrkaVault', 'Production · secure access and credential sharing'],
-  ['OrkaSOP', 'Production · standard operating procedures'],
-  ['OrkaEval', 'Testing · reviews, coaching, and feedback'],
-  ['OrkaATS', 'Testing · applicant tracking'],
-  ['OrkaRecruiting', 'Testing · recruiting workflow'],
-  ['OrkaAssets', 'Testing · brand and media library'],
-  ['OrkaFeedback', 'Design · dynamic feedback forms'],
-  ['OrkaTask', 'Design · Kanban task management'],
-  ['OrkaAI', 'Next · assistant CTO and tool intelligence'],
-  ['OrkaAutomation', 'Next · cross-app rules and triggers'],
-  ['OrkaHR', 'Production · employee records and contact cards'],
-  ['OrkaFlow', 'Design · meetings and decisions']
-];
+// Product choices come from the same public catalog used by the landing page.
+// Non-concept apps are shown first; concept-stage apps remain in the expandable
+// roadmap group so the form stays scannable without drifting from the website.
+const DEVELOPMENT_APPS = ORKA_PRODUCTS
+  .filter((product) => product.status !== 'Concept')
+  .map((product) => [product.name, product.summary, product.status]);
 
-const ROADMAP_APPS = [
-  ['OrkaProduct', 'Roadmapping and product control'],
-  ['OrkaFinance', 'Budgeting, expenses, and revenue tracking'],
-  ['OrkaLegal', 'Contracts, agreements, and compliance'],
-  ['OrkaProject', 'Project planning and work tracking'],
-  ['OrkaSupport', 'Service requests and support tickets'],
-  ['OrkaCRM', 'Contacts, deals, and pipeline'],
-  ['OrkaChat', 'Communication and collaboration'],
-  ['OrkaWorkspace', 'User hub for Google and OrkaOS apps'],
-  ['OrkaOS', 'Admin hub for Google Workspace and OrkaOS'],
-  ['OrkaSocial', 'Social tracking and content calendar'],
-  ['OrkaMarketing', 'Campaign planning and funnels'],
-  ['OrkaMetrics', 'KPI dashboards and business intelligence'],
-  ['OrkaWiki / Knowledge', 'Shared intranet and knowledge base'],
-  ['OrkaResearch', 'Market research and strategy documents']
-];
+const ROADMAP_APPS = ORKA_PRODUCTS
+  .filter((product) => product.status === 'Concept')
+  .map((product) => [product.name, product.summary, product.status]);
 
 // Remaining option arrays are form copy only; submitted values are the visible
 // strings, so changing wording here also changes the payload value.
@@ -1043,17 +1020,17 @@ export default function IntakeForm({
 
                 <div className="intake-interest-group">
                   <div className="intake-interest-group__head">
-                    <h4>In development now</h4>
-                    <span>{DEVELOPMENT_APPS.length} current and upcoming apps</span>
+                    <h4>Available and in development</h4>
+                    <span>{DEVELOPMENT_APPS.length} non-concept apps</span>
                   </div>
                   <div className="intake-checkbox-grid">
-                    {DEVELOPMENT_APPS.map(([app, description], index) => (
+                    {DEVELOPMENT_APPS.map(([app, description, status], index) => (
                       <CheckOption
                         key={app}
                         id={`${id}-interest-development-${index}`}
                         value={app}
                         description={description}
-                        badge="In build"
+                        badge={status}
                         registerField={interestRegistration}
                       />
                     ))}
@@ -1063,18 +1040,19 @@ export default function IntakeForm({
                 <details className="intake-interest-group intake-interest-group--roadmap">
                   <summary>
                     <span>
-                      <strong>Additional apps on the roadmap</strong>
-                      <small>Choose any upcoming apps you want to follow.</small>
+                      <strong>Concept-stage apps on the roadmap</strong>
+                      <small>Choose early concepts you want to follow.</small>
                     </span>
                     <span className="intake-interest-group__count">{ROADMAP_APPS.length} apps</span>
                   </summary>
                   <div className="intake-checkbox-grid intake-checkbox-grid--roadmap">
-                    {ROADMAP_APPS.map(([app, description], index) => (
+                    {ROADMAP_APPS.map(([app, description, status], index) => (
                       <CheckOption
                         key={app}
                         id={`${id}-interest-roadmap-${index}`}
                         value={app}
                         description={description}
+                        badge={status}
                         registerField={interestRegistration}
                       />
                     ))}

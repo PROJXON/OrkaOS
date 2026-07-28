@@ -3851,3 +3851,380 @@ html:root[data-theme="light"] body #orka-shell #siteMain #cta .cta .cta-buttons 
   border: 0 !important; box-shadow: none !important;
   text-decoration: underline; text-underline-offset: 4px;
 }
+
+/* ==========================================================================
+   PUBLIC PRODUCT ROADMAP — roadmap-source refresh
+   Uses the V4 semantic tokens, calm elevation, and status-aware progression.
+   ========================================================================== */
+
+#roadmap {
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--brand) 7%, transparent), transparent 34%),
+    var(--bg-canvas);
+}
+
+#roadmap .section-head { margin-bottom: var(--space-8); }
+
+#roadmap .h2 {
+  max-width: 760px;
+  font-size: clamp(32px, 4.2vw, 52px);
+  line-height: var(--lh-tight);
+}
+
+#roadmap .lead { max-width: 760px; }
+
+.roadmap-overview {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.8fr) minmax(0, 2.2fr);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.roadmap-overview__total {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 112px;
+  padding: var(--space-5);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--brand-subtle) 82%, transparent), transparent),
+    var(--bg-subtle);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-lg);
+}
+
+.roadmap-overview__total span,
+.roadmap-stage-card span {
+  color: var(--text-tertiary);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.roadmap-overview__total strong {
+  margin-top: var(--space-1);
+  color: var(--text-primary);
+  font-size: var(--fs-4xl);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+.roadmap-overview__total small {
+  margin-top: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.roadmap-overview__stages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.roadmap-stage-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  overflow: hidden;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.roadmap-stage-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--stage-color, var(--border-strong));
+}
+
+.roadmap-stage-card strong {
+  color: var(--text-primary);
+  font-size: var(--fs-2xl);
+  font-variant-numeric: tabular-nums;
+}
+
+.roadmap-stage-card--concept { --stage-color: var(--text-tertiary); }
+.roadmap-stage-card--next { --stage-color: var(--accent-indigo); }
+.roadmap-stage-card--design { --stage-color: var(--brand); }
+.roadmap-stage-card--testing { --stage-color: var(--accent-teal); }
+.roadmap-stage-card--production { --stage-color: var(--brand-hover); }
+.roadmap-stage-card--live { --stage-color: var(--success-solid); }
+
+#roadmap .roadmap-scroll {
+  margin-top: var(--space-5);
+  padding: 0 0 var(--space-2);
+  border-radius: var(--radius-lg);
+}
+
+#roadmap .roadmap-chart {
+  --roadmap-label-width: 248px;
+  min-width: 1100px;
+  overflow: hidden;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+#roadmap .roadmap-chart::after {
+  content: none !important;
+  animation: none !important;
+}
+
+#roadmap .roadmap-chart .gantt-header {
+  background: var(--bg-surface-sunken) !important;
+  border-bottom: 1px solid var(--border-default);
+}
+
+#roadmap .roadmap-chart .gantt-header > div,
+#roadmap .roadmap-chart .gantt-header .corner {
+  padding: var(--space-3);
+  color: var(--text-tertiary) !important;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  border-right-color: var(--border-subtle);
+}
+
+#roadmap .roadmap-chart .gantt-header .corner {
+  color: var(--text-secondary) !important;
+  background: var(--bg-surface) !important;
+}
+
+#roadmap .roadmap-chart .gantt-row {
+  min-height: 54px;
+  background: var(--bg-surface) !important;
+  border-bottom-color: var(--border-subtle);
+}
+
+#roadmap .roadmap-chart .gantt-row:nth-of-type(odd) {
+  background: color-mix(in srgb, var(--bg-subtle) 42%, var(--bg-surface)) !important;
+}
+
+#roadmap .roadmap-chart .gantt-row:hover,
+#roadmap .roadmap-chart .gantt-row:hover .gantt-tool {
+  background: var(--brand-subtle) !important;
+}
+
+#roadmap .roadmap-chart .gantt-tool {
+  min-width: 0;
+  padding: var(--space-2-5) var(--space-3);
+  background: transparent !important;
+  border-right-color: var(--border-subtle);
+}
+
+#roadmap .roadmap-chart .gantt-icon {
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  color: var(--text-on-brand);
+  background: linear-gradient(135deg, var(--brand), var(--brand-active));
+  border: 1px solid color-mix(in srgb, var(--brand-border) 80%, transparent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
+}
+
+#roadmap .roadmap-chart .gantt-name {
+  gap: var(--space-2);
+  color: var(--text-primary) !important;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+#roadmap .roadmap-chart .gantt-owner {
+  display: block;
+  max-width: 190px;
+  margin-top: 2px;
+  padding: 0;
+  overflow: hidden;
+  color: var(--text-tertiary) !important;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: transparent !important;
+  border-radius: 0;
+}
+
+#roadmap .roadmap-chart .owner-pill {
+  margin-left: 0;
+  padding: 2px 7px;
+  color: var(--text-secondary);
+  font-size: 9px;
+  line-height: 1.35;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+}
+
+#roadmap .roadmap-chart .status-live {
+  color: var(--success-text);
+  background: var(--success-subtle);
+  border-color: var(--success-border);
+}
+
+#roadmap .roadmap-chart .status-production {
+  color: var(--brand-text);
+  background: var(--brand-subtle);
+  border-color: var(--brand-border);
+}
+
+#roadmap .roadmap-chart .status-testing {
+  color: var(--info-text);
+  background: var(--info-subtle);
+  border-color: var(--info-border);
+}
+
+#roadmap .roadmap-chart .status-design {
+  color: var(--brand-text);
+  background: color-mix(in srgb, var(--brand-subtle) 72%, var(--bg-surface));
+  border-color: var(--brand-border);
+}
+
+#roadmap .roadmap-chart .status-next {
+  color: var(--accent-indigo);
+  background: color-mix(in srgb, var(--accent-indigo) 11%, var(--bg-surface));
+  border-color: color-mix(in srgb, var(--accent-indigo) 32%, var(--border-subtle));
+}
+
+#roadmap .roadmap-chart .status-concept {
+  color: var(--text-secondary);
+  background: var(--bg-muted);
+  border-color: var(--border-default);
+}
+
+#roadmap .roadmap-chart .gantt-track {
+  min-height: 54px;
+  padding: var(--space-2) 0;
+  background: color-mix(in srgb, var(--bg-subtle) 56%, transparent) !important;
+}
+
+#roadmap .roadmap-chart .gantt-track > div {
+  border-right: 1px dashed var(--border-default) !important;
+}
+
+#roadmap .roadmap-chart .gantt-track > div:last-child { border-right: 0 !important; }
+
+#roadmap .roadmap-chart .gantt-bar {
+  justify-content: flex-end;
+  height: 24px;
+  padding: 0 var(--space-3);
+  overflow: visible;
+  color: var(--text-on-brand) !important;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-align: right;
+  text-shadow: none !important;
+  border: 1px solid color-mix(in srgb, var(--bg-surface) 46%, transparent);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-xs) !important;
+}
+
+#roadmap .roadmap-chart .gantt-bar::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border: 2px solid color-mix(in srgb, var(--bg-surface) 80%, transparent);
+  border-radius: var(--radius-circle);
+  transform: translateY(-50%);
+}
+
+#roadmap .roadmap-chart .gantt-bar > span { padding-right: var(--space-3); }
+
+#roadmap .roadmap-chart .gantt-bar.concept {
+  background: linear-gradient(90deg, var(--border-strong), var(--text-tertiary)) !important;
+}
+
+#roadmap .roadmap-chart .gantt-bar.next {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-indigo) 74%, var(--brand)), var(--accent-indigo)) !important;
+}
+
+#roadmap .roadmap-chart .gantt-bar.design {
+  background: linear-gradient(90deg, var(--brand), var(--brand-active)) !important;
+}
+
+#roadmap .roadmap-chart .gantt-bar.testing {
+  color: var(--orka-neutral-950) !important;
+  background: linear-gradient(90deg, var(--accent-teal), var(--orka-blue-400)) !important;
+}
+
+#roadmap .roadmap-chart .gantt-bar.production {
+  background: linear-gradient(90deg, var(--brand-hover), var(--orka-blue-800)) !important;
+}
+
+#roadmap .roadmap-chart .gantt-bar.live {
+  color: var(--orka-neutral-950) !important;
+  background: linear-gradient(90deg, var(--success-solid), var(--accent-teal)) !important;
+}
+
+#roadmap .roadmap-chart .gantt-bar--ai {
+  color: #FFFFFF !important;
+  background: var(--ai-grad) !important;
+  box-shadow: var(--ai-glow) !important;
+}
+
+#roadmap .roadmap-chart .gantt-bar:hover {
+  transform: translateY(-50%);
+  filter: brightness(1.03);
+  box-shadow: var(--shadow-sm) !important;
+}
+
+#roadmap .roadmap-chart .gantt-legend {
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-4);
+  color: var(--text-secondary);
+  background: var(--bg-surface-sunken) !important;
+  border-top-color: var(--border-default);
+}
+
+#roadmap .roadmap-chart .gantt-legend .key {
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+}
+
+#roadmap .roadmap-chart .gantt-legend .swatch {
+  width: 9px;
+  height: 9px;
+  background: var(--border-strong);
+  border: 0;
+  border-radius: var(--radius-circle);
+}
+
+#roadmap .roadmap-chart .swatch.concept { background: var(--text-tertiary); }
+#roadmap .roadmap-chart .swatch.next { background: var(--accent-indigo); }
+#roadmap .roadmap-chart .swatch.design { background: var(--brand); }
+#roadmap .roadmap-chart .swatch.testing { background: var(--accent-teal); }
+#roadmap .roadmap-chart .swatch.production { background: var(--brand-hover); }
+#roadmap .roadmap-chart .swatch.live { background: var(--success-solid); }
+
+#roadmap .roadmap-chart .roadmap-dependency-note {
+  margin-left: auto;
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 900px) {
+  .roadmap-overview { grid-template-columns: 1fr; }
+  .roadmap-overview__total { min-height: 0; }
+}
+
+@media (max-width: 640px) {
+  .roadmap-overview__stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #roadmap .roadmap-chart { --roadmap-label-width: 200px; min-width: 980px; }
+  #roadmap .roadmap-chart .gantt-owner { max-width: 136px; }
+}

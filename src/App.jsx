@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import IntakeForm from './IntakeForm';
+import {
+  ORKA_PRODUCTS,
+  ORKA_PRODUCTS_BY_ID,
+  PRODUCT_FILTERS,
+  ROADMAP_PHASES,
+  ROADMAP_SEQUENCE,
+  ROADMAP_STATUS_META
+} from './products.js';
 
 /**
  * Landing-page developer map
@@ -25,240 +33,8 @@ import IntakeForm from './IntakeForm';
 const THEME_STORAGE_KEY = 'orkaos-theme';
 const RAIL_SECTIONS = ['top', 'problem', 'progression', 'ecosystem', 'value', 'whitelabel-section', 'cta'];
 
-// Product catalog data is the single source of truth for the featured picker,
-// full catalog, intake links, and roadmap labels. Add or rename a product here
-// first so every product-facing widget stays consistent.
-const ORKA_PRODUCTS = [
-  {
-    id: 'orka-mps-learn', name: 'OrkaMPS-Learn', status: 'Live', priority: 'Immediate',
-    lane: 'current', category: 'people', series: 'People & Talent',
-    summary: 'Learning and development platform for courses and curriculum.',
-    google: 'Google Workspace + LMS', pairs: ['OrkaHR', 'OrkaEval'], featured: true
-  },
-  {
-    id: 'orka-vault', name: 'OrkaVault', status: 'Production', priority: 'Immediate',
-    lane: 'current', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Access management and secure sharing for team credentials.',
-    google: 'Google Workspace + secure app layer', pairs: ['OrkaSOP', 'OrkaWorkspace'], featured: true
-  },
-  {
-    id: 'orka-sop', name: 'OrkaSOP', status: 'Production', priority: 'Immediate',
-    lane: 'current', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Standard operating procedures built around Google Docs.',
-    google: 'Google Docs', pairs: ['OrkaFlow', 'OrkaMPS-Learn'], featured: true
-  },
-  {
-    id: 'orka-eval', name: 'OrkaEval', status: 'Testing', priority: 'Immediate',
-    lane: 'current', category: 'people', series: 'People & Talent',
-    summary: 'Performance reviews, coaching, and feedback loops.',
-    google: 'Google Forms + Sheets', pairs: ['OrkaHR', 'OrkaFeedback'], featured: true
-  },
-  {
-    id: 'orka-ats', name: 'OrkaATS', status: 'Testing', priority: 'Immediate',
-    lane: 'current', category: 'people', series: 'People & Talent',
-    summary: 'Applicant tracking and hiring pipeline.',
-    google: 'Google Apps Script + Sheets', pairs: ['OrkaRecruiting', 'OrkaHR'], featured: true
-  },
-  {
-    id: 'orka-recruiting', name: 'OrkaRecruiting', status: 'Testing', priority: 'Immediate',
-    lane: 'current', category: 'people', series: 'People & Talent',
-    summary: 'Recruiting workflow connected to ATS, LinkedIn, and candidate sources.',
-    google: 'Google Apps Script + Sheets', pairs: ['OrkaATS', 'OrkaHR'], featured: true
-  },
-  {
-    id: 'orka-assets', name: 'OrkaAssets', status: 'Testing', priority: 'Immediate',
-    lane: 'current', category: 'growth', series: 'Growth & Commercial',
-    summary: 'Brand assets, media library, and logo management.',
-    google: 'Google Drive + Sheets + Sites', pairs: ['OrkaMarketing', 'OrkaSocial'], featured: true
-  },
-  {
-    id: 'orka-feedback', name: 'OrkaFeedback', status: 'Design', priority: 'Immediate',
-    lane: 'building', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Dynamic feedback collection, routing, and follow-up.',
-    google: 'Google Forms + Apps Script', pairs: ['OrkaEval', 'OrkaSupport'], featured: true
-  },
-  {
-    id: 'orka-task', name: 'OrkaTask', status: 'Design', priority: 'Immediate',
-    lane: 'building', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Kanban-style task management for small teams.',
-    google: 'Google Workspace + app layer', pairs: ['OrkaProject', 'OrkaFlow'], featured: true
-  },
-  {
-    id: 'orka-ai', name: 'OrkaAI', status: 'Next', priority: 'Immediate',
-    lane: 'building', category: 'intelligence', series: 'AI & Technology',
-    summary: 'Assistant CTO and tool-usage intelligence across the OrkaOS ecosystem.',
-    google: 'Gemini + AWS', pairs: ['OrkaAutomation', 'OrkaOS'], featured: true, ai: true
-  },
-  {
-    id: 'orka-product', name: 'OrkaProduct', status: 'Concept', priority: 'Immediate',
-    lane: 'queued', category: 'operations', series: 'Operations & Finance',
-    summary: 'Roadmapping and product-control workspace.',
-    google: 'Google Workspace', pairs: ['OrkaProject', 'OrkaMetrics']
-  },
-  {
-    id: 'orka-finance', name: 'OrkaFinance', status: 'Concept', priority: 'Immediate',
-    lane: 'queued', category: 'operations', series: 'Operations & Finance',
-    summary: 'Budgeting, expenses, revenue tracking, and reporting.',
-    google: 'Google Sheets', pairs: ['OrkaMetrics', 'OrkaLegal']
-  },
-  {
-    id: 'orka-legal', name: 'OrkaLegal', status: 'Concept', priority: 'Immediate',
-    lane: 'queued', category: 'operations', series: 'Operations & Finance',
-    summary: 'Contracts, agreements, and compliance storage.',
-    google: 'Google Drive + Docs', pairs: ['OrkaVault', 'OrkaFinance']
-  },
-  {
-    id: 'orka-project', name: 'OrkaProject', status: 'Concept', priority: 'Immediate',
-    lane: 'queued', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Project planning, work tracking, and delivery coordination.',
-    google: 'Google Workspace + ClickUp integration', pairs: ['OrkaTask', 'OrkaFlow']
-  },
-  {
-    id: 'orka-support', name: 'OrkaSupport', status: 'Concept', priority: 'Immediate',
-    lane: 'queued', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Service requests, customer support tickets, and question routing.',
-    google: 'Google Forms + Sheets', pairs: ['OrkaFeedback', 'OrkaChat']
-  },
-  {
-    id: 'orka-hr', name: 'OrkaHR', status: 'Production', priority: 'Soon',
-    lane: 'current', category: 'people', series: 'People & Talent',
-    summary: 'Employee records, contact cards, roles, and team identity.',
-    google: 'Google Forms + Sheets', pairs: ['OrkaEval', 'OrkaATS'], featured: true
-  },
-  {
-    id: 'orka-flow', name: 'OrkaFlow', status: 'Design', priority: 'Soon',
-    lane: 'building', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Meeting agendas, decision tracking, and structured handoffs.',
-    google: 'Google Docs + Calendar', pairs: ['OrkaSOP', 'OrkaTask'], featured: true
-  },
-  {
-    id: 'orka-automation', name: 'OrkaAutomation', status: 'Next', priority: 'Soon',
-    lane: 'building', category: 'intelligence', series: 'AI & Technology',
-    summary: 'Cross-app rules and automation triggers for recurring work.',
-    google: 'Google Apps Script', pairs: ['OrkaAI', 'OrkaFlow'], featured: true, ai: true
-  },
-  {
-    id: 'orka-crm', name: 'OrkaCRM', status: 'Concept', priority: 'Soon',
-    lane: 'queued', category: 'growth', series: 'Growth & Commercial',
-    summary: 'Contacts, deals, and pipeline management.',
-    google: 'Google Sheets', pairs: ['OrkaMarketing', 'OrkaSupport']
-  },
-  {
-    id: 'orka-chat', name: 'OrkaChat', status: 'Concept', priority: 'Soon',
-    lane: 'building', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Communication and collaboration with shared business context.',
-    google: 'Google Chat', pairs: ['OrkaProject', 'OrkaSupport']
-  },
-  {
-    id: 'orka-workspace', name: 'OrkaWorkspace', status: 'Next', priority: 'Later',
-    lane: 'later', category: 'core', series: 'Core OS & Workspace',
-    summary: 'User hub for Google Workspace and OrkaOS apps.',
-    google: 'Google Workspace', pairs: ['OrkaOS', 'OrkaVault']
-  },
-  {
-    id: 'orka-os', name: 'OrkaOS', status: 'Concept', priority: 'Later',
-    lane: 'later', category: 'core', series: 'Core OS & Workspace',
-    summary: 'Admin hub for Google Workspace and the OrkaOS app ecosystem.',
-    google: 'Google Workspace + AWS', pairs: ['OrkaWorkspace', 'OrkaAI']
-  },
-  {
-    id: 'orka-social', name: 'OrkaSocial', status: 'Concept', priority: 'Later',
-    lane: 'later', category: 'growth', series: 'Growth & Commercial',
-    summary: 'Social account tracking, content calendar, and publishing workflow.',
-    google: 'Google Sheets + Drive', pairs: ['OrkaAssets', 'OrkaMarketing']
-  },
-  {
-    id: 'orka-marketing', name: 'OrkaMarketing', status: 'Concept', priority: 'Later',
-    lane: 'later', category: 'growth', series: 'Growth & Commercial',
-    summary: 'Campaign planning, messaging, audiences, and funnels.',
-    google: 'Google Sheets + Docs', pairs: ['OrkaAssets', 'OrkaCRM']
-  },
-  {
-    id: 'orka-metrics', name: 'OrkaMetrics', status: 'Concept', priority: 'Backlog',
-    lane: 'later', category: 'operations', series: 'Operations & Finance',
-    summary: 'KPI dashboards, analytics, and business intelligence.',
-    google: 'Looker Studio', pairs: ['OrkaFinance', 'OrkaProduct']
-  },
-  {
-    id: 'orka-wiki', name: 'OrkaWiki / Knowledge', status: 'Concept', priority: 'Backlog',
-    lane: 'later', category: 'productivity', series: 'Productivity & Collaboration',
-    summary: 'Shared intranet and knowledge base.',
-    google: 'Google Workspace', pairs: ['OrkaSOP', 'OrkaResearch']
-  },
-  {
-    id: 'orka-research', name: 'OrkaResearch', status: 'Concept', priority: 'Backlog',
-    lane: 'later', category: 'operations', series: 'Operations & Finance',
-    summary: 'Market research, source capture, and strategy documents.',
-    google: 'Google Docs + Sheets', pairs: ['OrkaWiki / Knowledge', 'OrkaProduct']
-  }
-];
-
-// Filter values match each product's `category`; labels are presentation copy.
-const PRODUCT_FILTERS = [
-  ['all', 'All'],
-  ['people', 'People'],
-  ['productivity', 'Productivity'],
-  ['operations', 'Operations'],
-  ['growth', 'Growth'],
-  ['intelligence', 'AI & automation'],
-  ['core', 'Core OS']
-];
-
-// The roadmap is dependency-based rather than date-based. These phase objects
-// become the six visible columns in the Gantt-style roadmap widget.
-const ROADMAP_PHASES = [
-  { id: 'foundation', label: 'Phase 1 · Foundation' },
-  { id: 'operate', label: 'Phase 2 · Operate' },
-  { id: 'scale', label: 'Phase 3 · Scale' },
-  { id: 'stabilize', label: 'Phase 4 · Stabilize' },
-  { id: 'expand', label: 'Phase 5 · Expand' },
-  { id: 'intelligence', label: 'Phase 6 · Intelligence' }
-];
-
-// Translate product statuses into the roadmap's visual labels and CSS variants.
-const ROADMAP_STATUS_META = {
-  Live: { barLabel: 'Live', barClass: 'beta', pillClass: 'owner-projxon' },
-  Production: { barLabel: 'Production', barClass: 'beta', pillClass: 'owner-projxon' },
-  Testing: { barLabel: 'Testing', barClass: 'building', pillClass: 'owner-aws' },
-  Design: { barLabel: 'Design', barClass: 'building', pillClass: 'owner-aws' },
-  Next: { barLabel: 'Next', barClass: 'building', pillClass: 'owner-aws' },
-  Concept: { barLabel: 'Planned', barClass: 'planned', pillClass: 'owner-planned' }
-};
-
-// Dependency order mirrors the six-phase roadmap mockup. Percentages position each
-// product across the phase grid; they are sequencing cues, not calendar dates.
-const ROADMAP_SEQUENCE = [
-  { id: 'orka-hr', start: 1, width: 32 },
-  { id: 'orka-chat', start: 6, width: 32 },
-  { id: 'orka-sop', start: 14, width: 24 },
-  { id: 'orka-eval', start: 10, width: 28 },
-  { id: 'orka-vault', start: 4, width: 30 },
-  { id: 'orka-feedback', start: 18, width: 24 },
-  { id: 'orka-crm', start: 22, width: 22 },
-  { id: 'orka-social', start: 24, width: 22 },
-  { id: 'orka-assets', start: 30, width: 18 },
-  { id: 'orka-automation', start: 34, width: 24 },
-  { id: 'orka-flow', start: 38, width: 22 },
-  { id: 'orka-task', start: 40, width: 20 },
-  { id: 'orka-marketing', start: 42, width: 20 },
-  { id: 'orka-product', start: 46, width: 20 },
-  { id: 'orka-ats', start: 48, width: 18 },
-  { id: 'orka-recruiting', start: 50, width: 18 },
-  { id: 'orka-finance', start: 55, width: 22 },
-  { id: 'orka-legal', start: 60, width: 18 },
-  { id: 'orka-support', start: 62, width: 18 },
-  { id: 'orka-metrics', start: 65, width: 18 },
-  { id: 'orka-wiki', start: 70, width: 18 },
-  { id: 'orka-project', start: 72, width: 18 },
-  { id: 'orka-mps-learn', start: 74, width: 16 },
-  { id: 'orka-research', start: 80, width: 14 },
-  { id: 'orka-ai', start: 30, width: 64, barLabel: 'In build · AI' },
-  { id: 'orka-workspace', start: 55, width: 42, barLabel: 'Future control layer', barClass: 'future', pillLabel: 'Future', pillClass: 'owner-future' },
-  { id: 'orka-os', start: 58, width: 39, barLabel: 'Future control center', barClass: 'future', pillLabel: 'Future', pillClass: 'owner-future' }
-];
-
-// A lookup avoids repeatedly scanning the full catalog while rendering roadmap rows.
-const ORKA_PRODUCTS_BY_ID = Object.fromEntries(ORKA_PRODUCTS.map((product) => [product.id, product]));
+// Product data lives in products.js so the catalog, roadmap, and intake form
+// always expose the same public app list and roadmap status.
 
 /**
  * Resolve the first theme before React paints.
@@ -466,6 +242,13 @@ export default function App() {
   const visibleCatalogProducts = ORKA_PRODUCTS.filter((product) =>
     catalogFilter === 'all' || product.category === catalogFilter
   );
+  const roadmapStageCounts = ROADMAP_PHASES.map((phase) => ({
+    ...phase,
+    count: ORKA_PRODUCTS.filter((product) => product.status.toLowerCase() === phase.id).length
+  }));
+  const availableProductCount = ORKA_PRODUCTS.filter((product) =>
+    product.status === 'Live' || product.status === 'Production'
+  ).length;
 
   return (
     <>
@@ -816,7 +599,7 @@ export default function App() {
                       <div className="side-label">Recent</div>
                       <a className="nav-item small">OrkaVault</a>
                       <a className="nav-item small">OrkaSOP</a>
-                      <a className="nav-item small">OrkaMPS-Learn</a>
+                      <a className="nav-item small">OrkaSkills</a>
                     </div>
                   </aside>
                   <main className="os-main">
@@ -865,13 +648,13 @@ export default function App() {
                         <div className="tile-icon">
                           <span className="official-orka-logo" aria-hidden="true" />
                         </div>
-                        <div className="tile-name">OrkaMPS-Learn</div>
+                        <div className="tile-name">OrkaSkills</div>
                       </div>
                       <div className="app-tile">
                         <div className="tile-icon">
                           <span className="official-orka-logo" aria-hidden="true" />
                         </div>
-                        <div className="tile-name">OrkaEval</div>
+                        <div className="tile-name">OrkaHR</div>
                       </div>
                       <div className="app-tile">
                         <div className="tile-icon">
@@ -903,7 +686,7 @@ export default function App() {
                   <div className="dock-icon" title="OrkaSOP">
                     <span className="official-orka-logo" aria-hidden="true" />
                   </div>
-                  <div className="dock-icon" title="OrkaMPS-Learn">
+                  <div className="dock-icon" title="OrkaSkills">
                     <span className="official-orka-logo" aria-hidden="true" />
                   </div>
                   <div className="dock-divider" />
@@ -1195,6 +978,89 @@ export default function App() {
               </div>
             </div>
           </section>
+          {/* Product roadmap follows the catalog so people can move directly from discovery to delivery status. */}
+          <section id="roadmap">
+            <div className="wrap">
+              <div className="section-head">
+                <span className="eyebrow">Product roadmap</span>
+                <h2 className="h2">From concept to live, in one view</h2>
+                <p className="lead">
+                  The public OrkaOS roadmap uses the current product-stage snapshot. Each bar shows how far an app has moved through the shared delivery path.
+                </p>
+              </div>
+
+              <div className="roadmap-overview" aria-label="OrkaOS roadmap summary">
+                <div className="roadmap-overview__total">
+                  <span>Public roadmap</span>
+                  <strong>{ORKA_PRODUCTS.length} apps</strong>
+                  <small>{availableProductCount} live or in production</small>
+                </div>
+                <div className="roadmap-overview__stages">
+                  {roadmapStageCounts.map((phase) => (
+                    <div className={`roadmap-stage-card roadmap-stage-card--${phase.id}`} key={phase.id}>
+                      <span>{phase.label.replace(/^\d+ · /, '')}</span>
+                      <strong>{phase.count}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="roadmap-scroll" tabIndex={0} aria-label="Scrollable OrkaOS product-stage roadmap">
+                <div className="gantt roadmap-chart" role="table" aria-label="OrkaOS products progressing from concept to live">
+                  <div className="gantt-header" role="rowgroup">
+                    <div className="corner" role="columnheader">App &amp; current stage</div>
+                    {ROADMAP_PHASES.map((phase) => (
+                      <div key={phase.id} role="columnheader">{phase.label}</div>
+                    ))}
+                  </div>
+
+                  {ROADMAP_SEQUENCE.map((roadmapItem) => {
+                    const product = ORKA_PRODUCTS_BY_ID[roadmapItem.id];
+                    const status = ROADMAP_STATUS_META[product.status];
+
+                    return (
+                      <div className="gantt-row" key={product.id} role="row">
+                        <div className="gantt-tool" role="rowheader" title={product.summary}>
+                          <span className={`gantt-icon${product.ai ? ' gantt-icon--ai' : ''}`} aria-hidden="true">
+                            {product.ai ? 'AI' : <span className="official-orka-logo" aria-hidden="true" />}
+                          </span>
+                          <div>
+                            <div className="gantt-name">
+                              {product.name}
+                              <span className={`owner-pill ${status.pillClass}`}>{product.status}</span>
+                            </div>
+                            <div className="gantt-owner">{product.series}</div>
+                          </div>
+                        </div>
+                        <div className="gantt-track" role="cell" aria-label={`${product.name} is currently in ${product.status}`}>
+                          {ROADMAP_PHASES.map((phase) => (
+                            <div key={`${product.id}-${phase.id}`} aria-hidden="true" />
+                          ))}
+                          <div
+                            className={`gantt-bar ${status.barClass}${product.ai ? ' gantt-bar--ai' : ''}`}
+                            style={{ left: `${roadmapItem.start}%`, width: `${roadmapItem.width}%` }}
+                            title={`${product.name} · ${product.status}`}
+                          >
+                            <span>{status.barLabel}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div className="gantt-legend">
+                    {roadmapStageCounts.map((phase) => (
+                      <span className="key" key={`legend-${phase.id}`}>
+                        <span className={`swatch ${phase.id}`} />
+                        {phase.label.replace(/^\d+ · /, '')} · {phase.count}
+                      </span>
+                    ))}
+                    <span className="roadmap-dependency-note">Bars show stage maturity, not promised dates.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
           {/* Four-step onboarding path from a single module to a branded system. */}
           <section id="how">
             <div className="wrap">
@@ -1216,7 +1082,7 @@ export default function App() {
                   <div className="step-num">2</div>
                   <h4>Validate the next workflow</h4>
                   <p>
-                    Add OrkaEval, OrkaATS, or OrkaAssets when that workflow becomes the priority.
+                    Add OrkaHR, OrkaATS, or OrkaAssets when that workflow becomes the priority.
                   </p>
                 </div>
                 <div className="step-card">
@@ -1485,7 +1351,7 @@ export default function App() {
                         <span className="official-orka-logo" aria-hidden="true" />
                       </div>
                       <div>
-                        <div className="pr-text">OrkaEval</div>
+                        <div className="pr-text">OrkaHR</div>
                         <div className="pr-meta">3 reviews due</div>
                       </div>
                     </div>
@@ -1541,14 +1407,14 @@ export default function App() {
                 <div className="di">✨</div>
                 <div className="copy">
                   <div className="sm">Suggested next tool</div>
-                  <h4>You documented 5 SOPs. Try OrkaMPS-Learn.</h4>
+                  <h4>You documented 5 SOPs. Try OrkaSkills.</h4>
                   <p>
                     Turn approved procedures into learning paths, curriculum, and
                     onboarding material for the team.
                   </p>
                 </div>
                 <a className="btn btn-secondary" href="#cta">
-                  Follow OrkaMPS-Learn →
+                  Follow OrkaSkills →
                 </a>
               </div>
             </div>
@@ -1628,78 +1494,6 @@ export default function App() {
                   <div className="name">Jira, HubSpot, Workday</div>
                   <div className="desc">
                     Built for 200-person orgs with admins and consultants.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Dependency roadmap. Rows are generated from ROADMAP_SEQUENCE above. */}
-          <section id="roadmap">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Product roadmap</span>
-                <h2 className="h2">What we're building, and in what order</h2>
-                <p className="lead">
-                  A logical sequence: foundation modules first, then operating layers, then advanced intelligence. Phases show dependency, not dates.
-                </p>
-              </div>
-
-              {/*
-                The chart is intentionally horizontally scrollable on narrow screens.
-                Percent-based bars communicate order and overlap, never delivery dates.
-              */}
-              <div className="roadmap-scroll" tabIndex={0} aria-label="Scrollable OrkaOS dependency roadmap">
-                <div className="gantt roadmap-chart" role="table" aria-label="OrkaOS product roadmap sequenced by dependency">
-                  <div className="gantt-header" role="rowgroup">
-                    <div className="corner" role="columnheader">Module &amp; status</div>
-                    {ROADMAP_PHASES.map((phase) => (
-                      <div key={phase.id} role="columnheader">{phase.label}</div>
-                    ))}
-                  </div>
-
-                  {ROADMAP_SEQUENCE.map((roadmapItem) => {
-                    const product = ORKA_PRODUCTS_BY_ID[roadmapItem.id];
-                    const status = ROADMAP_STATUS_META[product.status];
-                    const barClass = roadmapItem.barClass || status.barClass;
-                    const pillClass = roadmapItem.pillClass || status.pillClass;
-                    const pillLabel = roadmapItem.pillLabel || product.status;
-                    const barLabel = roadmapItem.barLabel || status.barLabel;
-
-                    return (
-                      <div className="gantt-row" key={product.id} role="row">
-                        <div className="gantt-tool" role="rowheader">
-                          <span className={`gantt-icon${product.ai ? ' gantt-icon--ai' : ''}`} aria-hidden="true">
-                            {product.ai ? 'AI' : <span className="official-orka-logo" aria-hidden="true" />}
-                          </span>
-                          <div>
-                            <div className="gantt-name">
-                              {product.name}
-                              <span className={`owner-pill ${pillClass}`}>{pillLabel}</span>
-                            </div>
-                            <div className="gantt-owner">{product.summary}</div>
-                          </div>
-                        </div>
-                        <div className="gantt-track" role="presentation">
-                          {ROADMAP_PHASES.map((phase) => (
-                            <div key={`${product.id}-${phase.id}`} aria-hidden="true" />
-                          ))}
-                          <div
-                            className={`gantt-bar ${barClass}${product.ai ? ' gantt-bar--ai' : ''}`}
-                            style={{ left: `${roadmapItem.start}%`, width: `${roadmapItem.width}%` }}
-                          >
-                            {barLabel}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <div className="gantt-legend">
-                    <span className="key"><span className="swatch beta" />Available</span>
-                    <span className="key"><span className="swatch building" />Testing, design, or next</span>
-                    <span className="key"><span className="swatch planned" />Planned</span>
-                    <span className="key"><span className="swatch future" />Future control layer</span>
-                    <span className="roadmap-dependency-note">Phases are sequenced by dependency, not date.</span>
                   </div>
                 </div>
               </div>
