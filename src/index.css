@@ -428,7 +428,7 @@ section+section { border-top: 1px solid var(--line); }
   max-width: 380px; margin: 0 auto;
 }
 
-.address::before { content: "🔒"; font-size: 10px; margin-right: 6px; opacity: 0.5; }
+.address::before { content: none; }
 
 .window-actions { width: 56px; display: flex; justify-content: flex-end; gap: 6px; }
 
@@ -761,7 +761,7 @@ section+section { border-top: 1px solid var(--line); }
 
 .wl-list li { display: flex; align-items: center; gap: 10px; color: rgba(255, 255, 255, .92); font-size: 14.5px; }
 
-.wl-list li::before { content: "✓"; color: var(--blue-2); font-weight: 700; }
+.wl-list li::before { content: none; }
 
 .wl-mock { background: var(--orka-neutral-0); color: var(--navy); border-radius: 18px; padding: 24px; box-shadow: 0 30px 60px rgba(0, 0, 0, .25); }
 
@@ -894,9 +894,9 @@ section+section { border-top: 1px solid var(--line); }
 
 .icp-card li { display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px; color: var(--text-2); }
 
-.icp-card.yes li::before { content: "✓"; color: #0FA76C; font-weight: 700; flex-shrink: 0; }
+.icp-card.yes li::before { content: none; }
 
-.icp-card.no li::before { content: "✕"; color: #EA4335; font-weight: 700; flex-shrink: 0; }
+.icp-card.no li::before { content: none; }
 
 .icp-punch { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 13.5px; color: var(--muted); font-style: italic; }
 
@@ -4228,3 +4228,64 @@ html:root[data-theme="light"] body #orka-shell #siteMain #cta .cta .cta-buttons 
   #roadmap .roadmap-chart { --roadmap-label-width: 200px; min-width: 980px; }
   #roadmap .roadmap-chart .gantt-owner { max-width: 136px; }
 }
+
+/* Shared outline icons replace decorative emoji and font glyphs. */
+.ui-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+  overflow: visible;
+}
+
+.problem-card .icon .ui-icon { width: 22px; height: 22px; }
+
+.address {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.address::before { content: none; }
+.address .ui-icon { opacity: .55; }
+
+.nav-item .ni {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-item .ni .ui-icon,
+.search-icon .ui-icon,
+.icon-btn .ui-icon { width: 16px; height: 16px; }
+
+.search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.welcome h3 .ui-icon { color: var(--blue); }
+.collab-badge .ui-icon { color: #C6E2FA; }
+.collab-work-state .ui-icon { width: 14px; height: 14px; }
+.phone-list li .pi .ui-icon { width: 17px; height: 17px; }
+.discover .di .ui-icon { width: 22px; height: 22px; }
+.compare-cell .check { display: flex; justify-content: center; }
+.compare-cell .check .ui-icon { width: 24px; height: 24px; }
+.slot-icon .ui-icon { width: 16px; height: 16px; }
+
+.wl-list li::before,
+.icp-card.yes li::before,
+.icp-card.no li::before { content: none; }
+
+.list-icon { width: 15px; height: 15px; margin-top: 2px; }
+.wl-list .list-icon { color: var(--blue-2); }
+.icp-card.yes .list-icon { color: #0FA76C; }
+.icp-card.no .list-icon { color: #EA4335; }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import IntakeForm from './IntakeForm';
+import Icon from './Icon';
 import {
   ORKA_PRODUCTS,
   ORKA_PRODUCTS_BY_ID,
@@ -464,7 +465,7 @@ export default function App() {
               </div>
               <div className="problem-grid">
                 <div className="problem-card">
-                  <div className="icon">⚡</div>
+                  <div className="icon"><Icon name="unlink" /></div>
                   <h4>Too many tools, nothing connected</h4>
                   <p>
                     Sheets here, Trello there, Slack somewhere else. Nothing talks.
@@ -472,7 +473,7 @@ export default function App() {
                   </p>
                 </div>
                 <div className="problem-card">
-                  <div className="icon">📊</div>
+                  <div className="icon"><Icon name="chart" /></div>
                   <h4>Google Sheets isn't enough anymore</h4>
                   <p>
                     You've outgrown ad-hoc spreadsheets, but a real CRM or PM tool feels
@@ -480,7 +481,7 @@ export default function App() {
                   </p>
                 </div>
                 <div className="problem-card">
-                  <div className="icon">🏢</div>
+                  <div className="icon"><Icon name="building" /></div>
                   <h4>Enterprise software is too complex, too early</h4>
                   <p>
                     HubSpot, Jira, Workday — built for teams of 200, not founders
@@ -563,7 +564,7 @@ export default function App() {
                     <span className="dot yellow" />
                     <span className="dot green" />
                   </div>
-                  <div className="address">orkaos.app/projxon</div>
+                  <div className="address"><Icon name="lock" size={12} /> <span>orkaos.app/projxon</span></div>
                   <div className="window-actions">
                     <span />
                     <span />
@@ -580,19 +581,19 @@ export default function App() {
                     </div>
                     <nav className="side-nav">
                       <a className="nav-item active">
-                        <span className="ni">⌂</span>Home
+                        <span className="ni"><Icon name="home" /></span>Home
                       </a>
                       <a className="nav-item">
-                        <span className="ni">▦</span>My Apps
+                        <span className="ni"><Icon name="grid" /></span>My Apps
                       </a>
                       <a className="nav-item">
-                        <span className="ni">⊕</span>Discover
+                        <span className="ni"><Icon name="compass" /></span>Discover
                       </a>
                       <a className="nav-item">
-                        <span className="ni">◷</span>Activity
+                        <span className="ni"><Icon name="clock" /></span>Activity
                       </a>
                       <a className="nav-item">
-                        <span className="ni">⚙</span>Settings
+                        <span className="ni"><Icon name="settings" /></span>Settings
                       </a>
                     </nav>
                     <div className="side-section">
@@ -605,16 +606,16 @@ export default function App() {
                   <main className="os-main">
                     <div className="os-topbar">
                       <div className="search">
-                        <span className="search-icon">⌕</span>
+                        <span className="search-icon"><Icon name="search" /></span>
                         <input placeholder="Search apps, contacts, files…" />
                         <span className="kbd">⌘K</span>
                       </div>
                       <div className="topbar-actions">
-                        <button className="icon-btn" title="Notifications">
-                          ◔
+                        <button className="icon-btn" type="button" title="Notifications" aria-label="Notifications">
+                          <Icon name="bell" />
                         </button>
-                        <button className="icon-btn" title="Help">
-                          ?
+                        <button className="icon-btn" type="button" title="Help" aria-label="Help">
+                          <Icon name="help" />
                         </button>
                         <div
                           className="avatar"
@@ -625,7 +626,7 @@ export default function App() {
                       </div>
                     </div>
                     <div className="welcome">
-                      <h3>Good morning, Phelan 👋</h3>
+                      <h3>Good morning, Phelan <Icon name="sun" size={18} /></h3>
                       <p>
                         3 apps installed at PROJXON · 24 more tracked across the current
                         roadmap
@@ -729,7 +730,7 @@ export default function App() {
                     <h3>Keep Google. Add only what your team needs.</h3>
                   </div>
                   <div className="collab-badge">
-                    <span aria-hidden="true">✓</span> Built for Google Workspace
+                    <Icon name="checkCircle" size={15} /> Built for Google Workspace
                   </div>
                 </div>
                 <div className="collab-map">
@@ -811,7 +812,7 @@ export default function App() {
                     >
                       <div className="collab-work-item">
                         <span className="collab-work-state collab-work-state--done">
-                          ✓
+                          <Icon name="check" size={14} />
                         </span>
                         <div>
                           <b>OrkaChat</b>
@@ -819,7 +820,7 @@ export default function App() {
                         </div>
                       </div>
                       <div className="collab-work-item">
-                        <span className="collab-work-state">+</span>
+                        <span className="collab-work-state"><Icon name="plus" size={14} /></span>
                         <div>
                           <b>More tools</b>
                           <small>Add them when needed</small>
@@ -827,7 +828,7 @@ export default function App() {
                       </div>
                       <div className="collab-work-item">
                         <span className="collab-work-state collab-work-state--today">
-                          •
+                          <Icon name="layers" size={14} />
                         </span>
                         <div>
                           <b>Workspace hub</b>
@@ -1238,11 +1239,11 @@ export default function App() {
                       they're inside <strong>your</strong> platform.
                     </p>
                     <ul className="wl-list">
-                      <li>Custom logo &amp; favicon</li>
-                      <li>Brand colors across every module</li>
-                      <li>Custom domain (yourcompany.app)</li>
-                      <li>Branded emails &amp; notifications</li>
-                      <li>Your team. Your identity. Your OS.</li>
+                      <li><Icon name="check" className="list-icon" />Custom logo &amp; favicon</li>
+                      <li><Icon name="check" className="list-icon" />Brand colors across every module</li>
+                      <li><Icon name="check" className="list-icon" />Custom domain (yourcompany.app)</li>
+                      <li><Icon name="check" className="list-icon" />Branded emails &amp; notifications</li>
+                      <li><Icon name="check" className="list-icon" />Your team. Your identity. Your OS.</li>
                     </ul>
                   </div>
                   <div className="wl-mock" aria-hidden="true">
@@ -1300,16 +1301,16 @@ export default function App() {
                   </p>
                   <ul className="phone-list">
                     <li>
-                      <span className="pi">⚙</span>Manage your team
+                      <span className="pi"><Icon name="users" /></span>Manage your team
                     </li>
                     <li>
-                      <span className="pi">▦</span>Track work
+                      <span className="pi"><Icon name="clipboard" /></span>Track work
                     </li>
                     <li>
-                      <span className="pi">◷</span>Run meetings
+                      <span className="pi"><Icon name="calendar" /></span>Run meetings
                     </li>
                     <li>
-                      <span className="pi">↗</span>Monitor performance
+                      <span className="pi"><Icon name="trending" /></span>Monitor performance
                     </li>
                   </ul>
                 </div>
@@ -1390,7 +1391,7 @@ export default function App() {
                 </p>
               </div>
               <div className="discover">
-                <div className="di">✨</div>
+                <div className="di"><Icon name="route" size={22} /></div>
                 <div className="copy">
                   <div className="sm">Suggested next tool</div>
                   <h4>You're using OrkaVault. Add OrkaSOP next.</h4>
@@ -1404,7 +1405,7 @@ export default function App() {
                 </a>
               </div>
               <div className="discover" style={{ marginTop: 14 }}>
-                <div className="di">✨</div>
+                <div className="di"><Icon name="route" size={22} /></div>
                 <div className="copy">
                   <div className="sm">Suggested next tool</div>
                   <h4>You documented 5 SOPs. Try OrkaSkills.</h4>
@@ -1435,11 +1436,11 @@ export default function App() {
                   <div className="icp-tag">Built for</div>
                   <h3 className="h3">Who it's for</h3>
                   <ul>
-                    <li>Solopreneurs scaling to a team</li>
-                    <li>Micro-businesses (2–15 people)</li>
-                    <li>Startups in their first 18 months</li>
-                    <li>Nonprofits &amp; student orgs</li>
-                    <li>Remote-first teams without an ops hire</li>
+                    <li><Icon name="check" className="list-icon" />Solopreneurs scaling to a team</li>
+                    <li><Icon name="check" className="list-icon" />Micro-businesses (2–15 people)</li>
+                    <li><Icon name="check" className="list-icon" />Startups in their first 18 months</li>
+                    <li><Icon name="check" className="list-icon" />Nonprofits &amp; student orgs</li>
+                    <li><Icon name="check" className="list-icon" />Remote-first teams without an ops hire</li>
                   </ul>
                   <div className="icp-punch">
                     "I tried to scale, but hit a tech wall."
@@ -1449,10 +1450,10 @@ export default function App() {
                   <div className="icp-tag">Not built for</div>
                   <h3 className="h3">Who it's not for</h3>
                   <ul>
-                    <li>Large enterprises with established stacks</li>
-                    <li>Teams already deep in Jira / HubSpot / Salesforce</li>
-                    <li>Organizations needing heavy customization</li>
-                    <li>Tech-native teams building their own platform</li>
+                    <li><Icon name="x" className="list-icon" />Large enterprises with established stacks</li>
+                    <li><Icon name="x" className="list-icon" />Teams already deep in Jira / HubSpot / Salesforce</li>
+                    <li><Icon name="x" className="list-icon" />Organizations needing heavy customization</li>
+                    <li><Icon name="x" className="list-icon" />Tech-native teams building their own platform</li>
                   </ul>
                   <div className="icp-punch">
                     If you've already scaled your systems, you've likely outgrown
@@ -1482,7 +1483,7 @@ export default function App() {
                   </div>
                 </div>
                 <div className="compare-cell center">
-                  <div className="check">✓</div>
+                  <div className="check"><Icon name="checkCircle" size={24} /></div>
                   <div className="stage">Just Right</div>
                   <div className="name">OrkaOS</div>
                   <div className="desc">
@@ -1567,14 +1568,14 @@ export default function App() {
 
             <div className="actions-grid">
               <button className="form-slot primary" type="button" onClick={() => openForm('Join the Pod')}>
-                <span className="slot-icon">+</span>
+                <span className="slot-icon"><Icon name="userPlus" /></span>
                 <span>
                   <span className="slot-title">Join the Pod</span>
                   <span className="slot-detail">Early-access previews and demos as apps become ready</span>
                 </span>
               </button>
               <button className="form-slot" type="button" onClick={() => openForm('Join Alpha Testing')}>
-                <span className="slot-icon">α</span>
+                <span className="slot-icon"><Icon name="flask" /></span>
                 <span>
                   <span className="slot-title">Join Alpha Testing</span>
                   <span className="slot-detail">Test incomplete builds and shape what ships</span>
@@ -1587,14 +1588,14 @@ export default function App() {
                 aria-describedby="path-guidance-note"
                 disabled
               >
-                <span className="slot-icon">β</span>
+                <span className="slot-icon"><Icon name="badgeCheck" /></span>
                 <span>
                   <span className="slot-title">Join Beta Testing</span>
                   <span className="slot-detail">Near-release validation · enrollment coming soon</span>
                 </span>
               </button>
               <button className="form-slot" type="button" onClick={() => openForm('Partner with PROJXON')}>
-                <span className="slot-icon">∞</span>
+                <span className="slot-icon"><Icon name="handshake" /></span>
                 <span>
                   <span className="slot-title">Partner with PROJXON</span>
                   <span className="slot-detail">Explore pilots, integrations, or co-building</span>
