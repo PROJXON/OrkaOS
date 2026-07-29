@@ -2,7 +2,7 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import './IntakeForm.css';
 import { getTimeZoneGroups, US_TIME_ZONES } from './timezones.js';
-import { ORKA_PRODUCTS } from './products.js';
+import { ORKA_APP_SERIES, ORKA_PRODUCTS } from './products.js';
 
 /**
  * Intake dialog developer map
@@ -14,7 +14,7 @@ import { ORKA_PRODUCTS } from './products.js';
  *
  * CSS uses a BEM-style naming pattern: `.intake-modal__*` is the dialog shell,
  * `.intake-form__*` is section layout, and `.intake-field__*` is a form control.
- * Modifier classes such as `--card`, `--highlight`, and `--roadmap` change a
+ * Modifier classes such as `--card` and `--highlight` change a
  * component variant without changing its underlying responsibility.
  */
 
@@ -52,16 +52,15 @@ const INTENT_COPY = {
   }
 };
 
-// Product choices come from the same public catalog used by the landing page.
-// Non-concept apps are shown first; concept-stage apps remain in the expandable
-// roadmap group so the form stays scannable without drifting from the website.
-const DEVELOPMENT_APPS = ORKA_PRODUCTS
-  .filter((product) => product.status !== 'Concept')
-  .map((product) => [product.name, product.summary, product.status]);
-
-const ROADMAP_APPS = ORKA_PRODUCTS
-  .filter((product) => product.status === 'Concept')
-  .map((product) => [product.name, product.summary, product.status]);
+// Product choices come from the same public catalog and app-series taxonomy
+// used by the landing page. Roadmap stage remains visible as a badge, but apps
+// are grouped by what they help a person or team accomplish.
+const APP_INTEREST_SERIES = ORKA_APP_SERIES
+  .map((series) => ({
+    ...series,
+    apps: ORKA_PRODUCTS.filter((product) => product.seriesId === series.id)
+  }))
+  .filter((series) => series.apps.length > 0);
 
 // Remaining option arrays are form copy only; submitted values are the visible
 // strings, so changing wording here also changes the payload value.
@@ -1159,13 +1158,13 @@ export default function IntakeForm({
               </div>
             </section>
 
-            {/* Step 04: current-development apps first, expandable roadmap apps second. */}
+            {/* Step 04: product interests organized by app series. */}
             <section className="intake-form__section" aria-labelledby={`${id}-interests-heading`}>
               <div className="intake-form__section-head">
                 <span className="intake-form__step">04</span>
                 <div>
                   <h3 id={`${id}-interests-heading`}>Orka app interests</h3>
-                  <p>Choose the Orka apps you want to follow today, then add any upcoming products that interest you.</p>
+                  <p>Browse by app series, then choose the specific products you want to follow, test, or use.</p>
                 </div>
               </div>
 
@@ -1173,47 +1172,33 @@ export default function IntakeForm({
                 <legend className="intake-field__label">
                   Which Orka apps interest you? <span className="intake-field__required">*</span>
                 </legend>
+                <p className="intake-field__hint">Roadmap stage is shown on each app; select at least one app from any series.</p>
 
-                <div className="intake-interest-group">
-                  <div className="intake-interest-group__head">
-                    <h4>Available and in development</h4>
-                    <span>{DEVELOPMENT_APPS.length} non-concept apps</span>
-                  </div>
-                  <div className="intake-checkbox-grid">
-                    {DEVELOPMENT_APPS.map(([app, description, status], index) => (
-                      <CheckOption
-                        key={app}
-                        id={`${id}-interest-development-${index}`}
-                        value={app}
-                        description={description}
-                        badge={status}
-                        registerField={interestRegistration}
-                      />
-                    ))}
-                  </div>
+                <div className="intake-series-list">
+                  {APP_INTEREST_SERIES.map((series) => (
+                    <div className="intake-interest-group" key={series.id}>
+                      <div className="intake-interest-group__head">
+                        <div>
+                          <h4>{series.label}</h4>
+                          <p>{series.description}</p>
+                        </div>
+                        <span>{series.apps.length} {series.apps.length === 1 ? 'app' : 'apps'}</span>
+                      </div>
+                      <div className="intake-checkbox-grid">
+                        {series.apps.map((app) => (
+                          <CheckOption
+                            key={app.id}
+                            id={`${id}-interest-${series.id}-${app.id}`}
+                            value={app.name}
+                            description={app.summary}
+                            badge={app.status}
+                            registerField={interestRegistration}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-
-                <details className="intake-interest-group intake-interest-group--roadmap">
-                  <summary>
-                    <span>
-                      <strong>Concept-stage apps on the roadmap</strong>
-                      <small>Choose early concepts you want to follow.</small>
-                    </span>
-                    <span className="intake-interest-group__count">{ROADMAP_APPS.length} apps</span>
-                  </summary>
-                  <div className="intake-checkbox-grid intake-checkbox-grid--roadmap">
-                    {ROADMAP_APPS.map(([app, description, status], index) => (
-                      <CheckOption
-                        key={app}
-                        id={`${id}-interest-roadmap-${index}`}
-                        value={app}
-                        description={description}
-                        badge={status}
-                        registerField={interestRegistration}
-                      />
-                    ))}
-                  </div>
-                </details>
 
                 {errors.interests && <p className="intake-field__error">{errors.interests.message}</p>}
               </fieldset>

@@ -377,7 +377,9 @@ fieldset.intake-field > legend { padding: 0; }
   border: 1px solid var(--brand-border); border-radius: var(--radius-pill);
   vertical-align: 1px;
 }
-/* App-interest grouping: active-development cards plus expandable roadmap cards. */
+/* App-interest choices are grouped by the shared product-series taxonomy. */
+
+.intake-series-list { display: grid; gap: var(--space-3); margin-top: var(--space-1); }
 
 .intake-interest-group {
   display: flex; flex-direction: column;
@@ -386,44 +388,25 @@ fieldset.intake-field > legend { padding: 0; }
   border-radius: var(--radius-md);
 }
 
-.intake-interest-group + .intake-interest-group { margin-top: var(--space-3); }
-
-.intake-interest-group__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
-
-.intake-interest-group__head span, .intake-interest-group__count {
-  color: var(--brand-text); font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
+.intake-interest-group__head {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: var(--space-4);
 }
 
-.intake-interest-group--roadmap { padding: 0; overflow: hidden; background: var(--bg-surface); }
+.intake-interest-group__head > div { min-width: 0; }
 
-.intake-interest-group--roadmap summary {
-  display: flex; align-items: center;
-  justify-content: space-between; gap: var(--space-3);
-  padding: var(--space-4); color: var(--text-primary);
-  cursor: pointer; list-style: none;
+.intake-interest-group__head p {
+  margin: 3px 0 0; color: var(--text-secondary);
+  font-size: var(--fs-xs); line-height: var(--lh-normal);
 }
 
-.intake-interest-group--roadmap summary::-webkit-details-marker { display: none; }
-
-.intake-interest-group--roadmap summary::after {
-  content: "+"; order: 3;
-  display: inline-grid; place-items: center;
-  width: 24px; height: 24px;
-  color: var(--brand-text); font-weight: var(--fw-bold);
-  background: var(--brand-subtle); border-radius: var(--radius-pill);
+.intake-interest-group__head > span {
+  flex: none; padding: 3px 8px;
+  color: var(--brand-text); font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold); white-space: nowrap;
+  background: var(--brand-subtle); border: 1px solid var(--brand-border);
+  border-radius: var(--radius-pill);
 }
-
-.intake-interest-group--roadmap[open] summary::after { content: "−"; }
-
-.intake-interest-group--roadmap summary strong, .intake-interest-group--roadmap summary small { display: block; }
-
-.intake-interest-group--roadmap summary small {
-  margin-top: 2px; color: var(--text-secondary);
-  font-size: var(--fs-xs); font-weight: var(--fw-regular);
-}
-
-.intake-checkbox-grid--roadmap { padding: 0 var(--space-4) var(--space-4); }
 /* Familiarity and highlighted alpha-testing section layouts. */
 
 .intake-familiarity-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
@@ -453,8 +436,7 @@ fieldset.intake-field > legend { padding: 0; }
     max-width: none; max-height: calc(100dvh - 12px);
   }
   .intake-modal__brand { display: none; }
-  .intake-checkbox-grid--roadmap { padding-right: var(--space-3); padding-left: var(--space-3); }
-  .intake-interest-group, .intake-interest-group--roadmap summary { padding: var(--space-3); }
+  .intake-interest-group { padding: var(--space-3); }
   .intake-modal__actions { width: 100%; }
 }
 /* AI options receive a distinct treatment while retaining the standard card markup. */

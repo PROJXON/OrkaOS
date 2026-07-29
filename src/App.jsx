@@ -4,7 +4,7 @@ import Icon from './Icon';
 import {
   ORKA_PRODUCTS,
   ORKA_PRODUCTS_BY_ID,
-  PRODUCT_FILTERS,
+  PRODUCT_SERIES_FILTERS,
   ROADMAP_PHASES,
   ROADMAP_SEQUENCE,
   ROADMAP_STATUS_META
@@ -241,7 +241,7 @@ export default function App() {
   const selectedProduct = ORKA_PRODUCTS.find((product) => product.id === selectedModule) || ORKA_PRODUCTS[0];
   const featuredProducts = ORKA_PRODUCTS.filter((product) => product.featured);
   const visibleCatalogProducts = ORKA_PRODUCTS.filter((product) =>
-    catalogFilter === 'all' || product.category === catalogFilter
+    catalogFilter === 'all' || product.seriesId === catalogFilter
   );
   const roadmapStageCounts = ROADMAP_PHASES.map((phase) => ({
     ...phase,
@@ -858,7 +858,7 @@ export default function App() {
                 <span className="eyebrow">Product catalog</span>
                 <h2 className="h2">Explore what OrkaOS is offering and building</h2>
                 <p className="lead">
-                  Browse the full Orka lineup, filter by function, and follow the apps
+                  Browse the full Orka lineup, filter by app series, and follow the apps
                   that fit your team best.
                 </p>
               </div>
@@ -928,9 +928,9 @@ export default function App() {
                 </article>
               </div>
 
-              {/* Category filters only change which catalog cards are rendered below. */}
-              <div className="catalog-toolbar" role="group" aria-label="Filter Orka products">
-                {PRODUCT_FILTERS.map(([value, label]) => (
+              {/* App-series filters only change which catalog cards are rendered below. */}
+              <div className="catalog-toolbar" role="group" aria-label="Filter Orka products by app series">
+                {PRODUCT_SERIES_FILTERS.map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
