@@ -27,3 +27,10 @@ The provided OrkaSales source did not include public rollout dates for the full 
 - Replaced remaining app-pair references to OrkaOS.com with OrkaOS ecosystem relationships.
 - Matched the supplied OrkaSales three-segment pane-size selector dimensions and state styling.
 - Matched OrkaSales scrollbars: transparent at rest, Orka blue during active scrolling, then hidden again after 700 ms.
+
+
+## V1 hero simplification
+
+- The public version chip now reads `v1`.
+- The opening hero now contains only the headline and a concise subheading; the eyebrow, action buttons, proof chips, and decorative app-pod panel were removed.
+- The hero was rebalanced as a spacious single-column composition across desktop and mobile.

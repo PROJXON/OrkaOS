@@ -1017,7 +1017,7 @@ export default function App() {
           <button className="brand-mark" type="button" onClick={() => navigate('overview')} aria-label="Go to OrkaOS overview">
             <img src={logo} alt="" />
             <span className="brand-word"><b>Orka</b><strong>OS</strong></span>
-            <span className="version-chip">V 1.6</span>
+            <span className="version-chip">v1</span>
           </button>
         </div>
 

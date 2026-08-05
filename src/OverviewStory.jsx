@@ -2,7 +2,6 @@ import React from 'react';
 import Icon from './Icon';
 import { ORKA_PRODUCTS_BY_ID } from './products.js';
 import orkaLogoLight from './assets/brand/orka-logo-on-light.png';
-import orkaLogoDark from './assets/brand/orka-logo-on-dark.png';
 import './OverviewStory.css';
 
 const STORY_CHAPTERS = [
@@ -79,36 +78,6 @@ function NextChapter({ current, onNavigate, onOpenApps }) {
   );
 }
 
-function PodVisual() {
-  return (
-    <div className="pod-hero-visual" aria-label="A small pod moving together around the OrkaOS hub">
-      <div className="pod-radar-ring ring-one" />
-      <div className="pod-radar-ring ring-two" />
-      <div className="pod-radar-ring ring-three" />
-      <div className="flow-hub-card">
-        <div className="flow-hub-logo">
-          <img src={orkaLogoDark} alt="" />
-          <div>
-            <span>ORKAOS</span>
-            <b>One connected flow</b>
-          </div>
-        </div>
-        <p>Google Workspace stays at the center. Add focused apps only as your pod needs them.</p>
-        <div className="flow-hub-chips" aria-hidden="true">
-          <span>Google-centered</span>
-          <span>Modular</span>
-          <span>Built to scale</span>
-        </div>
-      </div>
-      <div className="pod-visual-caption">
-        <span><b>3–5</b> people</span>
-        <span><b>1</b> shared flow</span>
-        <span><b>As needed</b> apps</span>
-      </div>
-    </div>
-  );
-}
-
 function AppShellPreview() {
   return (
     <div className="story-app-shell" aria-label="Example of the familiar three-pane OrkaApp layout">
@@ -152,23 +121,9 @@ function StartChapter({ onOpenForm, onOpenApps, onNavigate }) {
     <>
       <section className="story-hero story-ocean-card">
         <div className="story-hero-copy">
-          <span className="story-chapter-label light">OrkaOS · A two-minute introduction</span>
           <h1>A whale of a project should not require a whale of a tech stack.</h1>
-          <p>
-            OrkaOS is a <strong>tech-stack starter kit for small teams</strong>. It keeps Google Workspace at the center,
-            then adds a pod of focused apps — one clear tool for one clear job — only when your team needs them.
-          </p>
-          <div className="story-hero-actions">
-            <button className="button story-button-light" type="button" onClick={() => onNavigate('overview', 'why')}>Tell me the story</button>
-            <button className="button story-button-ghost" type="button" onClick={onOpenApps}>See the apps</button>
-          </div>
-          <div className="story-proof-row">
-            <span><Icon name="checkCircle" size={15} /> Built for Google Workspace</span>
-            <span><Icon name="users" size={15} /> Pods of 3–5 and beyond</span>
-            <span><Icon name="layers" size={15} /> Start with one app</span>
-          </div>
+          <p>OrkaOS keeps Google Workspace at the center and adds only the focused apps your team needs.</p>
         </div>
-        <PodVisual />
       </section>
 
       <section className="story-definition content-surface">
