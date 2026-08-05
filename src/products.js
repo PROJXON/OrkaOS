@@ -1,10 +1,41 @@
 /**
  * Public OrkaOS product catalog
  * -----------------------------
- * This list mirrors the OrkaOS Product Roadmap. Only rows whose `OrkaOS.com`
- * value is not `NA` are included, and every app is assigned to the exact group
- * named in that column: IT, OPS, HR, Business, or Marketing.
+ * This list mirrors the public OrkaOS Product Roadmap. Every app is assigned
+ * to one of the published groups: IT, OPS, HR, Business, or Marketing.
+ *
+ * `rolloutDate` values are public planning estimates used by the website's
+ * rollout calendar. They are not committed release dates and are intentionally
+ * kept separate from the roadmap stage.
  */
+
+const ESTIMATED_ROLLOUTS = {
+  'orka-ats': '2026-09-15',
+  'orka-process': '2026-10-15',
+  'orka-os': '2026-11-15',
+  'orka-task': '2026-12-15',
+  'orka-aria': '2027-01-15',
+  'orka-prompt': '2027-02-15',
+  'orka-project': '2027-03-15',
+  'orka-goals': '2027-04-15',
+  'orka-flow': '2027-05-15',
+  'orka-legal': '2027-06-15',
+  'orka-finance': '2027-07-15',
+  'orka-marketing': '2027-08-15',
+  'orka-social': '2027-09-15',
+  'orka-content': '2027-11-15',
+  'orka-crm': '2027-12-15',
+  'orka-sales': '2028-01-15',
+  'orka-chat': '2028-02-15'
+};
+
+function formatRolloutLabel(date, status) {
+  if (status === 'Live' || status === 'Production') return 'Available now';
+  if (!date) return 'Estimate pending';
+  return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(`${date}T12:00:00Z`));
+}
+
 
 export const ORKA_APP_GROUPS = [
   {
@@ -45,34 +76,28 @@ const ORKA_GROUP_BY_ID = Object.fromEntries(
 
 export const ORKA_PRODUCTS = [
   {
-    id: 'orkaos-com', name: 'OrkaOS.com', status: 'Concept', priority: 'Planned',
-    lane: 'later', groupId: 'it',
-    summary: 'The public home for learning about OrkaOS, exploring apps, following the roadmap, and choosing an intake path.',
-    google: 'Public web experience + intake workflows', pairs: ['OrkaOS', 'OrkaContent'], featured: true
-  },
-  {
     id: 'orka-vault', name: 'OrkaVault', status: 'Live', priority: 'Available',
     lane: 'current', groupId: 'it',
     summary: 'Secure access management and credential sharing for small teams.',
     google: 'Google Workspace + secure app layer', pairs: ['OrkaSOP', 'OrkaOS'], featured: true
   },
   {
-    id: 'orka-aira', name: 'OrkaAira', status: 'Design', priority: 'In design',
+    id: 'orka-aria', name: 'OrkaAria', status: 'Design', priority: 'In design',
     lane: 'building', groupId: 'it',
     summary: 'An onboard CTO for tech-stack visibility, AI adoption, and tool governance.',
-    google: 'Gemini + AWS', pairs: ['OrkaPrompt', 'OrkaOS.com'], featured: true, ai: true
+    google: 'Gemini + AWS', pairs: ['OrkaPrompt', 'OrkaOS'], featured: true, ai: true
   },
   {
     id: 'orka-prompt', name: 'OrkaPrompt', status: 'Design', priority: 'In design',
     lane: 'building', groupId: 'it',
     summary: 'A version-controlled prompt catalog for reusable, stage-based AI workflows.',
-    google: 'Google Docs + Drive', pairs: ['OrkaAira', 'OrkaTask'], ai: true
+    google: 'Google Docs + Drive', pairs: ['OrkaAria', 'OrkaTask'], ai: true
   },
   {
     id: 'orka-os', name: 'OrkaOS', status: 'Design', priority: 'In design',
     lane: 'building', groupId: 'ops',
     summary: 'The modular operating-system hub connecting Google Workspace and Orka apps.',
-    google: 'Google Workspace + AWS', pairs: ['OrkaOS.com', 'OrkaVault'], featured: true
+    google: 'Google Workspace + AWS', pairs: ['OrkaVault', 'OrkaAria'], featured: true
   },
   {
     id: 'orka-chat', name: 'OrkaChat', status: 'Concept', priority: 'Planned',
@@ -170,10 +195,15 @@ export const ORKA_PRODUCTS = [
     summary: 'A guided campaign builder for audiences, journeys, channels, and deadlines.',
     google: 'Google Sheets + Docs + creative tools', pairs: ['OrkaSocial', 'OrkaCRM'], featured: true
   }
-].map((product) => ({
-  ...product,
-  group: ORKA_GROUP_BY_ID[product.groupId].label
-}));
+].map((product) => {
+  const rolloutDate = ESTIMATED_ROLLOUTS[product.id] || null;
+  return {
+    ...product,
+    group: ORKA_GROUP_BY_ID[product.groupId].label,
+    rolloutDate,
+    rolloutLabel: formatRolloutLabel(rolloutDate, product.status)
+  };
+});
 
 export const PRODUCT_GROUP_FILTERS = [
   ['all', 'All'],

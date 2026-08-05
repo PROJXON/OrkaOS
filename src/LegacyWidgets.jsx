@@ -10,7 +10,7 @@ import {
 } from './products.js';
 
 /**
- * Original OrkaOS.com widgets, preserved inside the GAS-inspired website shell.
+ * Original OrkaOS website widgets, preserved inside the GAS-inspired website shell.
  * The `panel` prop places the original long-form homepage sections into the
  * Overview, Orka Apps, and Future Plan folders without flattening them away.
  */
@@ -582,7 +582,6 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
             <div className="search">
               <span className="search-icon"><Icon name="search" /></span>
               <input placeholder="Search apps, contacts, files…" />
-              <span className="kbd">⌘K</span>
             </div>
             <div className="topbar-actions">
               <button className="icon-btn" type="button" title="Notifications" aria-label="Notifications">
@@ -649,7 +648,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
             </div>
             <div className="app-tile app-tile--ai">
               <div className="tile-icon tile-icon--ai" aria-hidden="true">AI</div>
-              <div className="tile-name">OrkaAira</div>
+              <div className="tile-name">OrkaAria</div>
             </div>
           </div>
         </main>
@@ -669,7 +668,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
           <span className="official-orka-logo" aria-hidden="true" />
         </div>
         <div className="dock-divider" />
-        <div className="dock-icon ai" title="OrkaAira · AI Agent">
+        <div className="dock-icon ai" title="OrkaAria · AI Agent">
           AI
         </div>
       </div>
@@ -756,7 +755,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
           <div className="phone-row phone-row--ai">
             <div className="pr-icon pr-icon--ai" aria-hidden="true">AI</div>
             <div>
-              <div className="pr-text">OrkaAira</div>
+              <div className="pr-text">OrkaAria</div>
               <div className="pr-meta">Summary ready</div>
             </div>
           </div>
@@ -880,7 +879,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
       <span className="eyebrow">Product catalog</span>
       <h2 className="h2">Explore what OrkaOS is offering and building</h2>
       <p className="lead">
-        Browse the roadmap-approved Orka lineup, filter by OrkaOS.com group, and follow the apps
+        Browse the roadmap-approved Orka lineup, filter by Orka app group, and follow the apps
         that fit your team best.
       </p>
     </div>
@@ -950,8 +949,8 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
       </article>
     </div>
 
-    {/* OrkaOS.com group filters only change which catalog cards are rendered below. */}
-    <div className="catalog-toolbar" role="group" aria-label="Filter Orka products by OrkaOS.com group">
+    {/* Orka app group filters only change which catalog cards are rendered below. */}
+    <div className="catalog-toolbar" role="group" aria-label="Filter Orka products by Orka app group">
       {PRODUCT_GROUP_FILTERS.map(([value, label]) => (
         <button
           key={value}
@@ -1010,7 +1009,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
       <span className="eyebrow">Product roadmap</span>
       <h2 className="h2">From concept to live, in one view</h2>
       <p className="lead">
-        The public roadmap includes only apps assigned to an OrkaOS.com group. Each bar shows how far an included app has moved through the shared delivery path.
+        The public roadmap includes only apps assigned to a public Orka app group. Each bar shows how far an included app has moved through the shared delivery path.
       </p>
     </div>
 

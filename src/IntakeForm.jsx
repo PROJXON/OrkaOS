@@ -52,9 +52,9 @@ const INTENT_COPY = {
   }
 };
 
-// Product choices come from the same roadmap-approved catalog and OrkaOS.com group taxonomy
+// Product choices come from the same roadmap-approved catalog and public Orka app group taxonomy
 // used by the landing page. Roadmap stage remains visible as a badge, but apps
-// are grouped by the value assigned in the roadmap OrkaOS.com column.
+// are grouped by the value assigned in the published roadmap group.
 const APP_INTEREST_GROUPS = ORKA_APP_GROUPS
   .map((group) => ({
     ...group,
@@ -1158,13 +1158,13 @@ export default function IntakeForm({
               </div>
             </section>
 
-            {/* Step 04: product interests organized by OrkaOS.com group. */}
+            {/* Step 04: product interests organized by Orka app group. */}
             <section className="intake-form__section" aria-labelledby={`${id}-interests-heading`}>
               <div className="intake-form__section-head">
                 <span className="intake-form__step">04</span>
                 <div>
                   <h3 id={`${id}-interests-heading`}>Orka app interests</h3>
-                  <p>Browse by OrkaOS.com group, then choose the specific products you want to follow, test, or use.</p>
+                  <p>Browse by Orka app group, then choose the specific products you want to follow, test, or use.</p>
                 </div>
               </div>
 

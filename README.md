@@ -6,7 +6,7 @@ OrkaOS helps a pod start with one focused app, solve one real collaboration prob
 
 ## Overview
 
-This repository contains the public OrkaOS product website in an OrkaApp-style shell. The Overview folder is a five-chapter guided story for first-time visitors: **Start Here**, **The Story**, **How It Works**, **The Orka Way**, and **Is It for You?** The Orka Apps and Future Plan workspaces remain available in the same interface.
+This repository contains the public OrkaOS product website in an OrkaApp-style shell. The Overview folder is a five-chapter guided story for first-time visitors: **Start Here**, **The Story**, **How It Works**, **The Orka Way**, and **Is It for You?** The Orka Apps and Future Plan workspaces remain available in the same interface. The public shell intentionally omits the internal OrkaAnalytics-through-OrkaSheets tool rail.
 
 The site is built as a responsive React application using Vite.
 
@@ -14,15 +14,16 @@ The site is built as a responsive React application using Vite.
 
 * OrkaOS GAS-inspired top bar, sidebar, guide bar, panes, and semantic design tokens
 * Non-clickable Overview, Orka Apps, and Future Plan folder labels with GAS-style disclosure controls, child tabs, and folder/tab breadcrumbs
-* Global search with `Cmd/Ctrl + K`
+* Centered global search without a platform-specific shortcut badge
 * User/Admin demonstration modes
 * Nine-dot Orka app launcher
 * Light and dark themes saved with `localStorage`
 * Gray anonymous profile avatar and profile menu
-* Searchable, filterable three-pane Orka Apps workspace with functional collapse, restore, and expand controls, plus the restored original card explorer in its own child tab
+* Searchable, filterable three-pane Orka Apps workspace with the latest compact collapse / balanced / expand selector, plus the restored original card explorer in its own child tab
 * A redesigned story-led Overview with a plain-English product definition, origin story, micro-stack model, product principles, audience fit, FAQs, and starting paths
 * Restored original website widgets, including the desktop preview, collaboration flow, white-label demo, mobile mockup, adoption scope, and Gantt roadmap
-* Browser-persisted Favorites tab and public product roadmap
+* Browser-persisted Favorites tab, public product roadmap, and estimated OrkaApp rollout calendar with Month, Quarter, and List views
+* OrkaAria public guide with transparent prewritten answers for ecosystem, app, pane, and rollout questions
 * Configurable Google Apps Script feedback-form link
 * Persistent CTA footer on every tab for Pod, Alpha, Beta, and PROJXON partnership paths
 * Responsive desktop sidebar and mobile navigation drawer
@@ -292,7 +293,7 @@ Accessibility should be reviewed whenever interactive components or visual style
 
 ## Development Notes
 
-* Application content and product data are currently defined directly in `src/App.jsx`.
+* Shell behavior and page components are defined in `src/App.jsx`; catalog and rollout-estimate data are defined in `src/products.js`.
 * Intake-form options and validation are defined in `src/IntakeForm.jsx`.
 * Global page styles are located in `src/index.css`.
 * Intake-form-specific styles are located in `src/IntakeForm.css`.
