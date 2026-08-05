@@ -1,12 +1,12 @@
 # OrkaOS Web
 
-The public-facing website for **OrkaOS**, a modular operating system for small teams built around Google Workspace.
+The public-facing website for **OrkaOS**, a modular micro-stack that completes Google Workspace for small teams.
 
-OrkaOS helps teams organize, collaborate, and scale by adding a guided operating layer on top of tools such as Gmail, Google Drive, Calendar, Docs, Sheets, Forms, and Google identity.
+OrkaOS helps a pod start with one focused app, solve one real collaboration problem, and grow into a connected operating system without adopting an enterprise suite too early.
 
 ## Overview
 
-This repository contains the public OrkaOS product website, restructured as an OrkaApp-style experience. The former long homepage is reorganized into non-navigational Overview, Orka Apps, and Future Plan folders inside the same shell used by the OrkaOS Google Apps Script application. Each folder expands to child tabs, and all page content lives in those tabs. The original website widgets are preserved rather than removed.
+This repository contains the public OrkaOS product website in an OrkaApp-style shell. The Overview folder is a five-chapter guided story for first-time visitors: **Start Here**, **The Story**, **How It Works**, **The Orka Way**, and **Is It for You?** The Orka Apps and Future Plan workspaces remain available in the same interface.
 
 The site is built as a responsive React application using Vite.
 
@@ -20,6 +20,7 @@ The site is built as a responsive React application using Vite.
 * Light and dark themes saved with `localStorage`
 * Gray anonymous profile avatar and profile menu
 * Searchable, filterable three-pane Orka Apps workspace with functional collapse, restore, and expand controls, plus the restored original card explorer in its own child tab
+* A redesigned story-led Overview with a plain-English product definition, origin story, micro-stack model, product principles, audience fit, FAQs, and starting paths
 * Restored original website widgets, including the desktop preview, collaboration flow, white-label demo, mobile mockup, adoption scope, and Gantt roadmap
 * Browser-persisted Favorites tab and public product roadmap
 * Configurable Google Apps Script feedback-form link
@@ -123,6 +124,8 @@ orka-os-web/
 │   ├── LegacyWidgets.jsx
 │   ├── IntakeForm.css
 │   ├── IntakeForm.jsx
+│   ├── OverviewStory.css
+│   ├── OverviewStory.jsx
 │   └── main.jsx
 ├── .gitignore
 ├── .oxlintrc.json

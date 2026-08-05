@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import IntakeForm from './IntakeForm';
 import Icon from './Icon';
 import LegacyWidgets from './LegacyWidgets';
+import OverviewStory from './OverviewStory';
 import {
   ORKA_PRODUCTS,
   PRODUCT_GROUP_FILTERS,
@@ -25,10 +26,10 @@ const NAV_FOLDERS = {
     icon: 'home',
     tabs: [
       { id: 'start', label: 'Start Here', icon: 'home' },
-      { id: 'why', label: 'Why OrkaOS', icon: 'help' },
+      { id: 'why', label: 'The Story', icon: 'help' },
       { id: 'how', label: 'How It Works', icon: 'route' },
-      { id: 'experience', label: 'OrkaApp Experience', icon: 'grid' },
-      { id: 'fit', label: 'Fit & Brand', icon: 'users' }
+      { id: 'experience', label: 'The Orka Way', icon: 'grid' },
+      { id: 'fit', label: 'Is It for You?', icon: 'users' }
     ]
   },
   apps: {
@@ -63,11 +64,11 @@ const APP_LAUNCHER_IDS = [
 ];
 
 const OVERVIEW_SEARCH_ITEMS = [
-  ['Why OrkaOS', 'The scaling problem OrkaOS is designed to solve.'],
-  ['How it works', 'Keep Google Workspace and add only the apps your team needs.'],
-  ['What an OrkaApp feels like', 'A familiar, focused app shell with one clear job.'],
-  ['Who it is for', 'Small teams in the space between spreadsheets and enterprise software.'],
-  ['White-label experience', 'A shared design system that can carry your organization’s brand.']
+  ['Meet OrkaOS', 'A plain-English introduction to the Google Workspace micro-stack.'],
+  ['The OrkaOS origin story', 'How group-project friction became a pod of focused business apps.'],
+  ['How the micro-stack works', 'Start with one app, follow a useful series, and grow toward the OrkaOS hub.'],
+  ['Pod, flow, slipstream, ecosystem', 'The four ideas behind the OrkaOS product experience.'],
+  ['Is OrkaOS for my team?', 'Who it is built for, who has outgrown it, and where to start.']
 ];
 
 function initialTheme() {
@@ -186,183 +187,6 @@ function FeedbackPlaceholder({ onClose }) {
           <button className="button secondary" type="button" onClick={onClose}>Close</button>
           <button className="button primary" type="button" disabled>Submit feedback</button>
         </footer>
-      </section>
-    </div>
-  );
-}
-
-function OverviewView({ onOpenForm, onOpenApps }) {
-  const availableCount = ORKA_PRODUCTS.filter((product) => ['Live', 'Production', 'Testing'].includes(product.status)).length;
-  const inProgressCount = ORKA_PRODUCTS.filter((product) => ['Design', 'Next'].includes(product.status)).length;
-
-  return (
-    <div className="view-scroll overview-view" id="overview-view">
-      <section className="hero-card content-surface">
-        <div className="hero-copy">
-          <span className="eyebrow">OrkaOS overview</span>
-          <h1>The operating system for teams ready to scale.</h1>
-          <p>
-            OrkaOS adds a simple operating layer to Google Workspace. Start with one focused app,
-            solve one problem, and grow into a connected system without adopting enterprise software too early.
-          </p>
-          <div className="hero-actions">
-            <button className="button primary" type="button" onClick={onOpenApps}>Explore Orka Apps</button>
-            <button className="button secondary" type="button" onClick={() => onOpenForm('Join the Pod')}>Join the Pod</button>
-          </div>
-          <div className="hero-badges">
-            <span><Icon name="checkCircle" size={15} /> Google Workspace foundation</span>
-            <span><Icon name="layers" size={15} /> Modular by design</span>
-            <span><Icon name="route" size={15} /> Built to be outgrown</span>
-          </div>
-        </div>
-        <div className="app-preview" aria-label="Example OrkaApp interface">
-          <div className="preview-topbar">
-            <div className="preview-brand">
-              <img src={orkaLogoLight} alt="" />
-              <b><span>Orka</span>Task</b>
-            </div>
-            <div className="preview-search"><Icon name="search" size={14} /> Search tasks</div>
-            <AnonymousAvatar />
-          </div>
-          <div className="preview-body">
-            <aside className="preview-sidebar">
-              <button className="preview-add"><Icon name="plus" size={14} /> Add task</button>
-              <span className="preview-nav active"><Icon name="grid" size={14} /> Board</span>
-              <span className="preview-nav"><Icon name="clipboard" size={14} /> My work</span>
-              <span className="preview-nav"><Icon name="chart" size={14} /> Progress</span>
-            </aside>
-            <main className="preview-workspace">
-              <div className="preview-guide">Workspace / Mission Production Process</div>
-              <div className="preview-columns">
-                {[
-                  ['Backlog', 'Clarify website message', 'Map customer intake'],
-                  ['In progress', 'Build OrkaOS catalog', 'Test onboarding flow'],
-                  ['Done', 'Connect Google Sheet', 'Publish first SOP']
-                ].map(([label, ...tasks]) => (
-                  <div className="preview-column" key={label}>
-                    <div className="preview-column-head"><b>{label}</b><span>{tasks.length}</span></div>
-                    {tasks.map((task) => <div className="preview-task" key={task}><span className="task-dot" />{task}</div>)}
-                  </div>
-                ))}
-              </div>
-            </main>
-          </div>
-          <div className="preview-caption">One shared shell. One clear job per app.</div>
-        </div>
-      </section>
-
-      <section className="metric-grid" aria-label="OrkaOS summary metrics">
-        <article className="metric-card"><span>Public catalog</span><strong>{ORKA_PRODUCTS.length}</strong><small>roadmap-approved Orka apps</small></article>
-        <article className="metric-card"><span>Available now</span><strong>{availableCount}</strong><small>live, production, or testing</small></article>
-        <article className="metric-card"><span>Actively shaping</span><strong>{inProgressCount}</strong><small>next or in design</small></article>
-        <article className="metric-card"><span>Core principle</span><strong>1</strong><small>problem solved per app</small></article>
-      </section>
-
-      <section className="section-block">
-        <div className="section-heading">
-          <span className="eyebrow">Why it exists</span>
-          <h2>Scaling a small team breaks the tools that got it started.</h2>
-          <p>OrkaOS is designed for the point where spreadsheets are no longer enough, but enterprise platforms are still too much.</p>
-        </div>
-        <div className="three-card-grid">
-          <article className="info-card">
-            <span className="card-icon"><Icon name="unlink" size={22} /></span>
-            <h3>Too many tools, nothing connected</h3>
-            <p>Work scatters across files, messages, forms, and personal workarounds. The team loses shared context.</p>
-          </article>
-          <article className="info-card">
-            <span className="card-icon"><Icon name="chart" size={22} /></span>
-            <h3>Google Sheets is not enough anymore</h3>
-            <p>Sheets remain useful, but they do not provide the guided workflows, ownership, and permissions a growing team needs.</p>
-          </article>
-          <article className="info-card">
-            <span className="card-icon"><Icon name="building" size={22} /></span>
-            <h3>Enterprise software is too complex, too early</h3>
-            <p>Heavy platforms introduce administrators, consultants, and configuration before the business is ready for them.</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="content-surface progression-surface">
-        <div className="section-heading compact-heading">
-          <span className="eyebrow">How OrkaOS works</span>
-          <h2>Keep Google. Add only what your team needs.</h2>
-        </div>
-        <div className="progression-grid">
-          <article>
-            <span className="step-number">01</span>
-            <div><h3>Stay in Google Workspace</h3><p>Drive, Docs, Sheets, Forms, Calendar, and Gmail remain the foundation your team already understands.</p></div>
-          </article>
-          <article>
-            <span className="step-number">02</span>
-            <div><h3>Solve one problem at a time</h3><p>Add a focused OrkaApp for tasks, SOPs, people, finance, marketing, or another workflow only when the need appears.</p></div>
-          </article>
-          <article>
-            <span className="step-number">03</span>
-            <div><h3>See the work more clearly</h3><p>Use a consistent shell, shared design language, and connected data so every new app still feels familiar.</p></div>
-          </article>
-        </div>
-      </section>
-
-      <section className="split-section">
-        <article className="content-surface audience-card positive">
-          <span className="eyebrow">Built for</span>
-          <h2>The in-between stage</h2>
-          <ul className="check-list">
-            <li><Icon name="check" size={17} /> Solopreneurs scaling into a team</li>
-            <li><Icon name="check" size={17} /> Micro-businesses and startups</li>
-            <li><Icon name="check" size={17} /> Nonprofits, student organizations, and remote teams</li>
-            <li><Icon name="check" size={17} /> Teams that hit a technology wall before hiring operations staff</li>
-          </ul>
-          <blockquote>“I tried to scale, but hit a tech wall.”</blockquote>
-        </article>
-        <article className="content-surface audience-card neutral">
-          <span className="eyebrow">Positioning</span>
-          <h2>Structured simplicity in the middle</h2>
-          <div className="position-scale">
-            <div><small>Too loose</small><b>Sheets · Notion · Trello</b></div>
-            <div className="position-current"><small>Just right</small><b>OrkaOS</b></div>
-            <div><small>Too heavy</small><b>Jira · HubSpot · Workday</b></div>
-          </div>
-          <p>OrkaOS is intentionally temporary: a launchpad toward larger systems when your team truly needs them.</p>
-        </article>
-      </section>
-
-      <section className="content-surface system-section">
-        <div className="system-copy">
-          <span className="eyebrow">The system teaches you</span>
-          <h2>Capability grows progressively, never all at once.</h2>
-          <p>As your team gets value from one module, OrkaOS can suggest the next connected workflow without forcing a full-suite rollout.</p>
-        </div>
-        <div className="suggestion-stack">
-          <article><span className="suggestion-icon"><Icon name="route" size={20} /></span><div><small>Suggested next tool</small><b>You’re using OrkaVault. Add OrkaSOP next.</b><p>Turn organized company information into reusable operating procedures.</p></div></article>
-          <article><span className="suggestion-icon"><Icon name="route" size={20} /></span><div><small>Then</small><b>You documented five SOPs. Try OrkaProcess.</b><p>Connect approved procedures into a clearer end-to-end workflow.</p></div></article>
-        </div>
-      </section>
-
-      <section className="white-label-section">
-        <div>
-          <span className="eyebrow light-eyebrow">One shared design language</span>
-          <h2>Every OrkaApp can feel like it belongs to your organization.</h2>
-          <p>OrkaOS carries the global brand, permissions, and app catalog while each module keeps the same familiar top bar, sidebar, controls, and light/dark themes.</p>
-        </div>
-        <div className="brand-swatch-demo">
-          <div className="swatch-card"><span className="swatch blue" /><b>Orka blue</b><small>Default system</small></div>
-          <div className="swatch-card"><span className="swatch navy" /><b>Organization brand</b><small>White-label ready</small></div>
-          <div className="swatch-card"><span className="swatch teal" /><b>AI accent</b><small>Clearly distinct</small></div>
-        </div>
-      </section>
-
-      <section className="final-cta content-surface">
-        <div>
-          <span className="eyebrow">Start small</span>
-          <h2>Pick one module. Solve one problem. Let the system grow with you.</h2>
-          <p>Start with what you need. Scale with confidence. Outgrow OrkaOS on purpose.</p>
-        </div>
-        <div className="final-actions">
-          <button className="button primary" type="button" onClick={() => onOpenForm('Join the Pod')}>Join the Pod</button>
-          <button className="button secondary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button>
-        </div>
       </section>
     </div>
   );
@@ -856,7 +680,7 @@ export default function App() {
       .map(([title, description]) => ({
         type: 'destination',
         id: 'overview',
-        tab: /how/i.test(title) ? 'how' : /feel/i.test(title) ? 'experience' : /who|white/i.test(title) ? 'fit' : 'why',
+        tab: /meet/i.test(title) ? 'start' : /origin|story/i.test(title) ? 'why' : /micro-stack|works/i.test(title) ? 'how' : /pod|flow|slipstream|ecosystem/i.test(title) ? 'experience' : 'fit',
         title,
         meta: description
       }));
@@ -886,12 +710,14 @@ export default function App() {
 
   const renderUserView = () => {
     if (activeView === 'overview') {
-      if (activeTab === 'start') return <OverviewView onOpenForm={openIntake} onOpenApps={() => navigate('apps', 'catalog')} />;
-      if (activeTab === 'why') return <div className="view-scroll legacy-view"><LegacyWidgets panel="overview-why" onOpenForm={openIntake} onNavigate={navigate} /></div>;
-      if (activeTab === 'how') return <div className="view-scroll legacy-view"><LegacyWidgets panel="overview-how" onOpenForm={openIntake} onNavigate={navigate} /></div>;
-      if (activeTab === 'experience') return <div className="view-scroll legacy-view"><LegacyWidgets panel="overview-experience" onOpenForm={openIntake} onNavigate={navigate} /></div>;
-      if (activeTab === 'fit') return <div className="view-scroll legacy-view"><LegacyWidgets panel="overview-fit" onOpenForm={openIntake} onNavigate={navigate} /></div>;
-      return null;
+      return (
+        <OverviewStory
+          chapter={activeTab}
+          onOpenForm={openIntake}
+          onOpenApps={() => navigate('apps', 'catalog')}
+          onNavigate={navigate}
+        />
+      );
     }
 
     if (activeView === 'apps') {
