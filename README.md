@@ -6,24 +6,25 @@ OrkaOS helps teams organize, collaborate, and scale by adding a guided operating
 
 ## Overview
 
-This repository contains the OrkaOS marketing and product ecosystem website. It introduces the OrkaOS platform, presents the roadmap-approved catalog of applications grouped by the OrkaOS.com assignments, explains the product roadmap, and provides intake paths for early access, alpha testing, and partnership opportunities.
+This repository contains the public OrkaOS product website, restructured as an OrkaApp-style experience. The former long homepage is reorganized into non-navigational Overview, Orka Apps, and Future Plan folders inside the same shell used by the OrkaOS Google Apps Script application. Each folder expands to child tabs, and all page content lives in those tabs. The original website widgets are preserved rather than removed.
 
-The site is built as a responsive single-page React application using Vite.
+The site is built as a responsive React application using Vite.
 
 ## Features
 
-* Responsive single-page layout
-* Light and dark themes
-* Saved theme preference using `localStorage`
-* Interactive OrkaOS product catalog
-* Product filtering by OrkaOS.com group (IT, OPS, HR, Business, and Marketing)
-* Product roadmap and development status views
-* White-label branding preview
-* Mobile-responsive navigation and content
-* Accessible intake form modal
-* Form validation with React Hook Form
-* Early-access, alpha-testing, and partnership intake paths
-* Static production build for straightforward deployment
+* OrkaOS GAS-inspired top bar, sidebar, guide bar, panes, and semantic design tokens
+* Non-clickable Overview, Orka Apps, and Future Plan folder labels with GAS-style disclosure controls, child tabs, and folder/tab breadcrumbs
+* Global search with `Cmd/Ctrl + K`
+* User/Admin demonstration modes
+* Nine-dot Orka app launcher
+* Light and dark themes saved with `localStorage`
+* Gray anonymous profile avatar and profile menu
+* Searchable, filterable three-pane Orka Apps workspace with functional collapse, restore, and expand controls, plus the restored original card explorer in its own child tab
+* Restored original website widgets, including the desktop preview, collaboration flow, white-label demo, mobile mockup, adoption scope, and Gantt roadmap
+* Browser-persisted Favorites tab and public product roadmap
+* Configurable Google Apps Script feedback-form link
+* Persistent CTA footer on every tab for Pod, Alpha, Beta, and PROJXON partnership paths
+* Responsive desktop sidebar and mobile navigation drawer
 
 ## Technology Stack
 
@@ -118,6 +119,8 @@ orka-os-web/
 │   ├── assets/
 │   ├── App.jsx
 │   ├── index.css
+│   ├── legacy-widgets.css
+│   ├── LegacyWidgets.jsx
 │   ├── IntakeForm.css
 │   ├── IntakeForm.jsx
 │   └── main.jsx
@@ -195,7 +198,8 @@ Do not place private API keys, credentials, or secrets directly in frontend sour
 Create a local `.env` file when environment-specific configuration is needed:
 
 ```env
-VITE_API_URL=https://example.com/api
+VITE_FEEDBACK_FORM_URL=https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec
+VITE_TURNSTILE_SITE_KEY=YOUR_TURNSTILE_SITE_KEY
 ```
 
 Access Vite environment variables in the application with:
@@ -209,7 +213,8 @@ Only variables beginning with `VITE_` are exposed to browser code. Because these
 A shareable template can be committed as `.env.example`:
 
 ```env
-VITE_API_URL=
+VITE_FEEDBACK_FORM_URL=
+VITE_TURNSTILE_SITE_KEY=
 ```
 
 Local `.env` files should remain excluded from Git.

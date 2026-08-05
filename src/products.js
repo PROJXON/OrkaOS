@@ -57,7 +57,7 @@ export const ORKA_PRODUCTS = [
     google: 'Google Workspace + secure app layer', pairs: ['OrkaSOP', 'OrkaOS'], featured: true
   },
   {
-    id: 'orka-ai', name: 'OrkaAI', status: 'Design', priority: 'In design',
+    id: 'orka-aira', name: 'OrkaAira', status: 'Design', priority: 'In design',
     lane: 'building', groupId: 'it',
     summary: 'An onboard CTO for tech-stack visibility, AI adoption, and tool governance.',
     google: 'Gemini + AWS', pairs: ['OrkaPrompt', 'OrkaOS.com'], featured: true, ai: true
@@ -66,7 +66,7 @@ export const ORKA_PRODUCTS = [
     id: 'orka-prompt', name: 'OrkaPrompt', status: 'Design', priority: 'In design',
     lane: 'building', groupId: 'it',
     summary: 'A version-controlled prompt catalog for reusable, stage-based AI workflows.',
-    google: 'Google Docs + Drive', pairs: ['OrkaAI', 'OrkaTask'], ai: true
+    google: 'Google Docs + Drive', pairs: ['OrkaAira', 'OrkaTask'], ai: true
   },
   {
     id: 'orka-os', name: 'OrkaOS', status: 'Design', priority: 'In design',

@@ -1,1637 +1,1083 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import IntakeForm from './IntakeForm';
 import Icon from './Icon';
+import LegacyWidgets from './LegacyWidgets';
 import {
   ORKA_PRODUCTS,
-  ORKA_PRODUCTS_BY_ID,
   PRODUCT_GROUP_FILTERS,
   ROADMAP_PHASES,
-  ROADMAP_SEQUENCE,
   ROADMAP_STATUS_META
 } from './products.js';
+import orkaLogoLight from './assets/brand/orka-logo-on-light.png';
+import orkaLogoDark from './assets/brand/orka-logo-on-dark.png';
 
-/**
- * Landing-page developer map
- * --------------------------
- * This component owns the public OrkaOS page and the small pieces of UI state
- * that make its demos interactive. The large visual blocks are intentionally
- * grouped in the JSX in the same order that they appear on the page.
- *
- * Useful class families when tracing a widget into index.css:
- * - `rail-*` / `orka-actions`: the fixed left and right side panels.
- * - `os-*`: the desktop product-preview window.
- * - `collab-*`: the Google Workspace + OrkaOS explainer.
- * - `product-*` and `catalog-*`: the interactive product explorer and catalog.
- * - `scope-*`, `wl-*`, `phone-*`, and `gantt-*`: the adoption, brand, mobile,
- *   and roadmap widgets respectively.
- *
- * Keep new widget markup together here, then place its base CSS beside the
- * matching class-family section in index.css. This makes the project much
- * easier to scan than scattering one widget across unrelated regions.
- */
-
-// Persistent UI settings and the section IDs used by the left progress rail.
 const THEME_STORAGE_KEY = 'orkaos-theme';
-const RAIL_SECTIONS = ['top', 'problem', 'progression', 'ecosystem', 'value', 'whitelabel-section', 'cta'];
+const FEEDBACK_FORM_URL = import.meta.env.VITE_FEEDBACK_FORM_URL || '';
+const VIEW_LABELS = {
+  overview: 'Overview',
+  apps: 'Orka Apps',
+  future: 'Future Plan'
+};
 
-// Product data lives in products.js so the catalog, roadmap, and intake form
-// always expose the same public app list and roadmap status.
+const NAV_FOLDERS = {
+  overview: {
+    label: 'Overview',
+    icon: 'home',
+    tabs: [
+      { id: 'start', label: 'Start Here', icon: 'home' },
+      { id: 'why', label: 'Why OrkaOS', icon: 'help' },
+      { id: 'how', label: 'How It Works', icon: 'route' },
+      { id: 'experience', label: 'OrkaApp Experience', icon: 'grid' },
+      { id: 'fit', label: 'Fit & Brand', icon: 'users' }
+    ]
+  },
+  apps: {
+    label: 'Orka Apps',
+    icon: 'grid',
+    tabs: [
+      { id: 'catalog', label: 'Catalog', icon: 'layers' },
+      { id: 'directory', label: 'All App Cards', icon: 'grid' },
+      { id: 'favorites', label: 'Favorites', icon: 'star' }
+    ]
+  },
+  future: {
+    label: 'Future Plan',
+    icon: 'trending',
+    tabs: [
+      { id: 'plan', label: 'Plan Overview', icon: 'trending' },
+      { id: 'roadmap', label: 'Product Roadmap', icon: 'chart' },
+      { id: 'join', label: 'Get Involved', icon: 'users' }
+    ]
+  }
+};
 
-/**
- * Resolve the first theme before React paints.
- *
- * The saved preference wins; otherwise the browser's color-scheme preference is
- * used. Directly setting `documentElement.dataset.theme` here prevents a light
- * flash before the first effect runs.
- */
-function getInitialTheme() {
+const APP_LAUNCHER_IDS = [
+  'orka-os',
+  'orka-vault',
+  'orka-sop',
+  'orka-task',
+  'orka-hr',
+  'orka-aira',
+  'orka-marketing',
+  'orka-project'
+];
+
+const OVERVIEW_SEARCH_ITEMS = [
+  ['Why OrkaOS', 'The scaling problem OrkaOS is designed to solve.'],
+  ['How it works', 'Keep Google Workspace and add only the apps your team needs.'],
+  ['What an OrkaApp feels like', 'A familiar, focused app shell with one clear job.'],
+  ['Who it is for', 'Small teams in the space between spreadsheets and enterprise software.'],
+  ['White-label experience', 'A shared design system that can carry your organization’s brand.']
+];
+
+function initialTheme() {
   if (typeof window === 'undefined') return 'light';
-
   try {
-    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    const initialTheme = storedTheme === 'light' || storedTheme === 'dark'
-      ? storedTheme
-      : window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-
-    document.documentElement.dataset.theme = initialTheme;
-    return initialTheme;
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   } catch {
-    const initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-    document.documentElement.dataset.theme = initialTheme;
-    return initialTheme;
+    return 'light';
   }
 }
 
-async function sendIntakeSubmission(payload) {
-  const response = await fetch('/api/intake', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
+function AnonymousAvatar({ large = false }) {
+  return (
+    <span className={`anonymous-avatar${large ? ' is-large' : ''}`} aria-hidden="true">
+      <svg viewBox="0 0 40 40" role="img">
+        <circle cx="20" cy="14" r="7" />
+        <path d="M8.5 34c1.4-7.3 5.2-11 11.5-11s10.1 3.7 11.5 11" />
+      </svg>
+    </span>
+  );
+}
+
+function NineDotIcon() {
+  return (
+    <svg className="nine-dot-icon" viewBox="0 0 24 24" aria-hidden="true">
+      {[5, 12, 19].flatMap((x) => [5, 12, 19].map((y) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.8" />))}
+    </svg>
+  );
+}
+
+function Chevron({ open = false }) {
+  return (
+    <svg className={`chevron${open ? ' is-open' : ''}`} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m8 10 4 4 4-4" />
+    </svg>
+  );
+}
+
+function StatusPill({ status }) {
+  const normalized = status.toLowerCase().replace(/\s+/g, '-');
+  return <span className={`status-pill status-${normalized}`}>{status}</span>;
+}
+
+function PaneControls({ state = 'normal', onChange, compact = false }) {
+  const options = [
+    ['collapsed', 'Collapse pane'],
+    ['normal', 'Restore all panes'],
+    ['expanded', 'Expand pane']
+  ];
+
+  return (
+    <div className={`pane-controls${compact ? ' compact' : ''}`} role="group" aria-label="Pane size">
+      {options.map(([value, label]) => (
+        <button
+          key={value}
+          className={`pane-control-dot${state === value ? ' active' : ''}`}
+          type="button"
+          onClick={() => onChange?.(value)}
+          aria-label={label}
+          title={label}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FeedbackPlaceholder({ onClose }) {
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const onKey = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    dialogRef.current?.focus();
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div className="modal-scrim" role="presentation" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) onClose();
+    }}>
+      <section className="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-title" tabIndex="-1" ref={dialogRef}>
+        <header className="modal-header">
+          <div className="modal-icon"><Icon name="plus" size={20} /></div>
+          <div>
+            <h2 id="feedback-title">Feedback form placeholder</h2>
+            <p>The + Add action is ready for your Google Apps Script feedback form.</p>
+          </div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label="Close feedback dialog">
+            <Icon name="x" size={18} />
+          </button>
+        </header>
+        <div className="modal-body">
+          <div className="placeholder-form">
+            <label>
+              <span>Feedback type</span>
+              <select disabled><option>Website experience</option></select>
+            </label>
+            <label>
+              <span>Message</span>
+              <textarea disabled placeholder="Your GAS feedback form will appear here." />
+            </label>
+          </div>
+          <div className="integration-note">
+            <Icon name="checkCircle" size={18} />
+            <div>
+              <strong>Integration point prepared</strong>
+              <span>Replace this modal with your deployed GAS form URL or embedded form component.</span>
+            </div>
+          </div>
+        </div>
+        <footer className="modal-footer">
+          <button className="button secondary" type="button" onClick={onClose}>Close</button>
+          <button className="button primary" type="button" disabled>Submit feedback</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function OverviewView({ onOpenForm, onOpenApps }) {
+  const availableCount = ORKA_PRODUCTS.filter((product) => ['Live', 'Production', 'Testing'].includes(product.status)).length;
+  const inProgressCount = ORKA_PRODUCTS.filter((product) => ['Design', 'Next'].includes(product.status)).length;
+
+  return (
+    <div className="view-scroll overview-view" id="overview-view">
+      <section className="hero-card content-surface">
+        <div className="hero-copy">
+          <span className="eyebrow">OrkaOS overview</span>
+          <h1>The operating system for teams ready to scale.</h1>
+          <p>
+            OrkaOS adds a simple operating layer to Google Workspace. Start with one focused app,
+            solve one problem, and grow into a connected system without adopting enterprise software too early.
+          </p>
+          <div className="hero-actions">
+            <button className="button primary" type="button" onClick={onOpenApps}>Explore Orka Apps</button>
+            <button className="button secondary" type="button" onClick={() => onOpenForm('Join the Pod')}>Join the Pod</button>
+          </div>
+          <div className="hero-badges">
+            <span><Icon name="checkCircle" size={15} /> Google Workspace foundation</span>
+            <span><Icon name="layers" size={15} /> Modular by design</span>
+            <span><Icon name="route" size={15} /> Built to be outgrown</span>
+          </div>
+        </div>
+        <div className="app-preview" aria-label="Example OrkaApp interface">
+          <div className="preview-topbar">
+            <div className="preview-brand">
+              <img src={orkaLogoLight} alt="" />
+              <b><span>Orka</span>Task</b>
+            </div>
+            <div className="preview-search"><Icon name="search" size={14} /> Search tasks</div>
+            <AnonymousAvatar />
+          </div>
+          <div className="preview-body">
+            <aside className="preview-sidebar">
+              <button className="preview-add"><Icon name="plus" size={14} /> Add task</button>
+              <span className="preview-nav active"><Icon name="grid" size={14} /> Board</span>
+              <span className="preview-nav"><Icon name="clipboard" size={14} /> My work</span>
+              <span className="preview-nav"><Icon name="chart" size={14} /> Progress</span>
+            </aside>
+            <main className="preview-workspace">
+              <div className="preview-guide">Workspace / Mission Production Process</div>
+              <div className="preview-columns">
+                {[
+                  ['Backlog', 'Clarify website message', 'Map customer intake'],
+                  ['In progress', 'Build OrkaOS catalog', 'Test onboarding flow'],
+                  ['Done', 'Connect Google Sheet', 'Publish first SOP']
+                ].map(([label, ...tasks]) => (
+                  <div className="preview-column" key={label}>
+                    <div className="preview-column-head"><b>{label}</b><span>{tasks.length}</span></div>
+                    {tasks.map((task) => <div className="preview-task" key={task}><span className="task-dot" />{task}</div>)}
+                  </div>
+                ))}
+              </div>
+            </main>
+          </div>
+          <div className="preview-caption">One shared shell. One clear job per app.</div>
+        </div>
+      </section>
+
+      <section className="metric-grid" aria-label="OrkaOS summary metrics">
+        <article className="metric-card"><span>Public catalog</span><strong>{ORKA_PRODUCTS.length}</strong><small>roadmap-approved Orka apps</small></article>
+        <article className="metric-card"><span>Available now</span><strong>{availableCount}</strong><small>live, production, or testing</small></article>
+        <article className="metric-card"><span>Actively shaping</span><strong>{inProgressCount}</strong><small>next or in design</small></article>
+        <article className="metric-card"><span>Core principle</span><strong>1</strong><small>problem solved per app</small></article>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <span className="eyebrow">Why it exists</span>
+          <h2>Scaling a small team breaks the tools that got it started.</h2>
+          <p>OrkaOS is designed for the point where spreadsheets are no longer enough, but enterprise platforms are still too much.</p>
+        </div>
+        <div className="three-card-grid">
+          <article className="info-card">
+            <span className="card-icon"><Icon name="unlink" size={22} /></span>
+            <h3>Too many tools, nothing connected</h3>
+            <p>Work scatters across files, messages, forms, and personal workarounds. The team loses shared context.</p>
+          </article>
+          <article className="info-card">
+            <span className="card-icon"><Icon name="chart" size={22} /></span>
+            <h3>Google Sheets is not enough anymore</h3>
+            <p>Sheets remain useful, but they do not provide the guided workflows, ownership, and permissions a growing team needs.</p>
+          </article>
+          <article className="info-card">
+            <span className="card-icon"><Icon name="building" size={22} /></span>
+            <h3>Enterprise software is too complex, too early</h3>
+            <p>Heavy platforms introduce administrators, consultants, and configuration before the business is ready for them.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="content-surface progression-surface">
+        <div className="section-heading compact-heading">
+          <span className="eyebrow">How OrkaOS works</span>
+          <h2>Keep Google. Add only what your team needs.</h2>
+        </div>
+        <div className="progression-grid">
+          <article>
+            <span className="step-number">01</span>
+            <div><h3>Stay in Google Workspace</h3><p>Drive, Docs, Sheets, Forms, Calendar, and Gmail remain the foundation your team already understands.</p></div>
+          </article>
+          <article>
+            <span className="step-number">02</span>
+            <div><h3>Solve one problem at a time</h3><p>Add a focused OrkaApp for tasks, SOPs, people, finance, marketing, or another workflow only when the need appears.</p></div>
+          </article>
+          <article>
+            <span className="step-number">03</span>
+            <div><h3>See the work more clearly</h3><p>Use a consistent shell, shared design language, and connected data so every new app still feels familiar.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section className="split-section">
+        <article className="content-surface audience-card positive">
+          <span className="eyebrow">Built for</span>
+          <h2>The in-between stage</h2>
+          <ul className="check-list">
+            <li><Icon name="check" size={17} /> Solopreneurs scaling into a team</li>
+            <li><Icon name="check" size={17} /> Micro-businesses and startups</li>
+            <li><Icon name="check" size={17} /> Nonprofits, student organizations, and remote teams</li>
+            <li><Icon name="check" size={17} /> Teams that hit a technology wall before hiring operations staff</li>
+          </ul>
+          <blockquote>“I tried to scale, but hit a tech wall.”</blockquote>
+        </article>
+        <article className="content-surface audience-card neutral">
+          <span className="eyebrow">Positioning</span>
+          <h2>Structured simplicity in the middle</h2>
+          <div className="position-scale">
+            <div><small>Too loose</small><b>Sheets · Notion · Trello</b></div>
+            <div className="position-current"><small>Just right</small><b>OrkaOS</b></div>
+            <div><small>Too heavy</small><b>Jira · HubSpot · Workday</b></div>
+          </div>
+          <p>OrkaOS is intentionally temporary: a launchpad toward larger systems when your team truly needs them.</p>
+        </article>
+      </section>
+
+      <section className="content-surface system-section">
+        <div className="system-copy">
+          <span className="eyebrow">The system teaches you</span>
+          <h2>Capability grows progressively, never all at once.</h2>
+          <p>As your team gets value from one module, OrkaOS can suggest the next connected workflow without forcing a full-suite rollout.</p>
+        </div>
+        <div className="suggestion-stack">
+          <article><span className="suggestion-icon"><Icon name="route" size={20} /></span><div><small>Suggested next tool</small><b>You’re using OrkaVault. Add OrkaSOP next.</b><p>Turn organized company information into reusable operating procedures.</p></div></article>
+          <article><span className="suggestion-icon"><Icon name="route" size={20} /></span><div><small>Then</small><b>You documented five SOPs. Try OrkaProcess.</b><p>Connect approved procedures into a clearer end-to-end workflow.</p></div></article>
+        </div>
+      </section>
+
+      <section className="white-label-section">
+        <div>
+          <span className="eyebrow light-eyebrow">One shared design language</span>
+          <h2>Every OrkaApp can feel like it belongs to your organization.</h2>
+          <p>OrkaOS carries the global brand, permissions, and app catalog while each module keeps the same familiar top bar, sidebar, controls, and light/dark themes.</p>
+        </div>
+        <div className="brand-swatch-demo">
+          <div className="swatch-card"><span className="swatch blue" /><b>Orka blue</b><small>Default system</small></div>
+          <div className="swatch-card"><span className="swatch navy" /><b>Organization brand</b><small>White-label ready</small></div>
+          <div className="swatch-card"><span className="swatch teal" /><b>AI accent</b><small>Clearly distinct</small></div>
+        </div>
+      </section>
+
+      <section className="final-cta content-surface">
+        <div>
+          <span className="eyebrow">Start small</span>
+          <h2>Pick one module. Solve one problem. Let the system grow with you.</h2>
+          <p>Start with what you need. Scale with confidence. Outgrow OrkaOS on purpose.</p>
+        </div>
+        <div className="final-actions">
+          <button className="button primary" type="button" onClick={() => onOpenForm('Join the Pod')}>Join the Pod</button>
+          <button className="button secondary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, favoriteIds, onToggleFavorite }) {
+  const [groupFilter, setGroupFilter] = useState('all');
+  const [stageFilter, setStageFilter] = useState('all');
+  const [catalogQuery, setCatalogQuery] = useState('');
+  const [paneStates, setPaneStates] = useState({ catalog: 'normal', detail: 'normal', insight: 'normal' });
+
+  const visibleProducts = useMemo(() => ORKA_PRODUCTS.filter((product) => {
+    const groupMatches = groupFilter === 'all' || product.groupId === groupFilter;
+    const stageMatches = stageFilter === 'all' || product.status.toLowerCase() === stageFilter;
+    const haystack = `${product.name} ${product.summary} ${product.group} ${product.google}`.toLowerCase();
+    const queryMatches = !catalogQuery.trim() || haystack.includes(catalogQuery.trim().toLowerCase());
+    return groupMatches && stageMatches && queryMatches;
+  }), [groupFilter, stageFilter, catalogQuery]);
+
+  const selectedProduct = ORKA_PRODUCTS.find((product) => product.id === selectedProductId) || visibleProducts[0] || ORKA_PRODUCTS[0];
+  const relatedProducts = selectedProduct.pairs
+    .map((name) => ORKA_PRODUCTS.find((product) => product.name === name))
+    .filter(Boolean);
+
+  useEffect(() => {
+    if (visibleProducts.length && !visibleProducts.some((product) => product.id === selectedProductId)) {
+      setSelectedProductId(visibleProducts[0].id);
+    }
+  }, [visibleProducts, selectedProductId, setSelectedProductId]);
+
+  const setPaneState = (pane, nextState) => {
+    if (nextState === 'normal') {
+      setPaneStates({ catalog: 'normal', detail: 'normal', insight: 'normal' });
+      return;
+    }
+    if (nextState === 'expanded') {
+      setPaneStates({
+        catalog: pane === 'catalog' ? 'expanded' : 'collapsed',
+        detail: pane === 'detail' ? 'expanded' : 'collapsed',
+        insight: pane === 'insight' ? 'expanded' : 'collapsed'
+      });
+      return;
+    }
+    setPaneStates((current) => {
+      const next = { ...current, [pane]: 'collapsed' };
+      const remaining = Object.values(next).filter((state) => state !== 'collapsed').length;
+      return remaining ? next : { catalog: 'normal', detail: 'normal', insight: 'normal' };
+    });
+  };
+
+  const paneWidth = (pane, normalWidth) => {
+    const state = paneStates[pane];
+    if (state === 'collapsed') return '44px';
+    if (state === 'expanded') return 'minmax(0, 1fr)';
+    return normalWidth;
+  };
+  const gridTemplateColumns = [
+    paneWidth('catalog', 'minmax(260px, .82fr)'),
+    paneWidth('detail', 'minmax(420px, 1.25fr)'),
+    paneWidth('insight', 'minmax(260px, .78fr)')
+  ].join(' ');
+
+  const PaneRail = ({ pane, label, icon }) => (
+    <button className="pane-rail pane-shell" type="button" onClick={() => setPaneState(pane, 'normal')} title={`Restore ${label} pane`}>
+      <Icon name={icon} size={17} />
+      <span>{label}</span>
+      <span className="pane-rail-plus">+</span>
+    </button>
+  );
+
+  return (
+    <div className="apps-view" style={{ '--catalog-grid': gridTemplateColumns }}>
+      {paneStates.catalog === 'collapsed' ? <PaneRail pane="catalog" label="Catalog" icon="layers" /> : (
+        <section className={`catalog-pane pane-shell pane-state-${paneStates.catalog}`}>
+          <header className="pane-header">
+            <div><span className="pane-kicker">Catalog</span><h2>Orka Apps</h2><p>{visibleProducts.length} of {ORKA_PRODUCTS.length} apps</p></div>
+            <PaneControls state={paneStates.catalog} onChange={(state) => setPaneState('catalog', state)} compact />
+          </header>
+          <div className="pane-toolbar">
+            <label className="pane-search"><Icon name="search" size={15} /><input value={catalogQuery} onChange={(event) => setCatalogQuery(event.target.value)} placeholder="Filter apps" /></label>
+            <select value={stageFilter} onChange={(event) => setStageFilter(event.target.value)} aria-label="Filter by roadmap stage">
+              <option value="all">All stages</option>
+              {ROADMAP_PHASES.map((phase) => <option value={phase.id} key={phase.id}>{phase.label.replace(/^\d+ · /, '')}</option>)}
+            </select>
+          </div>
+          <div className="catalog-filter-row" aria-label="Filter by app group">
+            {PRODUCT_GROUP_FILTERS.map(([id, label]) => (
+              <button key={id} type="button" className={groupFilter === id ? 'active' : ''} onClick={() => setGroupFilter(id)}>{label}</button>
+            ))}
+          </div>
+          <div className="catalog-list scroll-area">
+            {visibleProducts.length ? visibleProducts.map((product) => (
+              <button
+                type="button"
+                className={`catalog-row${selectedProduct.id === product.id ? ' active' : ''}${product.ai ? ' ai-row' : ''}`}
+                key={product.id}
+                onClick={() => setSelectedProductId(product.id)}
+              >
+                <span className="app-mark">{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span>
+                <span className="catalog-row-copy"><b>{product.name}</b><small>{product.group} · {product.priority}</small></span>
+                <StatusPill status={product.status} />
+              </button>
+            )) : <div className="empty-state"><Icon name="search" size={26} /><b>No apps match</b><p>Try a different group, stage, or search term.</p></div>}
+          </div>
+        </section>
+      )}
+
+      {paneStates.detail === 'collapsed' ? <PaneRail pane="detail" label="Workspace" icon="clipboard" /> : (
+        <article className={`detail-pane pane-shell pane-state-${paneStates.detail}${selectedProduct.ai ? ' ai-detail' : ''}`}>
+          <header className="pane-header">
+            <div><span className="pane-kicker">App workspace</span><h2>{selectedProduct.name}</h2><p>{selectedProduct.group} · {selectedProduct.priority}</p></div>
+            <PaneControls state={paneStates.detail} onChange={(state) => setPaneState('detail', state)} compact />
+          </header>
+          <div className="detail-scroll scroll-area">
+            <div className="detail-hero">
+              <span className="detail-app-mark">{selectedProduct.ai ? 'AI' : selectedProduct.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span>
+              <div><StatusPill status={selectedProduct.status} /><h1>{selectedProduct.name}</h1><p>{selectedProduct.summary}</p></div>
+            </div>
+
+            <div className="detail-section">
+              <span className="detail-label">What it feels like</span>
+              <h3>A focused OrkaApp, not another giant platform.</h3>
+              <p>Each app uses the same navigation, controls, permissions, profile, search, and theme behavior you are experiencing on OrkaOS.com—then narrows the workspace to one operating problem.</p>
+            </div>
+
+            <div className="app-feature-grid">
+              <article><Icon name="checkCircle" size={19} /><b>Clear job</b><p>{selectedProduct.summary}</p></article>
+              <article><Icon name="layers" size={19} /><b>Shared shell</b><p>Familiar controls across every app reduce training and cognitive load.</p></article>
+              <article><Icon name="lock" size={19} /><b>Google foundation</b><p>{selectedProduct.google}</p></article>
+              <article><Icon name="route" size={19} /><b>Progressive adoption</b><p>Add it when the workflow becomes necessary—not before.</p></article>
+            </div>
+
+            <div className="mini-app-window">
+              <div className="mini-app-top"><span className="mini-app-logo">{selectedProduct.name.slice(0, 1)}</span><b>{selectedProduct.name}</b><span className="mini-app-search"><Icon name="search" size={13} /> Search</span><AnonymousAvatar /></div>
+              <div className="mini-app-content">
+                <div className="mini-app-nav"><span className="active">Overview</span><span>Workspace</span><span>Activity</span></div>
+                <div className="mini-app-canvas"><small>WELCOME TO {selectedProduct.name.toUpperCase()}</small><h4>One workflow. Clear ownership. Less setup.</h4><div className="mini-card-row"><span /><span /><span /></div></div>
+              </div>
+            </div>
+          </div>
+          <footer className="pane-footer">
+            <button className={`button favorite-button${favoriteIds.includes(selectedProduct.id) ? ' active' : ''}`} type="button" onClick={() => onToggleFavorite(selectedProduct.id)} aria-pressed={favoriteIds.includes(selectedProduct.id)}>
+              <span aria-hidden="true">{favoriteIds.includes(selectedProduct.id) ? '♥' : '♡'}</span> {favoriteIds.includes(selectedProduct.id) ? 'Favorited' : 'Favorite'}
+            </button>
+            <button className="button secondary" type="button" onClick={() => onOpenForm('Join the Pod')}>Follow this app</button>
+            <button className="button primary" type="button" onClick={() => onOpenForm(selectedProduct.status === 'Live' || selectedProduct.status === 'Production' ? 'Join the Pod' : 'Join Alpha Testing')}>
+              {selectedProduct.status === 'Live' || selectedProduct.status === 'Production' ? 'Request access' : 'Join testing'}
+            </button>
+          </footer>
+        </article>
+      )}
+
+      {paneStates.insight === 'collapsed' ? <PaneRail pane="insight" label="Dashboard" icon="chart" /> : (
+        <aside className={`insight-pane pane-shell pane-state-${paneStates.insight}`}>
+          <header className="pane-header">
+            <div><span className="pane-kicker">Dashboard</span><h2>App context</h2><p>How this module fits</p></div>
+            <PaneControls state={paneStates.insight} onChange={(state) => setPaneState('insight', state)} compact />
+          </header>
+          <div className="insight-scroll scroll-area">
+            <article className="dashboard-card">
+              <span className="dashboard-label">Roadmap stage</span>
+              <div className="stage-meter"><span style={{ width: `${ROADMAP_STATUS_META[selectedProduct.status].progress}%` }} /></div>
+              <div className="dashboard-row"><StatusPill status={selectedProduct.status} /><b>{ROADMAP_STATUS_META[selectedProduct.status].progress}%</b></div>
+            </article>
+            <article className="dashboard-card">
+              <span className="dashboard-label">Google pairing</span>
+              <h3>{selectedProduct.google}</h3>
+              <p>OrkaApps enhance the tools your team already uses instead of forcing a rip-and-replace migration.</p>
+            </article>
+            <article className="dashboard-card">
+              <span className="dashboard-label">Works well with</span>
+              <div className="related-apps">
+                {relatedProducts.map((product) => (
+                  <button type="button" key={product.id} onClick={() => setSelectedProductId(product.id)}>
+                    <span>{product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><div><b>{product.name}</b><small>{product.status}</small></div>
+                  </button>
+                ))}
+              </div>
+            </article>
+            <article className="dashboard-card catalog-snapshot-card">
+              <span className="dashboard-label">Catalog snapshot</span>
+              <p>The card-based explorer from the original website remains available in <b>All App Cards</b>. Use these quick picks without leaving the three-pane catalog.</p>
+              <div className="catalog-snapshot-grid">
+                {ORKA_PRODUCTS.slice(0, 6).map((product) => (
+                  <button type="button" key={product.id} onClick={() => setSelectedProductId(product.id)} className={product.id === selectedProduct.id ? 'active' : ''}>
+                    <span>{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span>
+                    <b>{product.name}</b>
+                  </button>
+                ))}
+              </div>
+            </article>
+            <article className="dashboard-card accent-card">
+              <span className="dashboard-label">OrkaOS principle</span>
+              <h3>Oversimplicity by design.</h3>
+              <p>The catalog is the point: discover a focused app, understand its role, and launch only what your team is ready to use.</p>
+            </article>
+          </div>
+        </aside>
+      )}
+    </div>
+  );
+}
+
+function RoadmapView({ onOpenForm, onOpenApps }) {
+  const stageCounts = ROADMAP_PHASES.map((phase) => ({
+    ...phase,
+    count: ORKA_PRODUCTS.filter((product) => product.status.toLowerCase() === phase.id).length
+  }));
+
+  const orderedProducts = [...ORKA_PRODUCTS].sort((a, b) => {
+    return ROADMAP_STATUS_META[b.status].progress - ROADMAP_STATUS_META[a.status].progress || a.name.localeCompare(b.name);
   });
 
-  const result = await response
-    .json()
-    .catch(() => ({}));
+  return (
+    <div className="view-scroll roadmap-view">
+      <section className="roadmap-header content-surface">
+        <div>
+          <span className="eyebrow">Product view</span>
+          <h1>What’s next for the Orka ecosystem.</h1>
+          <p>Follow every public OrkaApp from concept through live release. The roadmap is deliberately visible so early users can understand what exists, what is being shaped, and where feedback matters.</p>
+          <div className="hero-actions">
+            <button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button>
+            <button className="button secondary" type="button" onClick={onOpenApps}>Open the catalog</button>
+          </div>
+        </div>
+        <div className="roadmap-summary">
+          {stageCounts.map((stage) => <div key={stage.id}><span>{stage.label.replace(/^\d+ · /, '')}</span><b>{stage.count}</b></div>)}
+        </div>
+      </section>
 
-  if (!response.ok || !result.ok) {
-    throw new Error(
-      result.error ||
-      'Your submission could not be completed.'
-    );
-  }
+      <section className="roadmap-board content-surface">
+        <header className="roadmap-board-head">
+          <div><span className="eyebrow">Public build sequence</span><h2>From concept to live, in one view</h2></div>
+          <div className="roadmap-legend">
+            {ROADMAP_PHASES.map((phase) => <span key={phase.id}><i className={`legend-dot ${phase.id}`} />{phase.label.replace(/^\d+ · /, '')}</span>)}
+          </div>
+        </header>
+        <div className="roadmap-table">
+          <div className="roadmap-table-head"><span>App</span><span>Group</span><span>Progress</span><span>Stage</span></div>
+          {orderedProducts.map((product) => (
+            <div className="roadmap-row" key={product.id}>
+              <div className="roadmap-app"><span className="app-mark small">{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><div><b>{product.name}</b><small>{product.priority}</small></div></div>
+              <span className="roadmap-group">{product.group}</span>
+              <div className="roadmap-track"><span className={`roadmap-fill ${product.status.toLowerCase()}`} style={{ width: `${ROADMAP_STATUS_META[product.status].progress}%` }} /></div>
+              <StatusPill status={product.status} />
+            </div>
+          ))}
+        </div>
+      </section>
 
-  return result;
+      <section className="roadmap-principles">
+        <article className="content-surface"><span className="step-number">01</span><h3>Validate the problem</h3><p>Concepts stay visible before code is treated as a commitment.</p></article>
+        <article className="content-surface"><span className="step-number">02</span><h3>Design with real teams</h3><p>Early access and testing shape the workflow before production.</p></article>
+        <article className="content-surface"><span className="step-number">03</span><h3>Ship one clear job</h3><p>Apps move live only when they solve a focused problem simply.</p></article>
+        <article className="content-surface"><span className="step-number">04</span><h3>Connect, then graduate</h3><p>Teams can add adjacent apps or move to larger platforms when ready.</p></article>
+      </section>
+
+      <section className="content-surface future-cta">
+        <div><span className="eyebrow">Help shape the sequence</span><h2>See an app your team needs?</h2><p>Join the pod for previews, or participate in alpha testing when a module reaches an active build stage.</p></div>
+        <div className="final-actions"><button className="button primary" type="button" onClick={() => onOpenForm('Join the Pod')}>Join the Pod</button><button className="button secondary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Test a build</button></div>
+      </section>
+    </div>
+  );
+}
+
+function AdminView({ activeView, setActiveView, setFeedbackOpen }) {
+  const [adminTab, setAdminTab] = useState('content');
+  const publishedCount = ORKA_PRODUCTS.filter((product) => ['Live', 'Production'].includes(product.status)).length;
+
+  return (
+    <div className="admin-view view-scroll">
+      <section className="admin-hero content-surface">
+        <div><span className="eyebrow">Admin view · website preview</span><h1>Manage how OrkaOS.com introduces the ecosystem.</h1><p>This demo mirrors the OrkaOS GAS admin switch without exposing real controls on the public site. It shows where content, catalog status, brand settings, and the future feedback connection belong.</p></div>
+        <span className="admin-demo-badge">DEMO MODE</span>
+      </section>
+
+      <div className="admin-tabs" role="tablist">
+        {[['content', 'Content map'], ['catalog', 'Catalog status'], ['brand', 'Brand & feedback']].map(([id, label]) => (
+          <button key={id} className={adminTab === id ? 'active' : ''} type="button" onClick={() => setAdminTab(id)}>{label}</button>
+        ))}
+      </div>
+
+      {adminTab === 'content' && (
+        <section className="admin-grid">
+          {[
+            ['overview', 'Overview folder', 'Homepage story, OrkaApp experience, audience fit, positioning, white-label, and conversion paths.'],
+            ['apps', 'Orka Apps catalog', 'Interactive catalog, group filters, app details, Google pairings, and roadmap status.'],
+            ['future', 'Future Plan view', 'Public product sequence, stage counts, progress, and alpha-testing calls to action.']
+          ].map(([id, title, copy]) => (
+            <article className={`admin-tile content-surface${activeView === id ? ' selected' : ''}`} key={id}>
+              <div className="admin-tile-head"><span className="admin-page-icon"><Icon name={id === 'overview' ? 'home' : id === 'apps' ? 'grid' : 'trending'} size={20} /></span><StatusPill status={activeView === id ? 'Live' : 'Design'} /></div>
+              <h2>{title}</h2><p>{copy}</p><button className="button secondary" type="button" onClick={() => setActiveView(id)}>Preview this view</button>
+            </article>
+          ))}
+        </section>
+      )}
+
+      {adminTab === 'catalog' && (
+        <section className="admin-catalog content-surface">
+          <div className="admin-stat-row"><article><span>Total apps</span><b>{ORKA_PRODUCTS.length}</b></article><article><span>Published</span><b>{publishedCount}</b></article><article><span>Active design</span><b>{ORKA_PRODUCTS.filter((p) => p.status === 'Design').length}</b></article><article><span>Concepts</span><b>{ORKA_PRODUCTS.filter((p) => p.status === 'Concept').length}</b></article></div>
+          <div className="admin-catalog-table">
+            <div className="admin-catalog-head"><span>App</span><span>Group</span><span>Stage</span><span>Public action</span></div>
+            {ORKA_PRODUCTS.map((product) => <div key={product.id}><b>{product.name}</b><span>{product.group}</span><StatusPill status={product.status} /><span>{product.status === 'Live' || product.status === 'Production' ? 'Request access' : 'Follow / test'}</span></div>)}
+          </div>
+        </section>
+      )}
+
+      {adminTab === 'brand' && (
+        <section className="admin-brand-grid">
+          <article className="content-surface brand-config-card"><span className="eyebrow">Global brand</span><h2>OrkaOS design system</h2><p>The public website now uses the same semantic surface, border, typography, radius, and light/dark behavior as the GAS app.</p><div className="brand-token-row"><span /><span /><span /><span /></div></article>
+          <article className="content-surface feedback-config-card"><span className="eyebrow">+ Add action</span><h2>Feedback form connection</h2><p>The sidebar’s Add button currently opens a placeholder. Connect your GAS form here later without changing the navigation model.</p><button className="button primary" type="button" onClick={() => setFeedbackOpen(true)}>Preview placeholder</button></article>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function FavoritesView({ favoriteIds, onToggleFavorite, onSelectProduct, onOpenCatalog, onOpenForm }) {
+  const favorites = ORKA_PRODUCTS.filter((product) => favoriteIds.includes(product.id));
+
+  return (
+    <div className="view-scroll favorites-view">
+      <section className="folder-hero content-surface">
+        <div>
+          <span className="eyebrow">Orka Apps / Favorites</span>
+          <h1>Your saved Orka Apps.</h1>
+          <p>Keep a small shortlist while you learn the ecosystem. Favorites stay in this browser and can be removed at any time.</p>
+        </div>
+        <button className="button primary" type="button" onClick={onOpenCatalog}>Browse the catalog</button>
+      </section>
+
+      {favorites.length ? (
+        <section className="favorites-grid">
+          {favorites.map((product) => (
+            <article className={`favorite-card content-surface${product.ai ? ' ai-card' : ''}`} key={product.id}>
+              <div className="favorite-card-head">
+                <span className="app-mark">{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span>
+                <button className="favorite-heart active" type="button" onClick={() => onToggleFavorite(product.id)} aria-label={`Remove ${product.name} from favorites`}>♥</button>
+              </div>
+              <StatusPill status={product.status} />
+              <h2>{product.name}</h2>
+              <p>{product.summary}</p>
+              <div className="favorite-meta"><span>{product.group}</span><span>{product.google}</span></div>
+              <div className="favorite-actions">
+                <button className="button secondary" type="button" onClick={() => onSelectProduct(product.id)}>Open details</button>
+                <button className="button primary" type="button" onClick={() => onOpenForm(product.status === 'Live' || product.status === 'Production' ? 'Join the Pod' : 'Join Alpha Testing')}>Follow app</button>
+              </div>
+            </article>
+          ))}
+        </section>
+      ) : (
+        <section className="empty-favorites content-surface">
+          <span className="empty-favorite-icon">♡</span>
+          <h2>No favorites yet</h2>
+          <p>Open the Orka Apps folder, select an app, and use the Favorite button in its workspace.</p>
+          <button className="button primary" type="button" onClick={onOpenCatalog}>Explore Orka Apps</button>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function PersistentCtaFooter({ onOpenForm, onNavigate }) {
+  const actions = [
+    ['Join the Pod', 'Early-access previews and demos', 'userPlus', false],
+    ['Join Alpha Testing', 'Test incomplete builds and shape what ships', 'flask', false],
+    ['Join Beta Testing', 'Near-release validation · enrollment coming soon', 'badgeCheck', true],
+    ['Partner with PROJXON', 'Pilots, integrations, or co-building', 'handshake', false]
+  ];
+
+  return (
+    <footer className="persistent-cta-footer" aria-label="Join OrkaOS options">
+      <div className="persistent-cta-intro">
+        <div className="persistent-cta-brand"><span className="site-footer-mark"><span className="official-orka-logo" /></span><span><b>Build your pod.</b><small>OrkaOS · by PROJXON</small></span></div>
+        <div className="persistent-footer-links">
+          <button type="button" onClick={() => onNavigate('overview', 'start')}>Overview</button>
+          <a href="https://www.linkedin.com/company/orkaos/about/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+        </div>
+      </div>
+      <div className="persistent-cta-actions">
+        {actions.map(([intent, detail, icon, disabled]) => (
+          <button
+            className={`persistent-cta-card${intent === 'Join the Pod' ? ' primary' : ''}${disabled ? ' soon' : ''}`}
+            type="button"
+            key={intent}
+            disabled={disabled}
+            onClick={() => !disabled && onOpenForm(intent)}
+          >
+            <span className="persistent-cta-icon"><Icon name={icon} size={18} /></span>
+            <span><b>{intent}</b><small>{detail}</small></span>
+          </button>
+        ))}
+      </div>
+    </footer>
+  );
 }
 
 export default function App() {
-  // Modal state: `formIntent` preselects the intake path that opened the dialog.
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formIntent, setFormIntent] = useState('');
-
-  // Page-level display state shared by the theme toggle and interactive widgets.
-  const [theme, setTheme] = useState(getInitialTheme);
-  const [selectedModule, setSelectedModule] = useState('orka-vault');
-  const [catalogFilter, setCatalogFilter] = useState('all');
-  const [brandSwatch, setBrandSwatch] = useState('ocean');
-  const [activeRailSection, setActiveRailSection] = useState('top');
-  const [isRailCollapsed, setIsRailCollapsed] = useState(false);
-
-  async function submitIntakeForm(payload) {
-    const response = await fetch('/api/intake', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    let result = null;
-
+  const [theme, setTheme] = useState(initialTheme);
+  const [role, setRole] = useState('user');
+  const [activeView, setActiveView] = useState('overview');
+  const [activeTab, setActiveTab] = useState('start');
+  const [openFolders, setOpenFolders] = useState({ overview: true, apps: true, future: true });
+  const [selectedProductId, setSelectedProductId] = useState('orka-os');
+  const [favoriteIds, setFavoriteIds] = useState(() => {
     try {
-      result = await response.json();
+      const saved = JSON.parse(window.localStorage.getItem('orkaos-favorites') || 'null');
+      return Array.isArray(saved) ? saved : ['orka-vault', 'orka-sop', 'orka-task'];
     } catch {
-      // The generic error below handles invalid responses.
+      return ['orka-vault', 'orka-sop', 'orka-task'];
     }
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [appsOpen, setAppsOpen] = useState(false);
+  const [alertsOpen, setAlertsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formIntent, setFormIntent] = useState('Join the Pod');
+  const searchRef = useRef(null);
 
-    if (!response.ok || !result?.ok) {
-      throw new Error(
-        result?.error ||
-        'Unable to submit the form. Please try again.'
-      );
-    }
-
-    return result;
-  }
-
-  // Keep the root data attribute and localStorage in sync after a theme change.
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    } catch {
-      // The theme still works when storage is unavailable.
-    }
+    try { window.localStorage.setItem(THEME_STORAGE_KEY, theme); } catch { /* no-op */ }
   }, [theme]);
 
-
-  // Scroll-spy for the left rail. requestAnimationFrame batches rapid scroll and
-  // resize events so this visual progress indicator does not trigger extra work.
   useEffect(() => {
-    let frameId = 0;
+    try { window.localStorage.setItem('orkaos-favorites', JSON.stringify(favoriteIds)); } catch { /* no-op */ }
+  }, [favoriteIds]);
 
-    const updateActiveSection = () => {
-      frameId = 0;
-      const activationLine = window.innerHeight * 0.36;
-      let nextSection = RAIL_SECTIONS[0];
-
-      RAIL_SECTIONS.forEach((sectionId) => {
-        const section = document.getElementById(sectionId);
-        if (section && section.getBoundingClientRect().top <= activationLine) {
-          nextSection = sectionId;
-        }
-      });
-
-      setActiveRailSection((current) => current === nextSection ? current : nextSection);
+  useEffect(() => {
+    const handleKey = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (event.key === 'Escape') {
+        setSearchOpen(false);
+        setAppsOpen(false);
+        setAlertsOpen(false);
+        setProfileOpen(false);
+      }
     };
-
-    const queueUpdate = () => {
-      if (!frameId) frameId = window.requestAnimationFrame(updateActiveSection);
-    };
-
-    updateActiveSection();
-    window.addEventListener('scroll', queueUpdate, { passive: true });
-    window.addEventListener('resize', queueUpdate);
-
-    return () => {
-      window.removeEventListener('scroll', queueUpdate);
-      window.removeEventListener('resize', queueUpdate);
-      if (frameId) window.cancelAnimationFrame(frameId);
-    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
-  const toggleTheme = () => {
-    setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark');
+  const openFeedback = () => {
+    if (FEEDBACK_FORM_URL) {
+      window.open(FEEDBACK_FORM_URL, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    setFeedbackOpen(true);
   };
 
-  // Centralize the active-link class and accessible current-location attribute.
-  const railLinkProps = (sectionId) => ({
-    className: `rail-link${activeRailSection === sectionId ? ' is-active' : ''}`,
-    'aria-current': activeRailSection === sectionId ? 'location' : undefined
-  });
-
-  // Every call-to-action uses this helper so the modal always opens with the
-  // matching intake goal selected.
-  const openForm = (intent) => {
+  const openIntake = (intent) => {
     setFormIntent(intent);
     setIsFormOpen(true);
   };
 
-  const handleIntakeSubmit = async (payload) => {
-    try {
-      const response = await fetch('/api/intake', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await response
-        .json()
-        .catch(() => ({}));
-
-      if (!response.ok || !result.ok) {
-        throw new Error(
-          result.error ||
-          'Your submission could not be completed.'
-        );
-      }
-
-      if (result.emailSent === false) {
-        window.alert(
-          'Your submission was saved, but the notification email could not be sent.'
-        );
-      } else {
-        window.alert(
-          'Thank you. Your submission was received.'
-        );
-      }
-
-      return result;
-    } catch (error) {
-      console.error('Intake submission failed:', error);
-
-      window.alert(
-        error.message ||
-        'Your submission could not be completed. Please try again.'
-      );
-
-      // This prevents the form from clearing when submission fails.
-      throw error;
-    }
+  const navigate = (view, tab = null) => {
+    const destinationTab = tab || NAV_FOLDERS[view]?.tabs[0]?.id || null;
+    setActiveView(view);
+    setActiveTab(destinationTab);
+    setOpenFolders((current) => ({ ...current, [view]: true }));
+    setSidebarOpen(false);
+    setSearchOpen(false);
   };
 
-  // Derived collections feed the product explorer. They are calculated from the
-  // catalog rather than duplicated in markup, keeping filters and details aligned.
-  const selectedProduct = ORKA_PRODUCTS.find((product) => product.id === selectedModule) || ORKA_PRODUCTS[0];
-  const featuredProducts = ORKA_PRODUCTS.filter((product) => product.featured);
-  const visibleCatalogProducts = ORKA_PRODUCTS.filter((product) =>
-    catalogFilter === 'all' || product.groupId === catalogFilter
-  );
-  const roadmapStageCounts = ROADMAP_PHASES.map((phase) => ({
-    ...phase,
-    count: ORKA_PRODUCTS.filter((product) => product.status.toLowerCase() === phase.id).length
-  }));
-  const availableProductCount = ORKA_PRODUCTS.filter((product) =>
-    product.status === 'Live' || product.status === 'Production'
-  ).length;
+  const toggleFavorite = (productId) => {
+    setFavoriteIds((current) => current.includes(productId)
+      ? current.filter((id) => id !== productId)
+      : [...current, productId]);
+  };
+
+  const searchResults = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+
+    const folderResults = Object.entries(NAV_FOLDERS).flatMap(([folderId, folder]) =>
+      folder.tabs
+        .filter((tab) => `${tab.label} ${folder.label} ${VIEW_LABELS[folderId] || ''}`.toLowerCase().includes(query))
+        .map((tab) => ({ type: 'destination', id: folderId, tab: tab.id, title: tab.label, meta: folder.label }))
+    );
+
+    const overviewResults = OVERVIEW_SEARCH_ITEMS
+      .filter(([title, description]) => `${title} ${description}`.toLowerCase().includes(query))
+      .map(([title, description]) => ({
+        type: 'destination',
+        id: 'overview',
+        tab: /how/i.test(title) ? 'how' : /feel/i.test(title) ? 'experience' : /who|white/i.test(title) ? 'fit' : 'why',
+        title,
+        meta: description
+      }));
+
+    const appResults = ORKA_PRODUCTS
+      .filter((product) => `${product.name} ${product.summary} ${product.group} ${product.status}`.toLowerCase().includes(query))
+      .slice(0, 7)
+      .map((product) => ({ type: 'app', id: product.id, title: product.name, meta: `${product.group} · ${product.status}` }));
+
+    return [...folderResults, ...overviewResults, ...appResults].slice(0, 10);
+  }, [searchQuery]);
+
+  const chooseSearchResult = (result) => {
+    if (result.type === 'app') {
+      setSelectedProductId(result.id);
+      navigate('apps', 'catalog');
+    } else {
+      navigate(result.id, result.tab || null);
+    }
+    setSearchQuery('');
+  };
+
+  const launcherProducts = APP_LAUNCHER_IDS.map((id) => ORKA_PRODUCTS.find((product) => product.id === id)).filter(Boolean);
+  const logo = theme === 'dark' ? orkaLogoDark : orkaLogoLight;
+  const currentFolder = NAV_FOLDERS[activeView];
+  const currentTab = currentFolder?.tabs.find((tab) => tab.id === activeTab);
+
+  const renderUserView = () => {
+    if (activeView === 'overview') {
+      if (activeTab === 'start') return <OverviewView onOpenForm={openIntake} onOpenApps={() => navigate('apps', 'catalog')} />;
+      if (activeTab === 'why') return <div className="view-scroll legacy-view"><LegacyWidgets panel="overview-why" onOpenForm={openIntake} onNavigate={navigate} /></div>;
+      if (activeTab === 'how') return <div className="view-scroll legacy-view"><LegacyWidgets panel="overview-how" onOpenForm={openIntake} onNavigate={navigate} /></div>;
+      if (activeTab === 'experience') return <div className="view-scroll legacy-view"><LegacyWidgets panel="overview-experience" onOpenForm={openIntake} onNavigate={navigate} /></div>;
+      if (activeTab === 'fit') return <div className="view-scroll legacy-view"><LegacyWidgets panel="overview-fit" onOpenForm={openIntake} onNavigate={navigate} /></div>;
+      return null;
+    }
+
+    if (activeView === 'apps') {
+      if (activeTab === 'catalog') return <AppsView selectedProductId={selectedProductId} setSelectedProductId={setSelectedProductId} onOpenForm={openIntake} favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} />;
+      if (activeTab === 'directory') return <div className="view-scroll legacy-view"><LegacyWidgets panel="apps-catalog" onOpenForm={openIntake} onNavigate={navigate} /></div>;
+      if (activeTab === 'favorites') return (
+        <FavoritesView
+          favoriteIds={favoriteIds}
+          onToggleFavorite={toggleFavorite}
+          onSelectProduct={(id) => { setSelectedProductId(id); navigate('apps', 'catalog'); }}
+          onOpenCatalog={() => navigate('apps', 'catalog')}
+          onOpenForm={openIntake}
+        />
+      );
+      return null;
+    }
+
+    if (activeTab === 'plan') return <RoadmapView onOpenForm={openIntake} onOpenApps={() => navigate('apps', 'catalog')} />;
+    if (activeTab === 'roadmap') return <div className="view-scroll legacy-view"><LegacyWidgets panel="future-roadmap" onOpenForm={openIntake} onNavigate={navigate} /></div>;
+    if (activeTab === 'join') return <div className="view-scroll legacy-view"><LegacyWidgets panel="future-join" onOpenForm={openIntake} onNavigate={navigate} /></div>;
+    return null;
+  };
 
   return (
-    <>
-      {/*
-        Full-width page shell. `.orka-shell` controls the collapsible navigation
-        rail, main content column, and bottom action footer.
-      */}
-      <div className={`orka-shell${isRailCollapsed ? ' is-rail-collapsed' : ''}`} id="orka-shell">
-        {/*
-          Left progress rail: section links mirror `RAIL_SECTIONS`. When adding a
-          tracked page section, update both the ID list and the matching link here.
-        */}
-        <aside className="orka-rail" aria-label="Page progress">
-          <div className="orka-side-inner">
-            <button
-              className="rail-collapse-toggle"
-              type="button"
-              onClick={() => setIsRailCollapsed((isCollapsed) => !isCollapsed)}
-              aria-expanded={!isRailCollapsed}
-              aria-controls="rail-navigation"
-              aria-label={isRailCollapsed ? 'Expand page navigation' : 'Collapse page navigation'}
-              title={isRailCollapsed ? 'Expand navigation' : 'Collapse navigation'}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d={isRailCollapsed ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'} />
-              </svg>
-            </button>
+    <div className={`app-shell${sidebarCollapsed ? ' nav-collapsed' : ''}${sidebarOpen ? ' drawer-open' : ''}`}>
+      <header className="topnav">
+        <div className="topnav-left">
+          <button className="mobile-menu-button icon-button" type="button" onClick={() => setSidebarOpen((open) => !open)} aria-label="Open navigation">
+            <span /><span /><span />
+          </button>
+          <button className="brand-mark" type="button" onClick={() => navigate('overview')} aria-label="Go to OrkaOS overview">
+            <img src={logo} alt="" />
+            <span className="brand-word"><b>Orka</b><strong>OS</strong></span>
+            <span className="version-chip">WEB</span>
+          </button>
+        </div>
 
-            <a className="rail-brand" href="#top">
-              <span className="rail-brand-mark">
-                <span className="official-orka-logo" aria-hidden="true" />
-              </span>
-              <span className="rail-brand-label">OrkaOS</span>
-            </a>
-            <p className="rail-kicker">Explore the current</p>
-
-            <nav className="rail-nav" id="rail-navigation" aria-label="Page sections">
-              <span className="rail-progress" style={{ height: `${Math.max(0, RAIL_SECTIONS.indexOf(activeRailSection)) * 50}px` }} />
-
-              <a {...railLinkProps('top')} href="#top">
-                <span className="rail-symbol">
-                  <span className="rail-token">
-                    <span className="official-orka-logo" aria-hidden="true" />
-                  </span>
-                </span>
-                <span className="rail-link-label">Start</span>
-              </a>
-
-              <a {...railLinkProps('problem')} href="#problem">
-                <span className="rail-symbol">
-                  <svg viewBox="0 0 64 40" aria-hidden="true">
-                    <path className="g-fill" d="M4 25C13 10 27 8 35 16c6-6 17-4 23 5-9-2-13 4-15 10-8-8-19-8-26 0-3-5-7-6-13-6Z" />
-                    <circle className="g-blue" cx="34" cy="18" r="2.2" />
-                  </svg>
-                </span>
-                <span className="rail-link-label">Why OrkaOS</span>
-              </a>
-
-              <a {...railLinkProps('progression')} href="#progression">
-                <span className="rail-symbol">
-                  <svg viewBox="0 0 64 52" aria-hidden="true">
-                    <path className="g-stroke" d="M7 17c11-8 21-8 33 0s14 8 17 3" />
-                    <path className="g-stroke" d="M7 27c11-8 21-8 33 0s14 8 17 3" />
-                    <path className="g-stroke" d="M7 37c11-8 21-8 33 0s14 8 17 3" />
-                  </svg>
-                </span>
-                <span className="rail-link-label">Build the Pod</span>
-              </a>
-
-              <a {...railLinkProps('ecosystem')} href="#ecosystem">
-                <span className="rail-symbol">
-                  <svg viewBox="0 0 64 64" aria-hidden="true">
-                    <circle className="g-stroke" cx="32" cy="32" r="24" />
-                    <circle className="g-stroke" cx="32" cy="32" r="15" />
-                    <circle className="g-blue" cx="32" cy="32" r="5" />
-                  </svg>
-                </span>
-                <span className="rail-link-label">Explore the Stack</span>
-              </a>
-
-              <a {...railLinkProps('value')} href="#value">
-                <span className="rail-symbol">
-                  <svg viewBox="0 0 64 52" aria-hidden="true">
-                    <rect className="g-stroke" x="5" y="7" width="54" height="38" rx="5" />
-                    <path className="g-stroke" d="M19 8v36M45 8v36" />
-                    <path className="g-stroke" d="M23 17h17M23 26h13M23 35h15" />
-                  </svg>
-                </span>
-                <span className="rail-link-label">Find the Fit</span>
-              </a>
-
-              <a {...railLinkProps('whitelabel-section')} href="#whitelabel-section">
-                <span className="rail-symbol">
-                  <svg viewBox="0 0 64 52" aria-hidden="true">
-                    <rect className="g-stroke" x="7" y="7" width="50" height="38" rx="5" />
-                    <path className="g-stroke" d="M16 17h19M16 25h28" />
-                    <path className="g-stroke" d="M16 35c9-8 16-8 27 0" />
-                    <circle className="g-blue" cx="48" cy="17" r="3" />
-                  </svg>
-                </span>
-                <span className="rail-link-label">Make It Yours</span>
-              </a>
-
-              <a {...railLinkProps('cta')} href="#cta">
-                <span className="rail-symbol">
-                  <svg viewBox="0 0 64 52" aria-hidden="true">
-                    <path className="g-stroke" d="M7 38c10-17 19-17 27-7s14 8 23-8" />
-                    <path className="g-stroke" d="M48 16h9v9" />
-                    <circle className="g-blue" cx="8" cy="38" r="3" />
-                  </svg>
-                </span>
-                <span className="rail-link-label">Join the Pod</span>
-              </a>
-            </nav>
-
-            <p className="rail-note"><strong>Start with one.</strong><br />Grow into the ecosystem as your pod needs it.</p>
-
-            <a className="rail-social rail-social--icon-only" href="https://www.linkedin.com/company/orkaos/about/" target="_blank" rel="noopener noreferrer" aria-label="Follow OrkaOS on LinkedIn" title="Follow OrkaOS on LinkedIn">
-              <svg className="linkedin-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V8.98h3.41v1.57h.05c.48-.9 1.63-1.85 3.35-1.85 3.58 0 4.25 2.36 4.25 5.43v6.32ZM5.33 7.41a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14ZM7.11 20.45H3.55V8.98h3.56v11.47Z" />
-              </svg>
-              <span className="sr-only">Follow OrkaOS on LinkedIn</span>
-            </a>
+        <div className="top-center">
+          <div className="global-search">
+            <Icon name="search" size={17} />
+            <input
+              ref={searchRef}
+              value={searchQuery}
+              onChange={(event) => { setSearchQuery(event.target.value); setSearchOpen(true); }}
+              onFocus={() => setSearchOpen(true)}
+              placeholder="Search OrkaOS and apps"
+              aria-label="Search OrkaOS and apps"
+            />
+            <kbd>⌘ K</kbd>
+            {searchOpen && searchQuery.trim() && (
+              <div className="search-popover popover">
+                {searchResults.length ? searchResults.map((result, index) => (
+                  <button key={`${result.type}-${result.id}-${result.tab || ''}-${index}`} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => chooseSearchResult(result)}>
+                    <span className="search-result-icon">{result.type === 'app' ? result.title.replace('Orka', '').slice(0, 2).toUpperCase() : <Icon name={result.id === 'overview' ? 'home' : result.id === 'apps' ? 'grid' : 'trending'} size={15} />}</span>
+                    <span><b>{result.title}</b><small>{result.meta}</small></span>
+                  </button>
+                )) : <div className="search-empty">No matches found.</div>}
+              </div>
+            )}
           </div>
-        </aside>
+        </div>
 
-        {/* Center column: the public landing-page content and interactive demos. */}
-        <main className="orka-center" id="siteMain">
-          {/* Sticky site navigation and persisted light/dark theme control. */}
-          <header className="nav">
-            <div className="nav-inner">
-              <a className="brand" href="#top">
-                <span className="orka-mark" aria-hidden="true">
-                  <span className="official-orka-logo" aria-hidden="true" />
-                </span>
-                OrkaOS
-              </a>
-              <nav className="nav-links">
-                <a href="#problem">Why</a>
-                <a href="#how">How it works</a>
-                <a href="#ecosystem">Ecosystem</a>
-                <a href="#roadmap">Roadmap</a>
-                <a href="#who">Who it's for</a>
-              </nav>
-              <button
-                className="theme-toggle"
-                type="button"
-                onClick={toggleTheme}
-                aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                aria-pressed={theme === 'dark'}
-                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              >
-                <span className="theme-toggle-icon" aria-hidden="true">
-                  {theme === 'dark' ? (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="4" />
-                      <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
-                    </svg>
-                  )}
-                </span>
-                <span className="theme-toggle-label">{theme === 'dark' ? 'Dark' : 'Light'}</span>
-              </button>
-              <a className="nav-cta" href="#cta">
-                Start with a Module →
-              </a>
-            </div>
-          </header>
-          {/* Hero: primary positioning, requirements note, and page-level CTAs. */}
-          <section className="hero" id="top">
-            <div className="wrap hero-inner">
-              <div className="hero-mark" aria-hidden="true">
-                <span className="orka-mark" style={{ width: 60, height: 60 }}>
-                  <span className="official-orka-logo" aria-hidden="true" />
-                </span>
-              </div>
-              <span className="eyebrow" style={{ marginTop: 22 }}>
-                The OrkaOS Ecosystem
-              </span>
-              <h1 className="h1">The Operating System for Teams Ready to Scale</h1>
-              <p className="lead">
-                OrkaOS is a modular micro-stack built on Google Workspace that helps
-                small teams organize, collaborate, and scale — without the complexity of
-                enterprise tools.
-              </p>
-              <ul className="hero-bullets">
-                <li>Built on Google Workspace</li>
-                <li>Designed for teams of 1–30</li>
-                <li>No setup, no complexity</li>
-              </ul>
-              <div className="hero-cta">
-                <a href="#cta" className="btn btn-primary">
-                  Start with a Module →
-                </a>
-                <a href="#ecosystem" className="btn btn-secondary">
-                  Explore the Ecosystem
-                </a>
-                <a href="#how" className="btn btn-ghost">
-                  See how it works ↓
-                </a>
-              </div>
-              <div className="workspace-required" role="note">
-                <span className="workspace-required-badge">
-                  Google Workspace required
-                </span>
-                <span>
-                  OrkaOS is not a standalone suite. It adds a guided operating layer on
-                  top of Gmail, Drive, Calendar, and Google identity.
-                </span>
-              </div>
-            </div>
-          </section>
-          {/* Problem cards: explain the gap between ad-hoc and enterprise tools. */}
-          <section id="problem">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Why this exists</span>
-                <h2 className="h2">Scaling a team breaks everything</h2>
-                <p className="lead">
-                  Going from 1 → 5 people is harder than 5 → 50. The tools you start
-                  with stop working — and the tools built for scale are too much, too
-                  soon.
-                </p>
-              </div>
-              <div className="problem-grid">
-                <div className="problem-card">
-                  <div className="icon"><Icon name="unlink" /></div>
-                  <h4>Too many tools, nothing connected</h4>
-                  <p>
-                    Sheets here, Trello there, Slack somewhere else. Nothing talks.
-                    Everything leaks.
-                  </p>
-                </div>
-                <div className="problem-card">
-                  <div className="icon"><Icon name="chart" /></div>
-                  <h4>Google Sheets isn't enough anymore</h4>
-                  <p>
-                    You've outgrown ad-hoc spreadsheets, but a real CRM or PM tool feels
-                    like overkill.
-                  </p>
-                </div>
-                <div className="problem-card">
-                  <div className="icon"><Icon name="building" /></div>
-                  <h4>Enterprise software is too complex, too early</h4>
-                  <p>
-                    HubSpot, Jira, Workday — built for teams of 200, not founders
-                    running everything.
-                  </p>
-                </div>
-              </div>
-              <p className="problem-punch">
-                OrkaOS fills the gap between <span className="accent">chaos</span> and{" "}
-                <span className="accent">scale</span>.
-              </p>
-            </div>
-          </section>
-          {/* Three-layer model: Workspace foundation, OrkaOS layer, and modules. */}
-          <section id="what">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">What is OrkaOS</span>
-                <h2 className="h2">
-                  A startup operating system, built on what you already use
-                </h2>
-                <p className="lead">
-                  <strong>OrkaOS requires Google Workspace.</strong> It is not a
-                  standalone suite: it adds a micro-stack operating layer on top of
-                  Gmail, Drive, Calendar, and Google identity so your team can run the
-                  business with structure from day one.
-                </p>
-              </div>
-              <div className="workspace-foundation-note">
-                <strong>Keep the workspace you already use.</strong>
-                <span>
-                  Google Workspace stays underneath the system; OrkaOS connects the
-                  operating routines around it.
-                </span>
-              </div>
-              <div className="analogy">
-                <div className="analogy-card">
-                  <div className="label">Layer 1</div>
-                  <div className="name">Google Workspace</div>
-                  <div className="role">
-                    Your infrastructure — email, drive, identity.
-                  </div>
-                </div>
-                <div className="analogy-card center">
-                  <div className="label">Layer 2</div>
-                  <div className="name">OrkaOS</div>
-                  <div className="role">
-                    The operating system layer that ties it all together.
-                  </div>
-                </div>
-                <div className="analogy-card">
-                  <div className="label">Layer 3</div>
-                  <div className="name">Orka Modules</div>
-                  <div className="role">
-                    Apps and tools you turn on as you need them.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Desktop preview section. The mock window is decorative, not a live app. */}
-          <section id="demo">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Live preview</span>
-                <h2 className="h2">A familiar feel, built for first-time founders</h2>
-                <p className="lead">
-                  OrkaOS blends the simplicity of Google Workspace with the polish of
-                  macOS — anyone can run a business without a learning curve.
-                </p>
-              </div>
-              {/*
-                Desktop-preview widget (`window-*` and `os-*` classes): browser chrome,
-                sidebar, app grid, and dock are kept as one block for easy editing.
-              */}
-              <div className="os-window">
-                <div className="window-bar">
-                  <div className="traffic">
-                    <span className="dot red" />
-                    <span className="dot yellow" />
-                    <span className="dot green" />
-                  </div>
-                  <div className="address"><Icon name="lock" size={12} /> <span>orkaos.app/projxon</span></div>
-                  <div className="window-actions">
-                    <span />
-                    <span />
-                  </div>
-                </div>
-                <div className="os-body">
-                  <aside className="os-sidebar">
-                    <div className="user-chip">
-                      <div className="avatar">PX</div>
-                      <div>
-                        <div className="user-name">PROJXON</div>
-                        <div className="user-role">Phelan · Founder</div>
-                      </div>
-                    </div>
-                    <nav className="side-nav">
-                      <a className="nav-item active">
-                        <span className="ni"><Icon name="home" /></span>Home
-                      </a>
-                      <a className="nav-item">
-                        <span className="ni"><Icon name="grid" /></span>My Apps
-                      </a>
-                      <a className="nav-item">
-                        <span className="ni"><Icon name="compass" /></span>Discover
-                      </a>
-                      <a className="nav-item">
-                        <span className="ni"><Icon name="clock" /></span>Activity
-                      </a>
-                      <a className="nav-item">
-                        <span className="ni"><Icon name="settings" /></span>Settings
-                      </a>
-                    </nav>
-                    <div className="side-section">
-                      <div className="side-label">Recent</div>
-                      <a className="nav-item small">OrkaVault</a>
-                      <a className="nav-item small">OrkaSOP</a>
-                      <a className="nav-item small">OrkaTask</a>
-                    </div>
-                  </aside>
-                  <main className="os-main">
-                    <div className="os-topbar">
-                      <div className="search">
-                        <span className="search-icon"><Icon name="search" /></span>
-                        <input placeholder="Search apps, contacts, files…" />
-                        <span className="kbd">⌘K</span>
-                      </div>
-                      <div className="topbar-actions">
-                        <button className="icon-btn" type="button" title="Notifications" aria-label="Notifications">
-                          <Icon name="bell" />
-                        </button>
-                        <button className="icon-btn" type="button" title="Help" aria-label="Help">
-                          <Icon name="help" />
-                        </button>
-                        <div
-                          className="avatar"
-                          style={{ width: 30, height: 30, fontSize: 11 }}
-                        >
-                          PX
-                        </div>
-                      </div>
-                    </div>
-                    <div className="welcome">
-                      <h3>Good morning, Phelan <Icon name="sun" size={18} /></h3>
-                      <p>
-                        3 apps installed at PROJXON · 18 more included on the current
-                        website roadmap
-                      </p>
-                    </div>
-                    <div className="app-grid">
-                      <div className="app-tile installed">
-                        <div className="tile-icon">
-                          <span className="official-orka-logo" aria-hidden="true" />
-                        </div>
-                        <div className="tile-name">OrkaVault</div>
-                      </div>
-                      <div className="app-tile installed">
-                        <div className="tile-icon">
-                          <span className="official-orka-logo" aria-hidden="true" />
-                        </div>
-                        <div className="tile-name">OrkaSOP</div>
-                      </div>
-                      <div className="app-tile installed">
-                        <div className="tile-icon">
-                          <span className="official-orka-logo" aria-hidden="true" />
-                        </div>
-                        <div className="tile-name">OrkaTask</div>
-                      </div>
-                      <div className="app-tile">
-                        <div className="tile-icon">
-                          <span className="official-orka-logo" aria-hidden="true" />
-                        </div>
-                        <div className="tile-name">OrkaHR</div>
-                      </div>
-                      <div className="app-tile">
-                        <div className="tile-icon">
-                          <span className="official-orka-logo" aria-hidden="true" />
-                        </div>
-                        <div className="tile-name">OrkaATS</div>
-                      </div>
-                      <div className="app-tile">
-                        <div className="tile-icon">
-                          <span className="official-orka-logo" aria-hidden="true" />
-                        </div>
-                        <div className="tile-name">OrkaMarketing</div>
-                      </div>
-                      <div className="app-tile app-tile--ai">
-                        <div className="tile-icon tile-icon--ai" aria-hidden="true">AI</div>
-                        <div className="tile-name">OrkaProcess</div>
-                      </div>
-                      <div className="app-tile app-tile--ai">
-                        <div className="tile-icon tile-icon--ai" aria-hidden="true">AI</div>
-                        <div className="tile-name">OrkaAI</div>
-                      </div>
-                    </div>
-                  </main>
-                </div>
-                <div className="dock">
-                  <div className="dock-icon" title="OrkaVault">
-                    <span className="official-orka-logo" aria-hidden="true" />
-                  </div>
-                  <div className="dock-icon" title="OrkaSOP">
-                    <span className="official-orka-logo" aria-hidden="true" />
-                  </div>
-                  <div className="dock-icon" title="OrkaTask">
-                    <span className="official-orka-logo" aria-hidden="true" />
-                  </div>
-                  <div className="dock-divider" />
-                  <div className="dock-icon" title="OrkaOS">
-                    <span className="official-orka-logo" aria-hidden="true" />
-                  </div>
-                  <div className="dock-divider" />
-                  <div className="dock-icon ai" title="OrkaAI · AI Agent">
-                    AI
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Collaboration explainer: a three-step visual adoption flow. */}
-          <section id="progression">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Google Workspace + OrkaOS</span>
-                <h2 className="h2">
-                  Keep Google Workspace. Add the structure around it.
-                </h2>
-                <p className="lead">
-                  OrkaOS is a modular micro-stack designed to augment Google
-                  Workspace—not replace it. Add the right modules as your team grows, so
-                  the work is easier to see and coordinate.
-                </p>
-              </div>
-              {/*
-                Collaboration widget (`collab-*`): each card is one adoption step and
-                connector elements are decorative bridges between those steps.
-              */}
-              <div
-                className="collab-widget"
-                aria-label="A simple view of how Google Workspace and OrkaOS work together"
-              >
-                <div className="collab-widget-head">
-                  <div>
-                    <p className="collab-kicker">How it works</p>
-                    <h3>Keep Google. Add only what your team needs.</h3>
-                  </div>
-                  <div className="collab-badge">
-                    <Icon name="checkCircle" size={15} /> Built for Google Workspace
-                  </div>
-                </div>
-                <div className="collab-map">
-                  <article className="collab-card collab-card--tools">
-                    <p className="collab-card-label">Step 1 · Keep your tools</p>
-                    <h3>Stay in Google Workspace</h3>
-                    <p>Keep the tools your team already uses every day.</p>
-                    <div
-                      className="collab-tools"
-                      aria-label="Google Workspace tools that stay in place"
-                    >
-                      <div className="collab-tool">
-                        <span className="collab-tool-icon collab-tool-icon--docs">
-                          D
-                        </span>
-                        <span>Docs</span>
-                        <small>Write</small>
-                      </div>
-                      <div className="collab-tool">
-                        <span className="collab-tool-icon collab-tool-icon--sheets">
-                          S
-                        </span>
-                        <span>Sheets</span>
-                        <small>Track</small>
-                      </div>
-                      <div className="collab-tool">
-                        <span className="collab-tool-icon collab-tool-icon--gmail">
-                          M
-                        </span>
-                        <span>Gmail</span>
-                        <small>Email</small>
-                      </div>
-                      <div className="collab-tool">
-                        <span className="collab-tool-icon collab-tool-icon--calendar">
-                          C
-                        </span>
-                        <span>Calendar</span>
-                        <small>Plan</small>
-                      </div>
-                    </div>
-                  </article>
-                  <div className="collab-connector" aria-hidden="true">
-                    <span className="collab-connector-line" />
-                    <span className="collab-connector-label">add a layer</span>
-                  </div>
-                  <article className="collab-card collab-card--orka">
-                    <p className="collab-card-label">Step 2 · Add one tool</p>
-                    <h3>Solve one problem at a time</h3>
-                    <p>
-                      Choose a small OrkaOS tool for the work that is getting stuck.
-                    </p>
-                    <div className="collab-core">
-                      <span className="collab-core-mark" aria-hidden="true">
-                        <span className="official-orka-logo" />
-                      </span>
-                      <span>OrkaOS</span>
-                    </div>
-                    <div className="collab-layer-list" aria-label="How to adopt OrkaOS">
-                      <span>Start small</span>
-                      <span>Fix one gap</span>
-                      <span>Work with Google</span>
-                      <span>Add more later</span>
-                    </div>
-                  </article>
-                  <div className="collab-connector" aria-hidden="true">
-                    <span className="collab-connector-line" />
-                    <span className="collab-connector-label">bring together</span>
-                  </div>
-                  <article className="collab-card collab-card--flow">
-                    <p className="collab-card-label">Step 3 · Bring work together</p>
-                    <h3>See the work more clearly</h3>
-                    <p>
-                      Use Orka apps when they help, then bring activity into one shared
-                      view.
-                    </p>
-                    <div
-                      className="collab-work-list"
-                      aria-label="Examples of the OrkaOS experience"
-                    >
-                      <div className="collab-work-item">
-                        <span className="collab-work-state collab-work-state--done">
-                          <Icon name="check" size={14} />
-                        </span>
-                        <div>
-                          <b>OrkaChat</b>
-                          <small>Team conversations</small>
-                        </div>
-                      </div>
-                      <div className="collab-work-item">
-                        <span className="collab-work-state"><Icon name="plus" size={14} /></span>
-                        <div>
-                          <b>More tools</b>
-                          <small>Add them when needed</small>
-                        </div>
-                      </div>
-                      <div className="collab-work-item">
-                        <span className="collab-work-state collab-work-state--today">
-                          <Icon name="layers" size={14} />
-                        </span>
-                        <div>
-                          <b>Workspace hub</b>
-                          <small>One shared view · planned</small>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </div>
-                <div className="collab-widget-foot">
-                  <span className="collab-foot-mark" aria-hidden="true">
-                    +
-                  </span>
-                  <p>
-                    <strong>Google Workspace is the base.</strong> OrkaOS fills the gaps
-                    around it.
-                  </p>
-                  <span className="collab-foot-note">Start small.</span>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Product explorer and filterable catalog, both driven by ORKA_PRODUCTS. */}
-          <section id="ecosystem">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Product catalog</span>
-                <h2 className="h2">Explore what OrkaOS is offering and building</h2>
-                <p className="lead">
-                  Browse the roadmap-approved Orka lineup, filter by OrkaOS.com group, and follow the apps
-                  that fit your team best.
-                </p>
-              </div>
+        <div className="topnav-right">
+          <div className="role-toggle" role="tablist" aria-label="View mode">
+            <button type="button" className={role === 'user' ? 'active' : ''} onClick={() => setRole('user')}><Icon name="users" size={14} /> User</button>
+            <button type="button" className={role === 'admin' ? 'active admin' : ''} onClick={() => setRole('admin')}><Icon name="settings" size={14} /> Admin</button>
+          </div>
 
-              {/*
-                Featured product explorer: selector buttons update `selectedModule`;
-                the detail panel reads the same product object and announces changes.
-              */}
-              <div className="product-explorer">
-                <div className="product-explorer__list" role="list" aria-label="Featured Orka products">
-                  {featuredProducts.map((product) => (
-                    <button
-                      key={product.id}
-                      type="button"
-                      className={`product-selector${selectedProduct.id === product.id ? ' is-active' : ''}${product.ai ? ' is-ai' : ''}`}
-                      onClick={() => setSelectedModule(product.id)}
-                      aria-pressed={selectedProduct.id === product.id}
-                    >
-                      <span className="product-selector__mark" aria-hidden="true">
-                        {product.ai ? 'AI' : <span className="official-orka-logo" />}
-                      </span>
-                      <span className="product-selector__copy">
-                        <strong>{product.name}</strong>
-                        <small>{product.status} · {product.priority}</small>
-                      </span>
+          <div className="menu-anchor">
+            <button className="icon-button" type="button" aria-label="Open Orka app launcher" onClick={() => { setAppsOpen((open) => !open); setAlertsOpen(false); setProfileOpen(false); }}><NineDotIcon /></button>
+            {appsOpen && (
+              <div className="apps-popover popover right-popover">
+                <div className="popover-title"><b>Orka Apps</b><small>Explore the ecosystem</small></div>
+                <div className="app-launcher-grid">
+                  {launcherProducts.map((product) => (
+                    <button type="button" key={product.id} onClick={() => { setSelectedProductId(product.id); navigate('apps', 'catalog'); setAppsOpen(false); }}>
+                      <span>{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><b>{product.name.replace('Orka', '') || 'OS'}</b>
                     </button>
                   ))}
                 </div>
+                <button className="popover-footer-action" type="button" onClick={() => { navigate('apps', 'catalog'); setAppsOpen(false); }}>View full catalog →</button>
+              </div>
+            )}
+          </div>
 
-                <article className={`product-detail${selectedProduct.ai ? ' is-ai' : ''}`} aria-live="polite">
-                  <div className="product-detail__head">
-                    <span className="product-detail__mark" aria-hidden="true">
-                      {selectedProduct.ai ? 'AI' : <span className="official-orka-logo" />}
-                    </span>
-                    <div>
-                      <p className="product-detail__series">{selectedProduct.group} group</p>
-                      <h3>{selectedProduct.name}</h3>
-                    </div>
-                    <span className={`product-status product-status--${selectedProduct.status.toLowerCase()}`}>
-                      {selectedProduct.status}
-                    </span>
+          <button className="theme-switch" type="button" onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+            <span className="theme-track"><span className="theme-knob" /><Icon name="sun" size={13} /></span>
+          </button>
+
+          <div className="menu-anchor alerts-anchor">
+            <button className="icon-button" type="button" aria-label="Open updates" onClick={() => { setAlertsOpen((open) => !open); setAppsOpen(false); setProfileOpen(false); }}><Icon name="bell" size={18} /><span className="notification-dot" /></button>
+            {alertsOpen && (
+              <div className="alerts-popover popover right-popover">
+                <div className="popover-title"><b>What’s new</b><small>OrkaOS.com preview</small></div>
+                <div className="alert-item"><span className="alert-dot blue" /><div><b>Original widgets restored</b><p>The full website experiences now live inside the three OrkaOS folders.</p></div></div>
+                <div className="alert-item"><span className="alert-dot green" /><div><b>Folder navigation</b><p>Use sidebar tabs or clickable breadcrumbs to move up the path.</p></div></div>
+                <div className="alert-item"><span className="alert-dot purple" /><div><b>Feedback ready</b><p>The + Add placeholder is prepared for your GAS form.</p></div></div>
+              </div>
+            )}
+          </div>
+
+          <div className="menu-anchor">
+            <button className="profile-button" type="button" aria-label="Open profile menu" onClick={() => { setProfileOpen((open) => !open); setAppsOpen(false); setAlertsOpen(false); }}><AnonymousAvatar /></button>
+            {profileOpen && (
+              <div className="profile-popover popover right-popover">
+                <div className="profile-summary"><AnonymousAvatar large /><div><b>Anonymous visitor</b><small>Public OrkaOS.com preview</small></div></div>
+                <div className="menu-separator" />
+                <button type="button" onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}><Icon name="sun" size={16} /> Toggle theme</button>
+                <button type="button" onClick={() => { navigate('overview'); setProfileOpen(false); }}><Icon name="help" size={16} /> About OrkaOS</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="app-body">
+        <div className="drawer-scrim" onClick={() => setSidebarOpen(false)} />
+        <aside className="gas-sidenav">
+          <div className="gas-sidenav-top">
+            <button className="add-button" type="button" onClick={openFeedback} title={FEEDBACK_FORM_URL ? 'Open feedback form' : 'Open feedback form placeholder'}>
+              <span className="add-icon"><Icon name="plus" size={17} /></span><span className="gas-nav-label">Feedback</span>
+            </button>
+          </div>
+          <div className="gas-sidenav-scroll scroll-area">
+            {Object.entries(NAV_FOLDERS).map(([folderId, folder]) => (
+              <div className={`gas-nav-group${openFolders[folderId] ? '' : ' collapsed'}`} key={folderId}>
+                <div className="folder-row">
+                  <div className={`folder-label${activeView === folderId ? ' current' : ''}`} title={`${folder.label} folder`}>
+                    <Icon name={folder.icon} size={18} /><span className="gas-nav-label">{folder.label}</span>
                   </div>
-
-                  <p className="product-detail__summary">{selectedProduct.summary}</p>
-
-                  <dl className="product-detail__facts">
-                    <div>
-                      <dt>Roadmap stage</dt>
-                      <dd>{selectedProduct.priority}</dd>
-                    </div>
-                    <div>
-                      <dt>Built around</dt>
-                      <dd>{selectedProduct.google}</dd>
-                    </div>
-                  </dl>
-
-                  <div className="product-detail__pairs">
-                    <span>Designed to pair with</span>
-                    <div>
-                      {selectedProduct.pairs.map((pair) => <span key={pair}>{pair}</span>)}
-                    </div>
-                  </div>
-
-                  <button type="button" className="btn btn-primary" onClick={() => openForm('Join the Pod')}>
-                    Follow {selectedProduct.name}
+                  <button className="folder-toggle" type="button" onClick={() => setOpenFolders((current) => ({ ...current, [folderId]: !current[folderId] }))} title={`${openFolders[folderId] ? 'Collapse' : 'Expand'} ${folder.label}`} aria-label={`${openFolders[folderId] ? 'Collapse' : 'Expand'} ${folder.label}`} aria-expanded={openFolders[folderId]}>
+                    <Chevron open={openFolders[folderId]} />
                   </button>
-                </article>
-              </div>
-
-              {/* OrkaOS.com group filters only change which catalog cards are rendered below. */}
-              <div className="catalog-toolbar" role="group" aria-label="Filter Orka products by OrkaOS.com group">
-                {PRODUCT_GROUP_FILTERS.map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`catalog-filter${catalogFilter === value ? ' is-active' : ''}`}
-                    onClick={() => setCatalogFilter(value)}
-                    aria-pressed={catalogFilter === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {/*
-                Full catalog grid. Each card keeps its status, description, metadata,
-                and related actions together so a future card change is self-contained.
-              */}
-              <div className="module-catalog-grid" aria-live="polite">
-                {visibleCatalogProducts.map((product) => (
-                  <article className={`catalog-card${product.ai ? ' is-ai' : ''}`} key={product.id}>
-                    <div className="catalog-card-top">
-                      <span className={`catalog-status catalog-status--${product.status.toLowerCase()}`}>{product.status}</span>
-                      <span className="catalog-orbit">{product.priority}</span>
-                    </div>
-                    <h3>{product.name}</h3>
-                    <p>{product.summary}</p>
-                    <div className="catalog-pairs">
-                      <b>{product.group}</b>
-                      <span>{product.google}</span>
-                    </div>
-                    <div className="catalog-card__actions">
-                      <button type="button" className="catalog-card__action catalog-card__action--detail" onClick={() => {
-                        setSelectedModule(product.id);
-                        document.getElementById('ecosystem')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }}>
-                        View details
-                      </button>
-                      <button type="button" className="catalog-card__action catalog-card__action--follow" onClick={() => {
-                        setSelectedModule(product.id);
-                        openForm('Join the Pod');
-                      }}>
-                        Follow {product.name} →
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-          {/* Product roadmap follows the catalog so people can move directly from discovery to delivery status. */}
-          <section id="roadmap">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Product roadmap</span>
-                <h2 className="h2">From concept to live, in one view</h2>
-                <p className="lead">
-                  The public roadmap includes only apps assigned to an OrkaOS.com group. Each bar shows how far an included app has moved through the shared delivery path.
-                </p>
-              </div>
-
-              <div className="roadmap-overview" aria-label="OrkaOS roadmap summary">
-                <div className="roadmap-overview__total">
-                  <span>Public roadmap</span>
-                  <strong>{ORKA_PRODUCTS.length} apps</strong>
-                  <small>{availableProductCount} live or in production</small>
                 </div>
-                <div className="roadmap-overview__stages">
-                  {roadmapStageCounts.map((phase) => (
-                    <div className={`roadmap-stage-card roadmap-stage-card--${phase.id}`} key={phase.id}>
-                      <span>{phase.label.replace(/^\d+ · /, '')}</span>
-                      <strong>{phase.count}</strong>
-                    </div>
+                <div className="folder-tabs">
+                  {folder.tabs.map((tab) => (
+                    <button className={`gas-nav-item${activeView === folderId && activeTab === tab.id && role === 'user' ? ' active' : ''}`} type="button" key={tab.id} onClick={() => navigate(folderId, tab.id)} title={tab.label}>
+                      <Icon name={tab.icon} size={17} /><span className="gas-nav-label">{tab.label}</span>
+                      {folderId === 'apps' && tab.id === 'favorites' ? <span className="gas-nav-count">{favoriteIds.length}</span> : null}
+                      {folderId === 'apps' && tab.id === 'catalog' ? <span className="gas-nav-count">{ORKA_PRODUCTS.length}</span> : null}
+                    </button>
                   ))}
                 </div>
               </div>
-
-              <div className="roadmap-scroll" tabIndex={0} aria-label="Scrollable OrkaOS product-stage roadmap">
-                <div className="gantt roadmap-chart" role="table" aria-label="OrkaOS products progressing from concept to live">
-                  <div className="gantt-header" role="rowgroup">
-                    <div className="corner" role="columnheader">App &amp; current stage</div>
-                    {ROADMAP_PHASES.map((phase) => (
-                      <div key={phase.id} role="columnheader">{phase.label}</div>
-                    ))}
-                  </div>
-
-                  {ROADMAP_SEQUENCE.map((roadmapItem) => {
-                    const product = ORKA_PRODUCTS_BY_ID[roadmapItem.id];
-                    const status = ROADMAP_STATUS_META[product.status];
-
-                    return (
-                      <div className="gantt-row" key={product.id} role="row">
-                        <div className="gantt-tool" role="rowheader" title={product.summary}>
-                          <span className={`gantt-icon${product.ai ? ' gantt-icon--ai' : ''}`} aria-hidden="true">
-                            {product.ai ? 'AI' : <span className="official-orka-logo" aria-hidden="true" />}
-                          </span>
-                          <div>
-                            <div className="gantt-name">
-                              {product.name}
-                              <span className={`owner-pill ${status.pillClass}`}>{product.status}</span>
-                            </div>
-                            <div className="gantt-owner">{product.group} group</div>
-                          </div>
-                        </div>
-                        <div className="gantt-track" role="cell" aria-label={`${product.name} is currently in ${product.status}`}>
-                          {ROADMAP_PHASES.map((phase) => (
-                            <div key={`${product.id}-${phase.id}`} aria-hidden="true" />
-                          ))}
-                          <div
-                            className={`gantt-bar ${status.barClass}${product.ai ? ' gantt-bar--ai' : ''}`}
-                            style={{ left: `${roadmapItem.start}%`, width: `${roadmapItem.width}%` }}
-                            title={`${product.name} · ${product.status}`}
-                          >
-                            <span>{status.barLabel}</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <div className="gantt-legend">
-                    {roadmapStageCounts.map((phase) => (
-                      <span className="key" key={`legend-${phase.id}`}>
-                        <span className={`swatch ${phase.id}`} />
-                        {phase.label.replace(/^\d+ · /, '')} · {phase.count}
-                      </span>
-                    ))}
-                    <span className="roadmap-dependency-note">Bars show stage maturity, not promised dates.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Four-step onboarding path from a single module to a branded system. */}
-          <section id="how">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">How you actually start</span>
-                <h2 className="h2">You don't start with OrkaOS</h2>
-                <p className="lead">
-                  OrkaOS is the destination, not the starting point. Pick one module,
-                  solve one problem, then expand from there.
-                </p>
-              </div>
-              <div className="steps">
-                <div className="step-card">
-                  <div className="step-num">1</div>
-                  <h4>Start with OrkaVault or OrkaSOP</h4>
-                  <p>Organize company information or document one critical process first.</p>
-                </div>
-                <div className="step-card">
-                  <div className="step-num">2</div>
-                  <h4>Validate the next workflow</h4>
-                  <p>
-                    Add OrkaHR, OrkaATS, or OrkaMarketing when that workflow becomes the priority.
-                  </p>
-                </div>
-                <div className="step-card">
-                  <div className="step-num">3</div>
-                  <h4>Unlock OrkaOS</h4>
-                  <p>
-                    Once you have 3+ modules, the control center activates: dashboards,
-                    permissions, automations.
-                  </p>
-                </div>
-                <div className="step-card final">
-                  <div className="step-num">4</div>
-                  <h4>Customize &amp; white-label</h4>
-                  <p>
-                    Add your logo, colors, and brand. Your team works inside{" "}
-                    <em>your</em> platform.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Adoption-scope widget: simple team-size stages connected left to right. */}
-          <section id="adoption-scope">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Grow at your own depth</span>
-                <h2 className="h2">Start small. Grow when you need to.</h2>
-                <p className="lead">
-                  Choose the stage that fits today. Add more only when your team needs
-                  it.
-                </p>
-              </div>
-              <div
-                className="adoption-scope-widget"
-                aria-label="Three simple ways to grow with OrkaOS"
-              >
-                <article className="scope-card scope-card--lean">
-                  <div className="scope-stage">01 · Start</div>
-                  <h3>
-                    <span className="scope-number">3–5</span>
-                    <span className="scope-phrase">in a pod</span>
-                  </h3>
-                  <p>Cover the essentials: people, processes, and communication.</p>
-                  <div className="scope-modules">
-                    <span>People</span>
-                    <span>Process</span>
-                    <span>Comms</span>
-                  </div>
-                </article>
-                <div className="scope-connector" aria-hidden="true">
-                  <span />
-                </div>
-                <article className="scope-card scope-card--operate">
-                  <div className="scope-stage">02 · Build</div>
-                  <h3>
-                    <span className="scope-number">10–15</span>
-                    <span className="scope-phrase">in a team</span>
-                  </h3>
-                  <p>Add the tools that keep shared work clear and moving.</p>
-                  <div className="scope-modules">
-                    <span>Planning</span>
-                    <span>Projects</span>
-                    <span>Customers</span>
-                  </div>
-                </article>
-                <div className="scope-connector" aria-hidden="true">
-                  <span />
-                </div>
-                <article className="scope-card scope-card--ecosystem">
-                  <div className="scope-stage">03 · Scale</div>
-                  <h3>
-                    <span className="scope-number">20–30</span>
-                    <span className="scope-phrase">for an organization</span>
-                  </h3>
-                  <p>Bring in deeper tools as roles, routines, and volume grow.</p>
-                  <div className="scope-modules">
-                    <span>Training</span>
-                    <span>Automation</span>
-                    <span>Insights</span>
-                  </div>
-                </article>
-              </div>
-              <p className="scope-bottom-note">
-                Start with what helps now. Add the next layer when it earns its place.
-              </p>
-            </div>
-          </section>
-          {/* Reusable value cards. Number and copy are intentionally kept together. */}
-          <section id="value">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">The value</span>
-                <h2 className="h2">Built for simplicity, designed for scale</h2>
-                <p className="lead">
-                  Five things that make OrkaOS feel different the second you turn it on.
-                </p>
-              </div>
-              <div className="value-grid">
-                <div className="value-card">
-                  <div className="value-num">01</div>
-                  <h4>No integration required</h4>
-                  <p>
-                    Every module talks to every other module from day one — no Zapier,
-                    no engineers.
-                  </p>
-                </div>
-                <div className="value-card">
-                  <div className="value-num">02</div>
-                  <h4>Intuitive by design</h4>
-                  <p>
-                    No training. No certifications. If you've used Google Docs, you can
-                    run OrkaOS.
-                  </p>
-                </div>
-                <div className="value-card">
-                  <div className="value-num">03</div>
-                  <h4>Modular growth</h4>
-                  <p>
-                    Add tools as you need them. Pay for what's on. Turn things off when
-                    you don't.
-                  </p>
-                </div>
-                <div className="value-card">
-                  <div className="value-num">04</div>
-                  <h4>White-labeled experience</h4>
-                  <p>
-                    Your team works inside <em>your</em> platform — not someone else's
-                    brand.
-                  </p>
-                </div>
-                <div className="value-card">
-                  <div className="value-num">05</div>
-                  <h4>Built for non-technical founders</h4>
-                  <p>
-                    No setup complexity. No admin console. You're operating in 30
-                    minutes.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* White-label preview. `data-swatch` lets CSS recolor the mock instantly. */}
-          <section id="whitelabel-section" data-swatch={brandSwatch}>
-            <div className="wrap">
-              <div className="whitelabel">
-                <div className="wl-grid">
-                  <div>
-                    <span className="wl-eyebrow">Your business, your OS</span>
-                    <h2>It feels like your company</h2>
-                    <p>
-                      Add your logo. Pick your colors. Drop in your brand voice. Your
-                      team doesn't feel like they're using tools — they feel like
-                      they're inside <strong>your</strong> platform.
-                    </p>
-                    <ul className="wl-list">
-                      <li><Icon name="check" className="list-icon" />Custom logo &amp; favicon</li>
-                      <li><Icon name="check" className="list-icon" />Brand colors across every module</li>
-                      <li><Icon name="check" className="list-icon" />Custom domain (yourcompany.app)</li>
-                      <li><Icon name="check" className="list-icon" />Branded emails &amp; notifications</li>
-                      <li><Icon name="check" className="list-icon" />Your team. Your identity. Your OS.</li>
-                    </ul>
-                  </div>
-                  <div className="wl-mock" aria-hidden="true">
-                    <div className="wl-mock-bar">
-                      <div className="wl-mock-logo">PX</div>
-                      <div>
-                        <div className="wl-mock-name">PROJXON Workspace</div>
-                        <div className="wl-mock-sub">
-                          Powered by OrkaOS · projxon.app
-                        </div>
-                      </div>
-                    </div>
-                    <div className="wl-mock-grid">
-                      <div className="wl-mini">HR</div>
-                      <div className="wl-mini">CH</div>
-                      <div className="wl-mini">EV</div>
-                      <div className="wl-mini alt">SOP</div>
-                      <div className="wl-mini alt">CRM</div>
-                      <div className="wl-mini alt">FN</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* These swatches only update the preview's `data-swatch` theme. */}
-              <div className="palette-orbit" role="group" aria-label="Brand color preview">
-                {[
-                  ['ocean', 'Ocean blue'],
-                  ['ember', 'Ember orange'],
-                  ['meadow', 'Meadow green'],
-                  ['indigo', 'Indigo']
-                ].map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    data-theme={value}
-                    aria-label={`${label} preview`}
-                    aria-pressed={brandSwatch === value}
-                    onClick={() => setBrandSwatch(value)}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
-          {/* Mobile-operation preview; the phone UI is an illustrative mockup. */}
-          <section id="mobile">
-            <div className="wrap">
-              <div className="phone-section">
-                <div>
-                  <span className="eyebrow">Built for real operators</span>
-                  <h2 className="h2">Run your entire business from your phone</h2>
-                  <p className="lead">
-                    OrkaOS lets founders operate, manage, and scale from anywhere —
-                    while their team executes independently. Delegate work, standardize
-                    processes, and stop being the bottleneck.
-                  </p>
-                  <ul className="phone-list">
-                    <li>
-                      <span className="pi"><Icon name="users" /></span>Manage your team
-                    </li>
-                    <li>
-                      <span className="pi"><Icon name="clipboard" /></span>Track work
-                    </li>
-                    <li>
-                      <span className="pi"><Icon name="calendar" /></span>Run meetings
-                    </li>
-                    <li>
-                      <span className="pi"><Icon name="trending" /></span>Monitor performance
-                    </li>
-                  </ul>
-                </div>
-                <div className="phone-mock" aria-hidden="true">
-                  <div className="phone-notch" />
-                  <div className="phone-screen">
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "var(--muted)",
-                        fontWeight: 700,
-                        letterSpacing: ".1em",
-                        textTransform: "uppercase"
-                      }}
-                    >
-                      PROJXON
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 800,
-                        color: "var(--navy)",
-                        marginTop: "-6px"
-                      }}
-                    >
-                      Good morning, Phelan
-                    </div>
-                    <div className="phone-row">
-                      <div className="pr-icon">
-                        <span className="official-orka-logo" aria-hidden="true" />
-                      </div>
-                      <div>
-                        <div className="pr-text">OrkaVault</div>
-                        <div className="pr-meta">Company index updated</div>
-                      </div>
-                    </div>
-                    <div className="phone-row">
-                      <div className="pr-icon">
-                        <span className="official-orka-logo" aria-hidden="true" />
-                      </div>
-                      <div>
-                        <div className="pr-text">OrkaHR</div>
-                        <div className="pr-meta">3 reviews due</div>
-                      </div>
-                    </div>
-                    <div className="phone-row">
-                      <div className="pr-icon">
-                        <span className="official-orka-logo" aria-hidden="true" />
-                      </div>
-                      <div>
-                        <div className="pr-text">OrkaATS</div>
-                        <div className="pr-meta">4 candidates in review</div>
-                      </div>
-                    </div>
-                    <div className="phone-row phone-row--ai">
-                      <div className="pr-icon pr-icon--ai" aria-hidden="true">AI</div>
-                      <div>
-                        <div className="pr-text">OrkaAI</div>
-                        <div className="pr-meta">Summary ready</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Progressive recommendations showing how the system suggests a next tool. */}
-          <section id="smart">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">The system teaches you</span>
-                <h2 className="h2">
-                  You don't learn the system — the system teaches you
-                </h2>
-                <p className="lead">
-                  As you use one module, OrkaOS suggests the next. Capability builds
-                  progressively, never overwhelming.
-                </p>
-              </div>
-              <div className="discover">
-                <div className="di"><Icon name="route" size={22} /></div>
-                <div className="copy">
-                  <div className="sm">Suggested next tool</div>
-                  <h4>You're using OrkaVault. Add OrkaSOP next.</h4>
-                  <p>
-                    Turn the information already organized in your company index into
-                    clear, reusable operating procedures.
-                  </p>
-                </div>
-                <a className="btn btn-primary" href="#cta">
-                  Add OrkaSOP →
-                </a>
-              </div>
-              <div className="discover" style={{ marginTop: 14 }}>
-                <div className="di"><Icon name="route" size={22} /></div>
-                <div className="copy">
-                  <div className="sm">Suggested next tool</div>
-                  <h4>You documented 5 SOPs. Try OrkaProcess.</h4>
-                  <p>
-                    Connect approved procedures into a clearer end-to-end operating process
-                    for the team.
-                  </p>
-                </div>
-                <a className="btn btn-secondary" href="#cta">
-                  Follow OrkaProcess →
-                </a>
-              </div>
-            </div>
-          </section>
-          {/* Audience-fit comparison: positive and negative ICP cards. */}
-          <section id="who">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Who it's for</span>
-                <h2 className="h2">Designed for the in-between stage</h2>
-                <p className="lead">
-                  If you've tried to scale and hit a tech wall, you're in the right
-                  place. If you've already built your stack, you've outgrown us.
-                </p>
-              </div>
-              <div className="icp-grid">
-                <div className="icp-card yes">
-                  <div className="icp-tag">Built for</div>
-                  <h3 className="h3">Who it's for</h3>
-                  <ul>
-                    <li><Icon name="check" className="list-icon" />Solopreneurs scaling to a team</li>
-                    <li><Icon name="check" className="list-icon" />Micro-businesses (2–15 people)</li>
-                    <li><Icon name="check" className="list-icon" />Startups in their first 18 months</li>
-                    <li><Icon name="check" className="list-icon" />Nonprofits &amp; student orgs</li>
-                    <li><Icon name="check" className="list-icon" />Remote-first teams without an ops hire</li>
-                  </ul>
-                  <div className="icp-punch">
-                    "I tried to scale, but hit a tech wall."
-                  </div>
-                </div>
-                <div className="icp-card no">
-                  <div className="icp-tag">Not built for</div>
-                  <h3 className="h3">Who it's not for</h3>
-                  <ul>
-                    <li><Icon name="x" className="list-icon" />Large enterprises with established stacks</li>
-                    <li><Icon name="x" className="list-icon" />Teams already deep in Jira / HubSpot / Salesforce</li>
-                    <li><Icon name="x" className="list-icon" />Organizations needing heavy customization</li>
-                    <li><Icon name="x" className="list-icon" />Tech-native teams building their own platform</li>
-                  </ul>
-                  <div className="icp-punch">
-                    If you've already scaled your systems, you've likely outgrown
-                    OrkaOS.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Market-positioning widget with OrkaOS highlighted in the center. */}
-          <section id="compare">
-            <div className="wrap">
-              <div className="section-head">
-                <span className="eyebrow">Positioning</span>
-                <h2 className="h2">A new category between simple and complex</h2>
-                <p className="lead">
-                  Notion and Trello are too loose. Jira and HubSpot are too heavy.
-                  OrkaOS is structured simplicity in the middle.
-                </p>
-              </div>
-              <div className="compare">
-                <div className="compare-cell">
-                  <div className="stage">Too Simple</div>
-                  <div className="name">Google Sheets, Notion, Trello</div>
-                  <div className="desc">
-                    Flexible, but no structure. Every team rebuilds the wheel.
-                  </div>
-                </div>
-                <div className="compare-cell center">
-                  <div className="check"><Icon name="checkCircle" size={24} /></div>
-                  <div className="stage">Just Right</div>
-                  <div className="name">OrkaOS</div>
-                  <div className="desc">
-                    Modular structure that actually fits a 1–30 person team.
-                  </div>
-                </div>
-                <div className="compare-cell">
-                  <div className="stage">Too Complex</div>
-                  <div className="name">Jira, HubSpot, Workday</div>
-                  <div className="desc">
-                    Built for 200-person orgs with admins and consultants.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* Final conversion block. Buttons reuse openForm to preserve intent. */}
-          <section id="cta">
-            <div className="wrap">
-              <div className="cta">
-                <h2>Start building your business the right way</h2>
-                <p>Pick one module. Solve one problem. Let the system grow with you.</p>
-                <div className="cta-buttons">
-                  <button type="button" className="btn btn-primary" onClick={() => openForm('Join the Pod')}>
-                    Join the Pod →
-                  </button>
-                  <a href="#ecosystem" className="btn btn-secondary">
-                    Explore catalog
-                  </a>
-                  <button type="button" className="btn btn-secondary" onClick={() => openForm('Join Alpha Testing')}>
-                    Join Alpha Testing
-                  </button>
-                </div>
-              </div>
-              <div className="closing">
-                <p className="closing-line">
-                  <span>Start with what you need.</span>
-                  <span>Scale with confidence.</span>
-                  <span className="accent">Outgrow us on purpose.</span>
-                </p>
-                <p className="closing-sub">
-                  OrkaOS is temporary by design — a launchpad into HubSpot, Slack,
-                  ClickUp, QuickBooks &amp; beyond.
-                </p>
-              </div>
-            </div>
-          </section>
-          {/* Compact footer navigation; keep anchors aligned with section IDs above. */}
-          <footer className="foot">
-            <div className="foot-inner">
-              <div className="brand">
-                <span className="orka-mark" style={{ width: 22, height: 22 }}>
-                  <span className="official-orka-logo" aria-hidden="true" />
-                </span>
-                OrkaOS · by PROJXON
-              </div>
-              <div>
-                <a href="#problem">Why</a>
-                <a href="#how">How</a>
-                <a href="#ecosystem">Ecosystem</a>
-                <a href="#roadmap">Roadmap</a>
-                <a
-                  href="https://www.linkedin.com/company/orkaos/about/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  LinkedIn ↗
-                </a>
-                <a href="#cta">Get started</a>
-              </div>
-            </div>
-          </footer>
-        </main>
-
-        {/*
-          Sticky action footer: each enabled card opens the same IntakeForm with a
-          different intent. The beta card stays visible but disabled for transparency.
-        */}
-        <footer className="orka-actions orka-action-footer" aria-label="Join OrkaOS options">
-          <div className="orka-side-inner">
-            <h2 className="actions-title">Build your pod.</h2>
-
-            <div className="actions-grid">
-              <button className="form-slot primary" type="button" onClick={() => openForm('Join the Pod')}>
-                <span className="slot-icon"><Icon name="userPlus" /></span>
-                <span>
-                  <span className="slot-title">Join the Pod</span>
-                  <span className="slot-detail">Early-access previews and demos as apps become ready</span>
-                </span>
-              </button>
-              <button className="form-slot" type="button" onClick={() => openForm('Join Alpha Testing')}>
-                <span className="slot-icon"><Icon name="flask" /></span>
-                <span>
-                  <span className="slot-title">Join Alpha Testing</span>
-                  <span className="slot-detail">Test incomplete builds and shape what ships</span>
-                </span>
-              </button>
-              <button
-                className="form-slot form-slot--soon"
-                type="button"
-                aria-disabled="true"
-                aria-describedby="path-guidance-note"
-                disabled
-              >
-                <span className="slot-icon"><Icon name="badgeCheck" /></span>
-                <span>
-                  <span className="slot-title">Join Beta Testing</span>
-                  <span className="slot-detail">Near-release validation · enrollment coming soon</span>
-                </span>
-              </button>
-              <button className="form-slot" type="button" onClick={() => openForm('Partner with PROJXON')}>
-                <span className="slot-icon"><Icon name="handshake" /></span>
-                <span>
-                  <span className="slot-title">Partner with PROJXON</span>
-                  <span className="slot-detail">Explore pilots, integrations, or co-building</span>
-                </span>
-              </button>
-            </div>
-
-            <p className="actions-copy actions-copy--bottom" id="path-guidance-note">
-              Choose the path that fits how you want to explore OrkaOS.
-            </p>
+            ))}
           </div>
-        </footer>
+          <div className="gas-sidenav-foot">
+            <a className="gas-foot-button" href="https://www.linkedin.com/company/orkaos/about/" target="_blank" rel="noopener noreferrer" title="OrkaOS on LinkedIn"><Icon name="users" size={18} /><span className="gas-nav-label">LinkedIn</span></a>
+            <button className="gas-foot-button" type="button" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}><Chevron open={sidebarCollapsed} /><span className="gas-nav-label">Collapse sidebar</span></button>
+          </div>
+        </aside>
 
-        {/* IntakeForm returns null while closed and manages its own dialog accessibility. */}
-        <IntakeForm
-          isOpen={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
-          defaultIntent={formIntent}
-          onSubmitData={submitIntakeForm}
-        />
+        <main className="main-wrap">
+          <div className="guide-bar">
+            <nav className="breadcrumb" aria-label="Breadcrumb">
+              {role === 'admin' ? (
+                <b aria-current="page">Admin Console</b>
+              ) : (
+                <>
+                  <span className="breadcrumb-folder">{currentFolder.label}</span>
+                  <span className="breadcrumb-separator">/</span>
+                  <b aria-current="page">{currentTab?.label}</b>
+                </>
+              )}
+            </nav>
+            <div className="guide-actions">
+              <span className="experience-chip"><span className="connected-dot" /> OrkaApp experience</span>
+              <button className="button small secondary" type="button" onClick={() => openIntake('Join the Pod')}>Get early access</button>
+            </div>
+          </div>
+
+          <div className="main-content">
+            {role === 'admin' ? (
+              <AdminView activeView={activeView} setActiveView={(view) => navigate(view)} setFeedbackOpen={openFeedback} />
+            ) : renderUserView()}
+          </div>
+
+        </main>
       </div>
-    </>
+
+      <PersistentCtaFooter onOpenForm={openIntake} onNavigate={navigate} />
+
+      {feedbackOpen && <FeedbackPlaceholder onClose={() => setFeedbackOpen(false)} />}
+      <IntakeForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} defaultIntent={formIntent} onSubmitData={async () => {
+        window.alert('The intake form is connected to the existing website flow. Configure /api/intake in deployment to receive submissions.');
+      }} />
+    </div>
   );
 }

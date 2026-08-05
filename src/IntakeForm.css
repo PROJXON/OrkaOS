@@ -441,15 +441,15 @@ fieldset.intake-field > legend { padding: 0; }
 }
 /* AI options receive a distinct treatment while retaining the standard card markup. */
 
-.intake-check--card:has(input[value="OrkaAI"]),
+.intake-check--card:has(input[value="OrkaAira"]),
 .intake-check--card:has(input[value="OrkaPrompt"]) {
   background: var(--ai-tint);
   border-color: var(--ai-border);
 }
 
-.intake-check--card:has(input[value="OrkaAI"]:hover),
+.intake-check--card:has(input[value="OrkaAira"]:hover),
 .intake-check--card:has(input[value="OrkaPrompt"]:hover),
-.intake-check--card:has(input[value="OrkaAI"]:checked),
+.intake-check--card:has(input[value="OrkaAira"]:checked),
 .intake-check--card:has(input[value="OrkaPrompt"]:checked),
 .intake-check--card:has(input[value="Explore AI-assisted workflows"]:checked) {
   background: var(--ai-tint-strong);
@@ -457,12 +457,12 @@ fieldset.intake-field > legend { padding: 0; }
   box-shadow: var(--ai-glow);
 }
 
-.intake-check--card:has(input[value="OrkaAI"]) .intake-check__title,
+.intake-check--card:has(input[value="OrkaAira"]) .intake-check__title,
 .intake-check--card:has(input[value="OrkaPrompt"]) .intake-check__title {
   color: var(--ai-text);
 }
 
-.intake-check--card:has(input[value="OrkaAI"]) .intake-status-badge,
+.intake-check--card:has(input[value="OrkaAira"]) .intake-status-badge,
 .intake-check--card:has(input[value="OrkaPrompt"]) .intake-status-badge {
   color: var(--ai-text);
   background: var(--ai-tint-strong);
