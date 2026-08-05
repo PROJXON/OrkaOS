@@ -4289,3 +4289,267 @@ html:root[data-theme="light"] body #orka-shell #siteMain #cta .cta .cta-buttons 
 .wl-list .list-icon { color: var(--blue-2); }
 .icp-card.yes .list-icon { color: #0FA76C; }
 .icp-card.no .list-icon { color: #EA4335; }
+
+/* Full-width application shell, collapsible navigation rail, and action footer. */
+.orka-shell {
+  --rail-width: 224px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  border-left: 0;
+  border-right: 0;
+  transition: grid-template-columns var(--dur-normal) var(--ease-standard);
+}
+
+.orka-shell.is-rail-collapsed { --rail-width: 76px; }
+
+.orka-rail {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.orka-center {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  max-width: none;
+}
+
+.rail-collapse-toggle {
+  position: absolute;
+  z-index: 4;
+  top: 18px;
+  right: 12px;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-surface) 88%, var(--brand-subtle));
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease, background var(--dur-fast) ease, transform var(--dur-fast) ease;
+}
+
+.rail-collapse-toggle:hover,
+.rail-collapse-toggle:focus-visible {
+  color: var(--brand-text);
+  background: var(--bg-surface);
+  border-color: var(--brand-border);
+}
+
+.rail-collapse-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.rail-collapse-toggle svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rail-brand { padding-right: 42px; }
+
+.is-rail-collapsed .rail-collapse-toggle {
+  top: 56px;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+.is-rail-collapsed .rail-brand {
+  width: 100%;
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 58px;
+}
+
+.is-rail-collapsed .rail-brand::after { left: 10px; right: 10px; }
+
+.is-rail-collapsed .rail-brand-label,
+.is-rail-collapsed .rail-brand > span:last-child,
+.is-rail-collapsed .rail-kicker,
+.is-rail-collapsed .rail-link-label,
+.is-rail-collapsed .rail-link > span:last-child,
+.is-rail-collapsed .rail-note,
+.is-rail-collapsed .rail-social {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.is-rail-collapsed .rail-nav { align-items: center; }
+
+.is-rail-collapsed .rail-nav::before {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.is-rail-collapsed .rail-progress {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.is-rail-collapsed .rail-link {
+  width: 52px;
+  justify-content: center;
+  gap: 0;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.is-rail-collapsed .rail-link:hover { transform: translateX(0); }
+
+.orka-actions.orka-action-footer {
+  position: sticky !important;
+  z-index: calc(var(--z-sticky) + 5);
+  bottom: 0;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-height: 0 !important;
+  height: auto !important;
+  align-self: end !important;
+  overflow: visible !important;
+  border-top: 1px solid var(--border-default);
+  border-left: 0;
+  background: color-mix(in srgb, var(--bg-surface) 94%, var(--brand-subtle)) !important;
+  box-shadow: 0 -12px 32px -24px rgba(6, 24, 46, .48);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.orka-actions.orka-action-footer > .orka-side-inner {
+  position: static !important;
+  display: grid;
+  grid-template-columns: minmax(150px, .55fr) minmax(0, 2.5fr) minmax(170px, .65fr);
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 14px 24px;
+  overflow: visible !important;
+}
+
+.orka-action-footer .actions-title {
+  margin: 0;
+  font-size: clamp(18px, 1.6vw, 22px);
+}
+
+.orka-action-footer .actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.orka-action-footer .actions-grid::before { display: none; }
+
+.orka-action-footer .form-slot {
+  min-width: 0;
+  min-height: 66px;
+  padding: 10px;
+}
+
+.orka-action-footer .slot-detail { max-width: none; }
+
+.orka-action-footer .actions-copy--bottom {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+@media (max-width: 1320px) {
+  .orka-shell { --rail-width: 202px; }
+  .orka-shell.is-rail-collapsed { --rail-width: 72px; }
+  .orka-actions.orka-action-footer > .orka-side-inner {
+    grid-template-columns: 140px minmax(0, 1fr);
+  }
+  .orka-action-footer .actions-copy--bottom {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 1080px) {
+  .orka-shell {
+    grid-template-columns: 196px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+  .orka-shell.is-rail-collapsed { grid-template-columns: 72px minmax(0, 1fr); }
+  .orka-actions.orka-action-footer {
+    position: static !important;
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .orka-actions.orka-action-footer > .orka-side-inner {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+  .orka-action-footer .actions-title,
+  .orka-action-footer .actions-copy--bottom { text-align: center; }
+  .orka-action-footer .actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 800px) {
+  .orka-shell,
+  .orka-shell.is-rail-collapsed {
+    display: block;
+    width: 100%;
+  }
+  .orka-rail {
+    width: 100%;
+    max-width: none;
+  }
+  .rail-brand { order: 1; }
+  .rail-nav { order: 2; }
+  .rail-collapse-toggle {
+    position: static;
+    order: 3;
+    flex: 0 0 30px;
+    margin-left: auto;
+    margin-right: 2px;
+  }
+  .is-rail-collapsed .rail-collapse-toggle {
+    right: auto;
+    transform: none;
+  }
+  .rail-brand { padding-right: 8px; }
+  .is-rail-collapsed .rail-brand {
+    width: auto;
+    justify-content: flex-start;
+    padding: 0 8px 0 0;
+  }
+  .is-rail-collapsed .rail-brand > .rail-brand-label,
+  .is-rail-collapsed .rail-brand > span:last-child {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: nowrap !important;
+  }
+  .is-rail-collapsed .rail-nav { display: none; }
+  .orka-center { width: 100%; }
+  .orka-center > .nav { top: 53px !important; }
+  .is-rail-collapsed + .orka-center > .nav { top: 53px !important; }
+  .orka-actions.orka-action-footer > .orka-side-inner { padding: 18px 14px; }
+}
+
+@media (max-width: 520px) {
+  .orka-action-footer .actions-grid { grid-template-columns: 1fr; }
+}

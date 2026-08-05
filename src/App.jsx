@@ -4,7 +4,7 @@ import Icon from './Icon';
 import {
   ORKA_PRODUCTS,
   ORKA_PRODUCTS_BY_ID,
-  PRODUCT_SERIES_FILTERS,
+  PRODUCT_GROUP_FILTERS,
   ROADMAP_PHASES,
   ROADMAP_SEQUENCE,
   ROADMAP_STATUS_META
@@ -100,6 +100,7 @@ export default function App() {
   const [catalogFilter, setCatalogFilter] = useState('all');
   const [brandSwatch, setBrandSwatch] = useState('ocean');
   const [activeRailSection, setActiveRailSection] = useState('top');
+  const [isRailCollapsed, setIsRailCollapsed] = useState(false);
 
   async function submitIntakeForm(payload) {
     const response = await fetch('/api/intake', {
@@ -241,7 +242,7 @@ export default function App() {
   const selectedProduct = ORKA_PRODUCTS.find((product) => product.id === selectedModule) || ORKA_PRODUCTS[0];
   const featuredProducts = ORKA_PRODUCTS.filter((product) => product.featured);
   const visibleCatalogProducts = ORKA_PRODUCTS.filter((product) =>
-    catalogFilter === 'all' || product.seriesId === catalogFilter
+    catalogFilter === 'all' || product.groupId === catalogFilter
   );
   const roadmapStageCounts = ROADMAP_PHASES.map((phase) => ({
     ...phase,
@@ -254,25 +255,39 @@ export default function App() {
   return (
     <>
       {/*
-        Three-column page shell. `.orka-shell` controls the grid, while each side
-        panel owns a sticky `.orka-side-inner` so its content follows the reader.
+        Full-width page shell. `.orka-shell` controls the collapsible navigation
+        rail, main content column, and bottom action footer.
       */}
-      <div className="orka-shell" id="orka-shell">
+      <div className={`orka-shell${isRailCollapsed ? ' is-rail-collapsed' : ''}`} id="orka-shell">
         {/*
           Left progress rail: section links mirror `RAIL_SECTIONS`. When adding a
           tracked page section, update both the ID list and the matching link here.
         */}
         <aside className="orka-rail" aria-label="Page progress">
           <div className="orka-side-inner">
+            <button
+              className="rail-collapse-toggle"
+              type="button"
+              onClick={() => setIsRailCollapsed((isCollapsed) => !isCollapsed)}
+              aria-expanded={!isRailCollapsed}
+              aria-controls="rail-navigation"
+              aria-label={isRailCollapsed ? 'Expand page navigation' : 'Collapse page navigation'}
+              title={isRailCollapsed ? 'Expand navigation' : 'Collapse navigation'}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d={isRailCollapsed ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'} />
+              </svg>
+            </button>
+
             <a className="rail-brand" href="#top">
               <span className="rail-brand-mark">
                 <span className="official-orka-logo" aria-hidden="true" />
               </span>
-              <span>OrkaOS</span>
+              <span className="rail-brand-label">OrkaOS</span>
             </a>
             <p className="rail-kicker">Explore the current</p>
 
-            <nav className="rail-nav" aria-label="Page sections">
+            <nav className="rail-nav" id="rail-navigation" aria-label="Page sections">
               <span className="rail-progress" style={{ height: `${Math.max(0, RAIL_SECTIONS.indexOf(activeRailSection)) * 50}px` }} />
 
               <a {...railLinkProps('top')} href="#top">
@@ -281,7 +296,7 @@ export default function App() {
                     <span className="official-orka-logo" aria-hidden="true" />
                   </span>
                 </span>
-                <span>Start</span>
+                <span className="rail-link-label">Start</span>
               </a>
 
               <a {...railLinkProps('problem')} href="#problem">
@@ -291,7 +306,7 @@ export default function App() {
                     <circle className="g-blue" cx="34" cy="18" r="2.2" />
                   </svg>
                 </span>
-                <span>Why OrkaOS</span>
+                <span className="rail-link-label">Why OrkaOS</span>
               </a>
 
               <a {...railLinkProps('progression')} href="#progression">
@@ -302,7 +317,7 @@ export default function App() {
                     <path className="g-stroke" d="M7 37c11-8 21-8 33 0s14 8 17 3" />
                   </svg>
                 </span>
-                <span>Build the Pod</span>
+                <span className="rail-link-label">Build the Pod</span>
               </a>
 
               <a {...railLinkProps('ecosystem')} href="#ecosystem">
@@ -313,7 +328,7 @@ export default function App() {
                     <circle className="g-blue" cx="32" cy="32" r="5" />
                   </svg>
                 </span>
-                <span>Explore the Stack</span>
+                <span className="rail-link-label">Explore the Stack</span>
               </a>
 
               <a {...railLinkProps('value')} href="#value">
@@ -324,7 +339,7 @@ export default function App() {
                     <path className="g-stroke" d="M23 17h17M23 26h13M23 35h15" />
                   </svg>
                 </span>
-                <span>Find the Fit</span>
+                <span className="rail-link-label">Find the Fit</span>
               </a>
 
               <a {...railLinkProps('whitelabel-section')} href="#whitelabel-section">
@@ -336,7 +351,7 @@ export default function App() {
                     <circle className="g-blue" cx="48" cy="17" r="3" />
                   </svg>
                 </span>
-                <span>Make It Yours</span>
+                <span className="rail-link-label">Make It Yours</span>
               </a>
 
               <a {...railLinkProps('cta')} href="#cta">
@@ -347,7 +362,7 @@ export default function App() {
                     <circle className="g-blue" cx="8" cy="38" r="3" />
                   </svg>
                 </span>
-                <span>Join the Pod</span>
+                <span className="rail-link-label">Join the Pod</span>
               </a>
             </nav>
 
@@ -600,7 +615,7 @@ export default function App() {
                       <div className="side-label">Recent</div>
                       <a className="nav-item small">OrkaVault</a>
                       <a className="nav-item small">OrkaSOP</a>
-                      <a className="nav-item small">OrkaSkills</a>
+                      <a className="nav-item small">OrkaTask</a>
                     </div>
                   </aside>
                   <main className="os-main">
@@ -628,8 +643,8 @@ export default function App() {
                     <div className="welcome">
                       <h3>Good morning, Phelan <Icon name="sun" size={18} /></h3>
                       <p>
-                        3 apps installed at PROJXON · 24 more tracked across the current
-                        roadmap
+                        3 apps installed at PROJXON · 18 more included on the current
+                        website roadmap
                       </p>
                     </div>
                     <div className="app-grid">
@@ -649,7 +664,7 @@ export default function App() {
                         <div className="tile-icon">
                           <span className="official-orka-logo" aria-hidden="true" />
                         </div>
-                        <div className="tile-name">OrkaSkills</div>
+                        <div className="tile-name">OrkaTask</div>
                       </div>
                       <div className="app-tile">
                         <div className="tile-icon">
@@ -667,11 +682,11 @@ export default function App() {
                         <div className="tile-icon">
                           <span className="official-orka-logo" aria-hidden="true" />
                         </div>
-                        <div className="tile-name">OrkaAssets</div>
+                        <div className="tile-name">OrkaMarketing</div>
                       </div>
                       <div className="app-tile app-tile--ai">
                         <div className="tile-icon tile-icon--ai" aria-hidden="true">AI</div>
-                        <div className="tile-name">OrkaAutomation</div>
+                        <div className="tile-name">OrkaProcess</div>
                       </div>
                       <div className="app-tile app-tile--ai">
                         <div className="tile-icon tile-icon--ai" aria-hidden="true">AI</div>
@@ -687,7 +702,7 @@ export default function App() {
                   <div className="dock-icon" title="OrkaSOP">
                     <span className="official-orka-logo" aria-hidden="true" />
                   </div>
-                  <div className="dock-icon" title="OrkaSkills">
+                  <div className="dock-icon" title="OrkaTask">
                     <span className="official-orka-logo" aria-hidden="true" />
                   </div>
                   <div className="dock-divider" />
@@ -858,7 +873,7 @@ export default function App() {
                 <span className="eyebrow">Product catalog</span>
                 <h2 className="h2">Explore what OrkaOS is offering and building</h2>
                 <p className="lead">
-                  Browse the full Orka lineup, filter by app series, and follow the apps
+                  Browse the roadmap-approved Orka lineup, filter by OrkaOS.com group, and follow the apps
                   that fit your team best.
                 </p>
               </div>
@@ -894,7 +909,7 @@ export default function App() {
                       {selectedProduct.ai ? 'AI' : <span className="official-orka-logo" />}
                     </span>
                     <div>
-                      <p className="product-detail__series">{selectedProduct.series} Series</p>
+                      <p className="product-detail__series">{selectedProduct.group} group</p>
                       <h3>{selectedProduct.name}</h3>
                     </div>
                     <span className={`product-status product-status--${selectedProduct.status.toLowerCase()}`}>
@@ -928,9 +943,9 @@ export default function App() {
                 </article>
               </div>
 
-              {/* App-series filters only change which catalog cards are rendered below. */}
-              <div className="catalog-toolbar" role="group" aria-label="Filter Orka products by app series">
-                {PRODUCT_SERIES_FILTERS.map(([value, label]) => (
+              {/* OrkaOS.com group filters only change which catalog cards are rendered below. */}
+              <div className="catalog-toolbar" role="group" aria-label="Filter Orka products by OrkaOS.com group">
+                {PRODUCT_GROUP_FILTERS.map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
@@ -957,7 +972,7 @@ export default function App() {
                     <h3>{product.name}</h3>
                     <p>{product.summary}</p>
                     <div className="catalog-pairs">
-                      <b>{product.series}</b>
+                      <b>{product.group}</b>
                       <span>{product.google}</span>
                     </div>
                     <div className="catalog-card__actions">
@@ -986,7 +1001,7 @@ export default function App() {
                 <span className="eyebrow">Product roadmap</span>
                 <h2 className="h2">From concept to live, in one view</h2>
                 <p className="lead">
-                  The public OrkaOS roadmap uses the current product-stage snapshot. Each bar shows how far an app has moved through the shared delivery path.
+                  The public roadmap includes only apps assigned to an OrkaOS.com group. Each bar shows how far an included app has moved through the shared delivery path.
                 </p>
               </div>
 
@@ -1030,7 +1045,7 @@ export default function App() {
                               {product.name}
                               <span className={`owner-pill ${status.pillClass}`}>{product.status}</span>
                             </div>
-                            <div className="gantt-owner">{product.series}</div>
+                            <div className="gantt-owner">{product.group} group</div>
                           </div>
                         </div>
                         <div className="gantt-track" role="cell" aria-label={`${product.name} is currently in ${product.status}`}>
@@ -1083,7 +1098,7 @@ export default function App() {
                   <div className="step-num">2</div>
                   <h4>Validate the next workflow</h4>
                   <p>
-                    Add OrkaHR, OrkaATS, or OrkaAssets when that workflow becomes the priority.
+                    Add OrkaHR, OrkaATS, or OrkaMarketing when that workflow becomes the priority.
                   </p>
                 </div>
                 <div className="step-card">
@@ -1408,14 +1423,14 @@ export default function App() {
                 <div className="di"><Icon name="route" size={22} /></div>
                 <div className="copy">
                   <div className="sm">Suggested next tool</div>
-                  <h4>You documented 5 SOPs. Try OrkaSkills.</h4>
+                  <h4>You documented 5 SOPs. Try OrkaProcess.</h4>
                   <p>
-                    Turn approved procedures into learning paths, curriculum, and
-                    onboarding material for the team.
+                    Connect approved procedures into a clearer end-to-end operating process
+                    for the team.
                   </p>
                 </div>
                 <a className="btn btn-secondary" href="#cta">
-                  Follow OrkaSkills →
+                  Follow OrkaProcess →
                 </a>
               </div>
             </div>
@@ -1559,10 +1574,10 @@ export default function App() {
         </main>
 
         {/*
-          Right action rail: each enabled card opens the same IntakeForm with a
+          Sticky action footer: each enabled card opens the same IntakeForm with a
           different intent. The beta card stays visible but disabled for transparency.
         */}
-        <aside className="orka-actions" aria-label="Join OrkaOS options">
+        <footer className="orka-actions orka-action-footer" aria-label="Join OrkaOS options">
           <div className="orka-side-inner">
             <h2 className="actions-title">Build your pod.</h2>
 
@@ -1607,7 +1622,7 @@ export default function App() {
               Choose the path that fits how you want to explore OrkaOS.
             </p>
           </div>
-        </aside>
+        </footer>
 
         {/* IntakeForm returns null while closed and manages its own dialog accessibility. */}
         <IntakeForm

@@ -2,7 +2,7 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import './IntakeForm.css';
 import { getTimeZoneGroups, US_TIME_ZONES } from './timezones.js';
-import { ORKA_APP_SERIES, ORKA_PRODUCTS } from './products.js';
+import { ORKA_APP_GROUPS, ORKA_PRODUCTS } from './products.js';
 
 /**
  * Intake dialog developer map
@@ -52,15 +52,15 @@ const INTENT_COPY = {
   }
 };
 
-// Product choices come from the same public catalog and app-series taxonomy
+// Product choices come from the same roadmap-approved catalog and OrkaOS.com group taxonomy
 // used by the landing page. Roadmap stage remains visible as a badge, but apps
-// are grouped by what they help a person or team accomplish.
-const APP_INTEREST_SERIES = ORKA_APP_SERIES
-  .map((series) => ({
-    ...series,
-    apps: ORKA_PRODUCTS.filter((product) => product.seriesId === series.id)
+// are grouped by the value assigned in the roadmap OrkaOS.com column.
+const APP_INTEREST_GROUPS = ORKA_APP_GROUPS
+  .map((group) => ({
+    ...group,
+    apps: ORKA_PRODUCTS.filter((product) => product.groupId === group.id)
   }))
-  .filter((series) => series.apps.length > 0);
+  .filter((group) => group.apps.length > 0);
 
 // Remaining option arrays are form copy only; submitted values are the visible
 // strings, so changing wording here also changes the payload value.
@@ -1158,13 +1158,13 @@ export default function IntakeForm({
               </div>
             </section>
 
-            {/* Step 04: product interests organized by app series. */}
+            {/* Step 04: product interests organized by OrkaOS.com group. */}
             <section className="intake-form__section" aria-labelledby={`${id}-interests-heading`}>
               <div className="intake-form__section-head">
                 <span className="intake-form__step">04</span>
                 <div>
                   <h3 id={`${id}-interests-heading`}>Orka app interests</h3>
-                  <p>Browse by app series, then choose the specific products you want to follow, test, or use.</p>
+                  <p>Browse by OrkaOS.com group, then choose the specific products you want to follow, test, or use.</p>
                 </div>
               </div>
 
@@ -1172,23 +1172,23 @@ export default function IntakeForm({
                 <legend className="intake-field__label">
                   Which Orka apps interest you? <span className="intake-field__required">*</span>
                 </legend>
-                <p className="intake-field__hint">Roadmap stage is shown on each app; select at least one app from any series.</p>
+                <p className="intake-field__hint">Roadmap stage is shown on each app; select at least one app from any group.</p>
 
-                <div className="intake-series-list">
-                  {APP_INTEREST_SERIES.map((series) => (
-                    <div className="intake-interest-group" key={series.id}>
+                <div className="intake-group-list">
+                  {APP_INTEREST_GROUPS.map((group) => (
+                    <div className="intake-interest-group" key={group.id}>
                       <div className="intake-interest-group__head">
                         <div>
-                          <h4>{series.label}</h4>
-                          <p>{series.description}</p>
+                          <h4>{group.label}</h4>
+                          <p>{group.description}</p>
                         </div>
-                        <span>{series.apps.length} {series.apps.length === 1 ? 'app' : 'apps'}</span>
+                        <span>{group.apps.length} {group.apps.length === 1 ? 'app' : 'apps'}</span>
                       </div>
                       <div className="intake-checkbox-grid">
-                        {series.apps.map((app) => (
+                        {group.apps.map((app) => (
                           <CheckOption
                             key={app.id}
-                            id={`${id}-interest-${series.id}-${app.id}`}
+                            id={`${id}-interest-${group.id}-${app.id}`}
                             value={app.name}
                             description={app.summary}
                             badge={app.status}

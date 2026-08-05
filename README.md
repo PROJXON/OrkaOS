@@ -6,7 +6,7 @@ OrkaOS helps teams organize, collaborate, and scale by adding a guided operating
 
 ## Overview
 
-This repository contains the OrkaOS marketing and product ecosystem website. It introduces the OrkaOS platform, presents its growing catalog of applications, explains the product roadmap, and provides intake paths for early access, alpha testing, and partnership opportunities.
+This repository contains the OrkaOS marketing and product ecosystem website. It introduces the OrkaOS platform, presents the roadmap-approved catalog of applications grouped by the OrkaOS.com assignments, explains the product roadmap, and provides intake paths for early access, alpha testing, and partnership opportunities.
 
 The site is built as a responsive single-page React application using Vite.
 
@@ -16,7 +16,7 @@ The site is built as a responsive single-page React application using Vite.
 * Light and dark themes
 * Saved theme preference using `localStorage`
 * Interactive OrkaOS product catalog
-* Product filtering by category
+* Product filtering by OrkaOS.com group (IT, OPS, HR, Business, and Marketing)
 * Product roadmap and development status views
 * White-label branding preview
 * Mobile-responsive navigation and content
