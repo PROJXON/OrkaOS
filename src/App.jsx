@@ -812,9 +812,7 @@ export default function App() {
             {alertsOpen && (
               <div className="alerts-popover popover right-popover">
                 <div className="popover-title"><b>What’s new</b><small>OrkaOS.com preview</small></div>
-                <div className="alert-item"><span className="alert-dot blue" /><div><b>Original widgets restored</b><p>The full website experiences now live inside the three OrkaOS folders.</p></div></div>
-                <div className="alert-item"><span className="alert-dot green" /><div><b>Folder navigation</b><p>Use sidebar tabs or clickable breadcrumbs to move up the path.</p></div></div>
-                <div className="alert-item"><span className="alert-dot purple" /><div><b>Feedback ready</b><p>The + Add placeholder is prepared for your GAS form.</p></div></div>
+                <div className="alert-item"><span className="alert-dot green" /><div><b>OrkaVault is live</b><p>Secure access management and credential sharing for small teams is now available.</p></div></div>
               </div>
             )}
           </div>

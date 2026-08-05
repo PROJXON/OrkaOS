@@ -1119,52 +1119,6 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
     </div>
   </div>
 </section>
-        <footer className="orka-actions orka-action-footer" aria-label="Join OrkaOS options">
-<div className="orka-side-inner">
-  <h2 className="actions-title">Build your pod.</h2>
-
-  <div className="actions-grid">
-    <button className="form-slot primary" type="button" onClick={() => openForm('Join the Pod')}>
-      <span className="slot-icon"><Icon name="userPlus" /></span>
-      <span>
-        <span className="slot-title">Join the Pod</span>
-        <span className="slot-detail">Early-access previews and demos as apps become ready</span>
-      </span>
-    </button>
-    <button className="form-slot" type="button" onClick={() => openForm('Join Alpha Testing')}>
-      <span className="slot-icon"><Icon name="flask" /></span>
-      <span>
-        <span className="slot-title">Join Alpha Testing</span>
-        <span className="slot-detail">Test incomplete builds and shape what ships</span>
-      </span>
-    </button>
-    <button
-      className="form-slot form-slot--soon"
-      type="button"
-      aria-disabled="true"
-      aria-describedby="path-guidance-note"
-      disabled
-    >
-      <span className="slot-icon"><Icon name="badgeCheck" /></span>
-      <span>
-        <span className="slot-title">Join Beta Testing</span>
-        <span className="slot-detail">Near-release validation · enrollment coming soon</span>
-      </span>
-    </button>
-    <button className="form-slot" type="button" onClick={() => openForm('Partner with PROJXON')}>
-      <span className="slot-icon"><Icon name="handshake" /></span>
-      <span>
-        <span className="slot-title">Partner with PROJXON</span>
-        <span className="slot-detail">Explore pilots, integrations, or co-building</span>
-      </span>
-    </button>
-  </div>
-
-  <p className="actions-copy actions-copy--bottom" id="path-guidance-note">
-    Choose the path that fits how you want to explore OrkaOS.
-  </p>
-</div>
-        </footer>
       </>}
     </div>
   );
