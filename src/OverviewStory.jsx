@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from './Icon';
-import { ORKA_PRODUCTS_BY_ID } from './products.js';
 import orkaLogoLight from './assets/brand/orka-logo-on-light.png';
+import { InteractiveAppShell, MicroStackExplorer, PodFormationVisual } from './OverviewInteractions';
 import './OverviewStory.css';
 
 const STORY_CHAPTERS = [
@@ -11,10 +11,6 @@ const STORY_CHAPTERS = [
   { id: 'experience', number: '04', label: 'The Orka Way', short: 'Pod, flow & feel' },
   { id: 'fit', number: '05', label: 'Is It for You?', short: 'Find your starting point' }
 ];
-
-const APP_PATH = ['orka-vault', 'orka-sop', 'orka-task', 'orka-hr', 'orka-flow', 'orka-project']
-  .map((id) => ORKA_PRODUCTS_BY_ID[id])
-  .filter(Boolean);
 
 function StoryProgress({ active, onNavigate }) {
   return (
@@ -78,52 +74,20 @@ function NextChapter({ current, onNavigate, onOpenApps }) {
   );
 }
 
-function AppShellPreview() {
-  return (
-    <div className="story-app-shell" aria-label="Example of the familiar three-pane OrkaApp layout">
-      <div className="story-app-topbar">
-        <div className="story-app-brand"><img src={orkaLogoLight} alt="" /><b><span>Orka</span>SOP</b></div>
-        <div className="story-app-search"><Icon name="search" size={13} /> Search procedures</div>
-        <div className="story-app-avatar">PX</div>
-      </div>
-      <div className="story-app-panes">
-        <aside>
-          <small>CATALOG</small>
-          <button className="active" type="button"><Icon name="grid" size={14} /> All SOPs <b>24</b></button>
-          <button type="button"><Icon name="star" size={14} /> Favorites <b>6</b></button>
-          <button type="button"><Icon name="users" size={14} /> My team <b>8</b></button>
-        </aside>
-        <main>
-          <small>WORKSPACE</small>
-          <div className="story-doc-title"><span>New Employee Onboarding</span><em>On track</em></div>
-          <div className="story-doc-line wide" />
-          <div className="story-doc-line" />
-          <div className="story-doc-steps">
-            <span><b>1</b> Welcome & accounts</span>
-            <span><b>2</b> Team introductions</span>
-            <span><b>3</b> First-week check-in</span>
-          </div>
-        </main>
-        <section>
-          <small>INSIGHTS</small>
-          <div className="story-insight"><b>92%</b><span>completion</span></div>
-          <div className="story-insight"><b>18m</b><span>average run</span></div>
-          <div className="story-mini-chart"><i /><i /><i /><i /><i /></div>
-        </section>
-      </div>
-      <div className="story-app-caption">Catalog on the left. Work in the center. Useful signals on the right.</div>
-    </div>
-  );
-}
-
-function StartChapter({ onOpenForm, onOpenApps, onNavigate }) {
+function StartChapter({ onOpenApps, onNavigate }) {
   return (
     <>
-      <section className="story-hero story-ocean-card">
+      <section className="story-hero story-ocean-card story-hero-with-art">
         <div className="story-hero-copy">
+          <span className="story-chapter-label light">A tech-stack starter kit for a synchronized pod</span>
           <h1>A whale of a project should not require a whale of a tech stack.</h1>
           <p>OrkaOS keeps Google Workspace at the center and adds only the focused apps your team needs.</p>
+          <div className="story-hero-actions">
+            <button className="button story-button-light" type="button" onClick={() => onNavigate('overview', 'how')}>Follow the current</button>
+            <button className="button story-button-ghost" type="button" onClick={onOpenApps}>Explore Orka Apps</button>
+          </div>
         </div>
+        <PodFormationVisual />
       </section>
 
       <section className="story-definition content-surface">
@@ -294,62 +258,13 @@ function HowChapter({ onNavigate, onOpenApps }) {
         </div>
       </section>
 
-      <section className="ecosystem-map content-surface">
+      <section className="ecosystem-map content-surface ecosystem-map-interactive">
         <div className="story-section-heading left compact">
           <span className="eyebrow">A choose-your-own-adventure micro-stack</span>
           <h2>There is no single front door.</h2>
-          <p>Enter through the problem you have today. The ecosystem guides you toward the next useful step — and eventually the hub.</p>
+          <p>Enter through the problem you have today. Google Workspace stays underneath it, while the app series changes around the work your pod actually needs.</p>
         </div>
-        <div className="ecosystem-orbit" aria-label="OrkaApps surrounding the OrkaOS hub">
-          <div className="ecosystem-watermark">GOOGLE WORKSPACE</div>
-          <div className="ecosystem-ring ring-a" />
-          <div className="ecosystem-ring ring-b" />
-          <div className="ecosystem-core"><img src={orkaLogoLight} alt="" /><b>OrkaOS</b><small>Your hub</small></div>
-          {APP_PATH.map((product, index) => (
-            <div className={`ecosystem-node node-${index + 1}`} key={product.id}>
-              <span>{product.name.replace('Orka', '') || 'OS'}</span>
-              <small>{product.group}</small>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="adoption-story">
-        <div className="story-section-heading">
-          <span className="eyebrow">The adoption path</span>
-          <h2>One useful win at a time.</h2>
-          <p>The system is intentionally progressive. You learn it by solving real work, not by sitting through an implementation.</p>
-        </div>
-        <div className="adoption-steps">
-          {[
-            ['01', 'Choose the stuck moment', '“Our credentials are scattered.” “Nobody follows the SOP.” “Tasks disappear after meetings.”'],
-            ['02', 'Adopt one focused app', 'Start with OrkaVault, OrkaSOP, OrkaTask, OrkaHR, or the app that best matches the problem.'],
-            ['03', 'Follow smart recommendations', 'A useful next app appears when the current workflow is working — not as a giant suite you must configure.'],
-            ['04', 'Unlock the hub around three apps', 'The OrkaOS layer starts tying identity, navigation, activity, and the growing app pod together.'],
-            ['05', 'Outgrow it when the time is right', 'Move into deeper specialist software when your scale truly requires it. OrkaOS is a launchpad, not a cage.']
-          ].map(([number, title, body], index) => (
-            <article key={number}>
-              <span className="adoption-number">{number}</span>
-              <div><h3>{title}</h3><p>{body}</p></div>
-              {index < 4 && <i aria-hidden="true">↓</i>}
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="app-series-demo content-surface">
-        <div>
-          <span className="eyebrow">Example app series</span>
-          <h2>Organize the knowledge. Turn it into a process. Put the process to work.</h2>
-          <p>A series is a recommended path, not a mandatory bundle.</p>
-        </div>
-        <div className="app-series-path">
-          <article><span>1</span><b>OrkaVault</b><small>Find the source of truth</small></article>
-          <i>→</i>
-          <article><span>2</span><b>OrkaSOP</b><small>Document the right way</small></article>
-          <i>→</i>
-          <article><span>3</span><b>OrkaFlow</b><small>Run the handoff</small></article>
-        </div>
+        <MicroStackExplorer onOpenApps={onOpenApps} />
       </section>
 
       <NextChapter current="how" onNavigate={onNavigate} onOpenApps={onOpenApps} />
@@ -367,7 +282,7 @@ function ExperienceChapter({ onNavigate, onOpenApps }) {
           title="The best tool disappears into the work."
           body="OrkaOS borrows the calm familiarity of Google Workspace and the deliberate polish of macOS. The goal is not to make your team feel impressed by software. The goal is to make the next step feel obvious."
         />
-        <AppShellPreview />
+        <InteractiveAppShell />
       </section>
 
       <section className="mental-models">
@@ -545,7 +460,7 @@ function FitChapter({ onOpenForm, onOpenApps, onNavigate }) {
 
 export default function OverviewStory({ chapter = 'start', onOpenForm, onOpenApps, onNavigate }) {
   const content = {
-    start: <StartChapter onOpenForm={onOpenForm} onOpenApps={onOpenApps} onNavigate={onNavigate} />,
+    start: <StartChapter onOpenApps={onOpenApps} onNavigate={onNavigate} />,
     why: <WhyChapter onNavigate={onNavigate} onOpenApps={onOpenApps} />,
     how: <HowChapter onNavigate={onNavigate} onOpenApps={onOpenApps} />,
     experience: <ExperienceChapter onNavigate={onNavigate} onOpenApps={onOpenApps} />,
