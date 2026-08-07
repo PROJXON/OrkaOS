@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from './Icon';
 import orkaLogoLight from './assets/brand/orka-logo-on-light.png';
-import { InteractiveAppShell, MicroStackExplorer, PodFormationVisual } from './OverviewInteractions';
+import { FitNavigator, FragmentedToFlow, InteractiveAppShell, MentalModelInstrument, MicroStackExplorer, OriginCurrent, PodFormationVisual } from './OverviewInteractions';
 import './OverviewStory.css';
 
 const STORY_CHAPTERS = [
@@ -175,49 +175,17 @@ function WhyChapter({ onNavigate, onOpenApps }) {
         </div>
       </section>
 
-      <section className="story-origin-section">
+      <section className="story-origin-section story-origin-current-section">
         <div className="story-section-heading left">
           <span className="eyebrow">How the pod formed</span>
-          <h2>Four discoveries turned a workflow into an operating system.</h2>
+          <h2>Four discoveries moved through one current.</h2>
+          <p>The origin story is not a product roadmap. It is a sequence of real problems becoming increasingly connected.</p>
         </div>
-        <div className="origin-timeline">
-          {[
-            ['01', 'Coaching revealed the pattern', 'Students, founders, and remote teammates were using capable tools in disconnected ways. The problem was not talent. It was coordination.'],
-            ['02', 'A personal workflow became the model', 'Deep-work sessions, better meetings, clear tasks, and follow-through showed that a team could be guided into flow.'],
-            ['03', 'The pod gave the idea a language', 'A synchronized micro-team of 3–5 could divide whale-sized work, communicate clearly, and keep momentum moving.'],
-            ['04', 'The apps started building themselves', 'An HR tool, a chat tool, an AI concept, task and project ideas — each solved a real problem, and the micro-stack emerged.']
-          ].map(([number, title, body]) => (
-            <article key={number}>
-              <div className="origin-marker"><span>{number}</span></div>
-              <div><h3>{title}</h3><p>{body}</p></div>
-            </article>
-          ))}
-        </div>
+        <OriginCurrent />
       </section>
 
-      <section className="story-friction content-surface">
-        <div className="story-section-heading left compact">
-          <span className="eyebrow">The enemy is friction</span>
-          <h2>Small teams get trapped between chaos and bloat.</h2>
-          <p>They outgrow ad-hoc workarounds before they are ready for enterprise software.</p>
-        </div>
-        <div className="friction-grid">
-          <article>
-            <span><Icon name="unlink" size={22} /></span>
-            <h3>Scattered work</h3>
-            <p>Files, chats, forms, and decisions live in different places. Context leaks at every handoff.</p>
-          </article>
-          <article>
-            <span><Icon name="help" size={22} /></span>
-            <h3>Tools that need a translator</h3>
-            <p>The team spends time learning the platform, configuring the platform, and explaining the platform.</p>
-          </article>
-          <article>
-            <span><Icon name="building" size={22} /></span>
-            <h3>40% used, 100% paid</h3>
-            <p>Huge suites arrive with features, certifications, and admin work a small team never asked for.</p>
-          </article>
-        </div>
+      <section className="story-friction-transform">
+        <FragmentedToFlow />
       </section>
 
       <section className="hammer-story story-ocean-card">
@@ -285,33 +253,8 @@ function ExperienceChapter({ onNavigate, onOpenApps }) {
         <InteractiveAppShell />
       </section>
 
-      <section className="mental-models">
-        <div className="story-section-heading">
-          <span className="eyebrow">Four ideas behind every app and pixel</span>
-          <h2>Pod. Flow. Slipstream. Ecosystem.</h2>
-        </div>
-        <div className="mental-model-grid">
-          <article>
-            <span className="model-number">01</span><span className="model-icon"><Icon name="users" size={21} /></span>
-            <h3>The Pod</h3><b>In sync · in formation · in flow</b>
-            <p>Collaboration is the point. Clear handoffs and shared accountability let a small team move as one.</p>
-          </article>
-          <article>
-            <span className="model-number">02</span><span className="model-icon"><Icon name="route" size={21} /></span>
-            <h3>The Flow</h3><b>Intuitive · natural · familiar</b>
-            <p>The interface should match the team’s instincts, so momentum keeps moving from meeting to meeting.</p>
-          </article>
-          <article>
-            <span className="model-number">03</span><span className="model-icon"><Icon name="trending" size={21} /></span>
-            <h3>The Slipstream</h3><b>We recede · your team accelerates</b>
-            <p>The system works beneath the surface. Your people, your brand, and your outcomes remain the focus.</p>
-          </article>
-          <article>
-            <span className="model-number">04</span><span className="model-icon"><Icon name="layers" size={21} /></span>
-            <h3>The Ecosystem</h3><b>Start with one · navigate to the hub</b>
-            <p>Every app has one clear job and points toward the next useful solution without forcing the full suite.</p>
-          </article>
-        </div>
+      <section className="mental-models mental-models-instrument">
+        <MentalModelInstrument />
       </section>
 
       <section className="monday-flow content-surface">
@@ -370,28 +313,8 @@ function FitChapter({ onOpenForm, onOpenApps, onNavigate }) {
         </div>
       </section>
 
-      <section className="audience-stages">
-        <div className="story-section-heading">
-          <span className="eyebrow">Who we build for</span>
-          <h2>From the first pod to a team on the cusp of scale.</h2>
-        </div>
-        <div className="audience-stage-grid">
-          <article className="primary">
-            <span>Primary · 01</span><h3>Small teams on the cusp of scaling</h3>
-            <p>Collaboration is beginning to crack. The team wants structure and speed without enterprise bloat.</p>
-            <b>Usually 5–50 people</b>
-          </article>
-          <article>
-            <span>Secondary · 02</span><h3>Micro-teams getting established</h3>
-            <p>A founding pod of 3–5 is building its first real workflow and putting calm structure around the chaos.</p>
-            <b>Usually 3–5 people</b>
-          </article>
-          <article>
-            <span>Third · 03</span><h3>Solopreneurs & university teams</h3>
-            <p>Solo founders and student groups are learning how to collaborate — and can carry that operating rhythm forward.</p>
-            <b>Usually 1–5 people</b>
-          </article>
-        </div>
+      <section className="audience-stages audience-current-section">
+        <FitNavigator />
       </section>
 
       <section className="fit-compare">

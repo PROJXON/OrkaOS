@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="r" cx="0" cy="0" r="1" gradientTransform="translate(256 256) rotate(90) scale(236)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A3B73" stop-opacity=".16"/><stop offset="1" stop-color="#061421" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="256" cy="256" r="234" fill="url(#r)" stroke="#86BEF2" stroke-opacity=".22" stroke-width="2"/>
+  <circle cx="256" cy="256" r="190" stroke="#5AA8EE" stroke-opacity=".18"/>
+  <circle cx="256" cy="256" r="142" stroke="#86BEF2" stroke-opacity=".12" stroke-dasharray="3 8"/>
+  <path d="M256 22v26M256 464v26M22 256h26M464 256h26" stroke="#86BEF2" stroke-opacity=".62" stroke-width="2" stroke-linecap="round"/>
+  <path d="M90 90l18 18M404 404l18 18M422 90l-18 18M108 404l-18 18" stroke="#86BEF2" stroke-opacity=".28" stroke-linecap="round"/>
+  <path d="M256 83 270 114 256 108 242 114Z" fill="#86BEF2" fill-opacity=".46"/>
+  <path d="M256 429 270 398 256 404 242 398Z" fill="#86BEF2" fill-opacity=".22"/>
+  <path d="M83 256 114 242 108 256 114 270Z" fill="#86BEF2" fill-opacity=".22"/>
+  <path d="M429 256 398 242 404 256 398 270Z" fill="#86BEF2" fill-opacity=".22"/>
+</svg>

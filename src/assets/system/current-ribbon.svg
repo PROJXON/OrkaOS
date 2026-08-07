@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 220" fill="none" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="g" x1="0" y1="110" x2="1000" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3D9BF0" stop-opacity="0"/>
+      <stop offset=".18" stop-color="#5AA8EE" stop-opacity=".42"/>
+      <stop offset=".55" stop-color="#86BEF2" stop-opacity=".72"/>
+      <stop offset=".82" stop-color="#5AA8EE" stop-opacity=".36"/>
+      <stop offset="1" stop-color="#3D9BF0" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="f" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#3D9BF0" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#3D9BF0" stop-opacity=".10"/>
+      <stop offset="1" stop-color="#3D9BF0" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path d="M-20 134C121 61 238 173 374 110S638 47 779 112s206 48 262 6v49c-84 41-171 47-282-5s-231-55-366 4S111 98-20 176z" fill="url(#f)"/>
+  <path d="M-15 141C126 69 246 164 382 105S642 55 780 116s200 44 257 8" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M-10 157C141 91 252 180 390 123S648 73 786 128s193 39 249 10" stroke="url(#g)" stroke-opacity=".36" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M-18 121C121 45 238 142 371 88S631 28 771 98s210 57 273 8" stroke="url(#g)" stroke-opacity=".24" stroke-width="1" stroke-linecap="round"/>
+</svg>
