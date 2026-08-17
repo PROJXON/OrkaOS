@@ -14,6 +14,7 @@ import orkaLogoLight from './assets/brand/orka-logo-on-light.png';
 import orkaLogoDark from './assets/brand/orka-logo-on-dark.png';
 import orkaProfile from './assets/shell/orka-profile.webp';
 import googleWorkspaceLogo from './assets/shell/google-workspace.png';
+import googleWorkspaceOfficialLogo from './assets/shell/google-workspace-official.png';
 import awsLogo from './assets/shell/aws-logo.webp';
 import rsnaLogo from './assets/shell/rsna-cloud-connect-black-transparent.png';
 
@@ -369,18 +370,37 @@ function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, favorit
               <div><StatusPill status={selectedProduct.status} /><h1>{selectedProduct.name}</h1><p>{selectedProduct.summary}</p><span className="rollout-inline"><Icon name="calendar" size={13} /> {selectedProduct.rolloutLabel}{selectedProduct.rolloutDate ? ' · estimated' : ''}</span></div>
             </div>
 
-            <div className="detail-section">
-              <span className="detail-label">What it feels like</span>
-              <h3>A focused OrkaApp, not another giant platform.</h3>
-              <p>Each app uses the same navigation, controls, permissions, profile, search, and theme behavior you are experiencing on this OrkaOS website—then narrows the workspace to one operating problem.</p>
-            </div>
+            {selectedProduct.ai ? (
+              <>
+                <div className="detail-section ai-catalog-intro">
+                  <span className="detail-label">What Orka AI actually is</span>
+                  <h3>An onboard CTO for small Google Workspace teams.</h3>
+                  <p>Orka AI is a read-only management console for leaders who have a real Google Workspace stack but no CTO, IT department, or AI specialist. It helps them see what AI and automation they already have, how much is being used, and what useful capacity is still sitting idle.</p>
+                </div>
+                <div className="app-feature-grid ai-catalog-feature-grid">
+                  <article><Icon name="layers" size={19} /><b>Capability inventory</b><p>What AI and automation is already included in the Workspace plan?</p></article>
+                  <article><Icon name="users" size={19} /><b>Utilization & adoption</b><p>Who is using it, where is adoption strong, and where is the organization dark?</p></article>
+                  <article><Icon name="sparkles" size={19} /><b>Feature advisory</b><p>What useful new capability has arrived inside tools the organization already owns?</p></article>
+                  <article><Icon name="route" size={19} /><b>Tech-stack impact</b><p>How would adding or removing a tool affect overlap, integration, and complexity?</p></article>
+                </div>
+                <div className="ai-catalog-guardrail"><Icon name="lock" size={16} /><span><b>Read-only and advisory.</b> Orka AI does not change Google Workspace, manage licenses, or recommend downsizing.</span></div>
+              </>
+            ) : (
+              <>
+                <div className="detail-section">
+                  <span className="detail-label">What it feels like</span>
+                  <h3>A focused OrkaApp, not another giant platform.</h3>
+                  <p>Each app uses the same navigation, controls, permissions, profile, search, and theme behavior you are experiencing on this OrkaOS website—then narrows the workspace to one operating problem.</p>
+                </div>
 
-            <div className="app-feature-grid">
-              <article><Icon name="checkCircle" size={19} /><b>Clear job</b><p>{selectedProduct.summary}</p></article>
-              <article><Icon name="layers" size={19} /><b>Shared shell</b><p>Familiar controls across every app reduce training and cognitive load.</p></article>
-              <article><Icon name="lock" size={19} /><b>Google foundation</b><p>{selectedProduct.google}</p></article>
-              <article><Icon name="route" size={19} /><b>Progressive adoption</b><p>Add it when the workflow becomes necessary—not before.</p></article>
-            </div>
+                <div className="app-feature-grid">
+                  <article><Icon name="checkCircle" size={19} /><b>Clear job</b><p>{selectedProduct.summary}</p></article>
+                  <article><Icon name="layers" size={19} /><b>Shared shell</b><p>Familiar controls across every app reduce training and cognitive load.</p></article>
+                  <article><Icon name="lock" size={19} /><b>Google foundation</b><p>{selectedProduct.google}</p></article>
+                  <article><Icon name="route" size={19} /><b>Progressive adoption</b><p>Add it when the workflow becomes necessary—not before.</p></article>
+                </div>
+              </>
+            )}
 
             <div className="mini-app-window">
               <div className="mini-app-top"><span className="mini-app-logo">{selectedProduct.name.slice(0, 1)}</span><b>{selectedProduct.name}</b><span className="mini-app-search"><Icon name="search" size={13} /> Search</span><OrkaAvatar /></div>
@@ -515,10 +535,10 @@ function RoadmapView({ onOpenForm, onOpenApps }) {
       </section>
 
       <section className="roadmap-principles">
-        <article className="content-surface"><span className="step-number">01</span><h3>Validate the problem</h3><p>Concepts stay visible before code is treated as a commitment.</p></article>
-        <article className="content-surface"><span className="step-number">02</span><h3>Design with real teams</h3><p>Early access and testing shape the workflow before production.</p></article>
-        <article className="content-surface"><span className="step-number">03</span><h3>Advance one clear job</h3><p>Each app should keep a focused operating purpose as it moves from design and testing into production.</p></article>
-        <article className="content-surface"><span className="step-number">04</span><h3>Connect, then graduate</h3><p>Teams can add adjacent apps or move to larger platforms when ready.</p></article>
+        <article className="content-surface"><span className="step-number">1</span><h3>Validate the problem</h3><p>Concepts stay visible before code is treated as a commitment.</p></article>
+        <article className="content-surface"><span className="step-number">2</span><h3>Design with real teams</h3><p>Early access and testing shape the workflow before production.</p></article>
+        <article className="content-surface"><span className="step-number">3</span><h3>Advance one clear job</h3><p>Each app should keep a focused operating purpose as it moves from design and testing into production.</p></article>
+        <article className="content-surface"><span className="step-number">4</span><h3>Connect, then graduate</h3><p>Teams can add adjacent apps or move to larger platforms when ready.</p></article>
       </section>
 
       <section className="content-surface future-cta">
@@ -564,7 +584,7 @@ function RolloutPlanningView({ onOpenForm, onSelectProduct }) {
         <div className="priority-roadmap-bar" aria-label="First four OrkaOS roadmap priorities">
           {priorities.map((product, index) => (
             <button type="button" key={product.id} onClick={() => onSelectProduct(product.id)}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
+              <span>{String(index + 1)}</span>
               <div><b>{product.name}</b><small>{product.publicStatus}</small></div>
               <i className={`priority-progress ${product.status.toLowerCase()}`} aria-hidden="true" />
             </button>
@@ -611,10 +631,10 @@ function ariaGuideAnswer(prompt) {
     return 'Start with the smallest workflow that is already painful. Use the User Journey section to recognize your operating situation, then use the 20-app Catalog or All App Cards view to choose the focused Orka app that fits that workflow.';
   }
   if (query.includes('aria')) {
-    return 'OrkaAria is the interactive guide in the OrkaOS shell. It can answer common questions about the story, navigation, apps, pane controls, adoption, and the public plan. Orka AI is the separate product destination beside this guide button.';
+    return 'OrkaAria is the interactive guide in the OrkaOS shell. It answers questions about this website and ecosystem. Orka AI is the separate onboard-CTO product beside it: a Google Workspace-first management console for capability inventory, adoption, feature advisory, and tech-stack impact.';
   }
   if (query.includes('ai')) {
-    return 'Orka AI is the separate AI product destination in the 20-app ecosystem. The OrkaAria control beside it is the website guide you are using now.';
+    return 'Orka AI is the onboard-CTO product in the 20-app ecosystem. It reads a small team’s Google Workspace environment without changing it, inventories the AI and automation they already have, measures adoption and hours realized or unrealized, surfaces relevant new capability, and advises on buy / keep / drop stack decisions. The OrkaAria control beside it is the website guide you are using now.';
   }
   if (query.includes('what is') || query.includes('orkaos') || query.includes('ecosystem')) {
     return 'OrkaOS is a modular operating system built around focused Orka apps and Google Workspace. Teams can start with one useful workflow, add adjacent capabilities as needs grow, and keep a shared operating language across the pod.';
@@ -678,19 +698,139 @@ function OrkaAriaPanel({ onClose, onNavigate }) {
 }
 
 function OrkaAIView({ onBack, onOpenForm }) {
+  const functions = [
+    {
+      icon: 'layers',
+      number: '1',
+      title: 'Capability Inventory',
+      question: 'What AI and automation do we already have and already pay for?',
+      copy: 'Maps the AI and automation surfaces available on the organization’s Google Workspace plan, including useful capability that may be entitled but untouched.'
+    },
+    {
+      icon: 'users',
+      number: '2',
+      title: 'Utilization & Adoption',
+      question: 'What is actually being used, what is not, and who is using it?',
+      copy: 'Shows adoption by person, team, and organization so leaders can see where capability is working, where it is dark, and who others can learn from.'
+    },
+    {
+      icon: 'sparkles',
+      number: '3',
+      title: 'Feature Advisory',
+      question: 'What is new inside the tools we already own?',
+      copy: 'Surfaces relevant new AI and automation capability inside the customer’s existing Workspace plan instead of adding general AI-news noise.'
+    },
+    {
+      icon: 'route',
+      number: '4',
+      title: 'Tech Stack Impact',
+      question: 'If we add or remove a tool, what does that do to our stack?',
+      copy: 'Provides onboard-CTO guidance on overlap, native integration, complexity, and silo risk in the context of what the organization already uses.'
+    }
+  ];
+
   return (
     <div className="view-scroll orka-ai-view">
-      <section className="content-surface orka-ai-minimal">
-        <span className="eyebrow">Orka AI · Production</span>
-        <h1>Orka AI</h1>
-        <p>Orka AI is the consolidated public destination for the onboard AI-agent concept in the Orka ecosystem. It is actively in development; this page intentionally stays minimal until the dedicated product design is approved.</p>
-        <div className="orka-ai-status-row">
-          <span><Icon name="sparkles" size={18} /> Active development</span>
-          <span><Icon name="layers" size={18} /> Part of the 20-app ecosystem</span>
+      <section className="orka-ai-hero orka-ai-grid-surface">
+        <div className="orka-ai-hero-copy">
+          <span className="orka-ai-kicker">Orka AI · Onboard CTO for small teams</span>
+          <h1>Get more out of the AI you already pay for.</h1>
+          <p>Orka AI connects to a company’s Google Workspace with read-only access and shows leaders what AI and automation they already have, who is actually using it, and how many hours of manual work are still being left on the table.</p>
+          <div className="orka-ai-audience-chips" aria-label="Orka AI audience and scope">
+            <span>3–50 people</span>
+            <span>Paid Google Workspace</span>
+            <span>No CTO / IT / AI specialist</span>
+            <span>Read-only & advisory</span>
+          </div>
+          <div className="hero-actions">
+            <button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button>
+            <button className="button orka-ai-ghost" type="button" onClick={onBack}>Back to OrkaOS</button>
+          </div>
         </div>
-        <div className="hero-actions">
-          <button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button>
-          <button className="button secondary" type="button" onClick={onBack}>Back to OrkaOS</button>
+
+        <aside className="orka-ai-console-preview" aria-label="Illustrative Orka AI management-console model">
+          <div className="orka-ai-console-top">
+            <span className="orka-ai-console-mark"><Icon name="sparkles" size={17} /></span>
+            <div><small>MANAGEMENT CONSOLE</small><b>Google Workspace assessment</b></div>
+            <span className="orka-ai-readonly"><Icon name="lock" size={13} /> Read only</span>
+          </div>
+          <div className="orka-ai-console-grid">
+            <article><small>SEE</small><b>Capability inventory</b><span>What is already available?</span></article>
+            <article><small>MEASURE</small><b>Adoption</b><span>Who is actually using it?</span></article>
+            <article><small>VALUE</small><b>Hours</b><span>Realized vs. unrealized</span></article>
+            <article><small>ADVISE</small><b>Next action</b><span>What should we do now?</span></article>
+          </div>
+          <div className="orka-ai-console-foot"><span className="status-dot" /> Advisory only · your Workspace stays under your control</div>
+        </aside>
+      </section>
+
+      <section className="orka-ai-section content-surface">
+        <div className="orka-ai-section-head">
+          <span className="eyebrow">Four core functions</span>
+          <h2>Four questions. Nothing extra.</h2>
+          <p>The product is intentionally anchored to four management questions so it does not drift into a generic AI assistant, license tool, or news feed.</p>
+        </div>
+        <div className="orka-ai-function-grid">
+          {functions.map((item) => (
+            <article key={item.number}>
+              <div className="orka-ai-function-top"><span>{item.number}</span><Icon name={item.icon} size={20} /></div>
+              <h3>{item.title}</h3>
+              <b>{item.question}</b>
+              <p>{item.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="orka-ai-value-section">
+        <div className="orka-ai-section-head">
+          <span className="eyebrow">Value model</span>
+          <h2>Measure the gap in hours, not cancelled licenses.</h2>
+          <p>Orka AI is an adoption and efficiency product. Its headline unit is time: how much manual work AI and automation removed, and how much useful capacity was available but not taken.</p>
+        </div>
+        <div className="orka-ai-value-grid">
+          <article className="realized"><span><Icon name="checkCircle" size={20} /></span><small>HOURS REALIZED</small><h3>Work already removed</h3><p>Manual effort that the organization’s AI and automation actually displaced during the period.</p></article>
+          <article className="unrealized"><span><Icon name="clock" size={20} /></span><small>HOURS UNREALIZED</small><h3>Useful capacity left untaken</h3><p>Eligible work that stayed manual even though an entitled AI or automation surface was available.</p></article>
+          <article className="score"><span><Icon name="chart" size={20} /></span><small>EFFICIENCY SCORE</small><h3>A comparable 0–100 signal</h3><p>A score at organization, team, and person level derived from realized and unrealized opportunity.</p></article>
+        </div>
+        <p className="orka-ai-value-note">Dollar equivalence can be an optional derived view. It is not the headline metric and is not framed as subscription savings.</p>
+      </section>
+
+      <section className="orka-ai-how content-surface">
+        <div className="orka-ai-how-copy">
+          <span className="eyebrow">Google Workspace first</span>
+          <h2>A magnifying glass, not a telescope.</h2>
+          <p>Phase 1 goes deep on Google Workspace. The POC architecture reads entitlement, configuration, and activity data, analyzes it on AWS, and returns ranked insight through the Orka AI management console. It does not write back to Workspace.</p>
+          <div className="orka-ai-how-flow" aria-label="Orka AI POC flow">
+            <div><img src={googleWorkspaceOfficialLogo} alt="Google Workspace" /><b>Google Workspace</b><span>Read-only signals</span></div>
+            <span aria-hidden="true">→</span>
+            <div><img src={awsLogo} alt="AWS" /><b>AWS analysis</b><span>Rules + Bedrock judgment</span></div>
+            <span aria-hidden="true">→</span>
+            <div><span className="orka-ai-flow-mark"><Icon name="sparkles" size={20} /></span><b>Orka AI</b><span>Insight + recommended action</span></div>
+          </div>
+        </div>
+        <div className="orka-ai-guardrail-card">
+          <span className="eyebrow">Deliberate guardrails</span>
+          <h3>What Orka AI is not</h3>
+          <ul>
+            <li><Icon name="x" size={16} /><span><b>Not license or billing management.</b> It does not track seats or subscriptions.</span></li>
+            <li><Icon name="x" size={16} /><span><b>Not a cost-cutting tool.</b> It never recommends downsizing; the goal is stronger adoption.</span></li>
+            <li><Icon name="x" size={16} /><span><b>Not a generic chatbot.</b> The CTO chat is one advisory function inside a management console.</span></li>
+            <li><Icon name="x" size={16} /><span><b>Not read-write.</b> It advises; the customer decides and acts.</span></li>
+            <li><Icon name="x" size={16} /><span><b>Not multi-tool yet.</b> Phase 1 is deliberately Google Workspace-first.</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="orka-ai-poc-strip content-surface">
+        <div className="orka-ai-poc-copy">
+          <span className="eyebrow">Proof of concept</span>
+          <h2>Built to prove the management layer, not a demo chatbot.</h2>
+          <p>The current POC direction with RSNA Cloud Connect on AWS is to prove that a real Workspace organization can be connected, assessed, and advised without changing anything in its environment.</p>
+        </div>
+        <div className="orka-ai-partner-row">
+          <div><img src={awsLogo} alt="AWS" /><span>Powered by AWS</span></div>
+          <div><img className="orka-ai-rsna-logo" src={rsnaLogo} alt="RSNA Cloud Connect" /><span>POC partner</span></div>
         </div>
       </section>
     </div>
@@ -1004,6 +1144,7 @@ export default function App() {
           chapter={activeTab}
           onOpenForm={openIntake}
           onOpenApps={() => navigate('apps', 'catalog')}
+          onSelectProduct={(id) => { setSelectedProductId(id); navigate('apps', 'catalog'); }}
           onNavigate={navigate}
           onSectionChange={handleOverviewSectionChange}
         />
@@ -1119,7 +1260,7 @@ export default function App() {
             {alertsOpen && (
               <div className="alerts-popover popover right-popover">
                 <div className="popover-title"><b>What’s new</b><small>Website preview</small></div>
-                <div className="alert-item"><span className="alert-dot purple" /><div><b>Orka AI is in Production</b><p>The public AI product is consolidated under Orka AI; detailed product-page design remains intentionally deferred.</p></div></div>
+                <div className="alert-item"><span className="alert-dot purple" /><div><b>Orka AI · onboard CTO</b><p>Google Workspace-first, read-only, and focused on capability inventory, adoption, relevant feature advisory, and tech-stack impact.</p></div></div>
                 <div className="alert-item"><span className="alert-dot blue" /><div><b>Overview rebuilt around five concepts</b><p>Philosophy, Ecosystem, Adoption, and User Journey now sit beside Start Here in one continuous experience.</p></div></div>
                 <div className="alert-item"><span className="alert-dot green" /><div><b>Public dates removed</b><p>Future Plan now communicates priority, stage, and TBD planning instead of speculative rollout dates.</p></div></div>
               </div>

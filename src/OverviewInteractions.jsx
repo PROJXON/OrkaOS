@@ -136,25 +136,25 @@ const MENTAL_MODELS = [
 
 const ORIGIN_EVENTS = [
   {
-    number: '01',
+    number: '1',
     short: 'Friction surfaced',
     title: 'Coaching revealed the same collaboration problem.',
     body: 'Students, founders, and remote teammates could do the work, but scattered messages and unclear handoffs kept breaking the group.'
   },
   {
-    number: '02',
+    number: '2',
     short: 'A workflow emerged',
     title: 'A personal deep-work rhythm became the first useful model.',
     body: 'Better meetings, visible owners, focused sessions, and follow-through showed that the process itself could guide a team into flow.'
   },
   {
-    number: '03',
+    number: '3',
     short: 'The pod formed',
     title: 'A synchronized micro-team gave the system its operating language.',
     body: 'A pod of three to five people could divide whale-sized work, stay aligned, and move faster through clear responsibilities.'
   },
   {
-    number: '04',
+    number: '4',
     short: 'The stack compounded',
     title: 'One focused app led naturally to another.',
     body: 'HR, chat, AI, tasks, projects, and operating tools stopped looking like separate ideas and became a modular micro-stack around Google Workspace.'

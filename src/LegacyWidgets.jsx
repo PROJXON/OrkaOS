@@ -90,7 +90,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
     </div>
     <div className="value-grid">
       <div className="value-card">
-        <div className="value-num">01</div>
+        <div className="value-num">1</div>
         <h4>No integration required</h4>
         <p>
           Every module talks to every other module from day one — no Zapier,
@@ -98,7 +98,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
         </p>
       </div>
       <div className="value-card">
-        <div className="value-num">02</div>
+        <div className="value-num">2</div>
         <h4>Intuitive by design</h4>
         <p>
           No training. No certifications. If you've used Google Docs, you can
@@ -106,7 +106,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
         </p>
       </div>
       <div className="value-card">
-        <div className="value-num">03</div>
+        <div className="value-num">3</div>
         <h4>Modular growth</h4>
         <p>
           Add tools as you need them. Pay for what's on. Turn things off when
@@ -114,7 +114,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
         </p>
       </div>
       <div className="value-card">
-        <div className="value-num">04</div>
+        <div className="value-num">4</div>
         <h4>White-labeled experience</h4>
         <p>
           Your team works inside <em>your</em> platform — not someone else's
@@ -122,7 +122,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
         </p>
       </div>
       <div className="value-card">
-        <div className="value-num">05</div>
+        <div className="value-num">5</div>
         <h4>Built for non-technical founders</h4>
         <p>
           No setup complexity. No admin console. You're operating in 30
@@ -422,7 +422,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
       aria-label="Three simple ways to grow with OrkaOS"
     >
       <article className="scope-card scope-card--lean">
-        <div className="scope-stage">01 · Start</div>
+        <div className="scope-stage">1 · Start</div>
         <h3>
           <span className="scope-number">3–5</span>
           <span className="scope-phrase">in a pod</span>
@@ -438,7 +438,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
         <span />
       </div>
       <article className="scope-card scope-card--operate">
-        <div className="scope-stage">02 · Build</div>
+        <div className="scope-stage">2 · Build</div>
         <h3>
           <span className="scope-number">10–15</span>
           <span className="scope-phrase">in a team</span>
@@ -454,7 +454,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
         <span />
       </div>
       <article className="scope-card scope-card--ecosystem">
-        <div className="scope-stage">03 · Scale</div>
+        <div className="scope-stage">3 · Scale</div>
         <h3>
           <span className="scope-number">20–30</span>
           <span className="scope-phrase">for an organization</span>
@@ -668,7 +668,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
           <span className="official-orka-logo" aria-hidden="true" />
         </div>
         <div className="dock-divider" />
-        <div className="dock-icon ai" title="Orka AI · AI Agent">
+        <div className="dock-icon ai" title="Orka AI · Onboard CTO">
           AI
         </div>
       </div>
@@ -756,7 +756,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
             <div className="pr-icon pr-icon--ai" aria-hidden="true">AI</div>
             <div>
               <div className="pr-text">Orka AI</div>
-              <div className="pr-meta">Summary ready</div>
+              <div className="pr-meta">Assessment ready</div>
             </div>
           </div>
         </div>

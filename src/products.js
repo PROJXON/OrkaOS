@@ -53,8 +53,8 @@ export const ORKA_PRODUCTS = [
     // Keep the legacy internal id for compatibility while consolidating the public product under Orka AI.
     // Orka AI intentionally leads the public catalog.
     id: 'orka-aria', name: 'Orka AI', status: 'Production', publicStatus: 'Production', priority: 'Priority 1 · Production', groupId: 'it',
-    summary: 'An onboard AI-agent concept for tech-stack visibility, AI adoption, and tool governance.',
-    google: 'Google Workspace + AWS foundation', pairs: ['OrkaPrompt', 'OrkaOS'], featured: true, ai: true
+    summary: 'An onboard CTO for small Google Workspace teams: inventory the AI and automation already available, measure adoption and unrealized hours, and advise on tech-stack impact.',
+    google: 'Google Workspace · read-only signals · AWS analysis', pairs: ['OrkaPrompt', 'OrkaOS'], featured: true, ai: true
   },
   {
     id: 'orka-vault', name: 'OrkaVault', groupId: 'it',
@@ -175,8 +175,8 @@ export const PRODUCT_GROUP_FILTERS = [
 ];
 
 export const ROADMAP_PHASES = [
-  { id: 'design', label: '01 · Design & Testing' },
-  { id: 'production', label: '02 · Production' }
+  { id: 'design', label: '1 · Design & Testing' },
+  { id: 'production', label: '2 · Production' }
 ];
 
 export const ROADMAP_STATUS_META = {

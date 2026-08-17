@@ -22,6 +22,22 @@ const OVERVIEW_SECTIONS = [
 ];
 
 
+const QUICK_TASKS = [
+  { task: 'See where AI fits into our tech stack', app: 'Orka AI', appId: 'orka-aria', tone: 'ai' },
+  { task: 'Share a password or credential safely', app: 'OrkaVault', appId: 'orka-vault', tone: 'it' },
+  { task: 'Look up how we do something', app: 'OrkaSOP', appId: 'orka-sop', tone: 'ops' },
+  { task: 'See who is who and what they own', app: 'OrkaHR', appId: 'orka-hr', tone: 'hr' },
+  { task: 'Move a candidate through hiring', app: 'OrkaATS', appId: 'orka-ats', tone: 'hr' },
+  { task: 'Run a meeting that ends with clear owners', app: 'OrkaFlow', appId: 'orka-flow', tone: 'ops' },
+  { task: 'See what I am meant to be working on', app: 'OrkaTask', appId: 'orka-task', tone: 'ops' },
+  { task: 'Plan a project with owners and deadlines', app: 'OrkaProject', appId: 'orka-project', tone: 'ops' },
+  { task: 'Set a goal and track it', app: 'OrkaGoals', appId: 'orka-goals', tone: 'ops' },
+  { task: 'Map a process and improve it', app: 'OrkaProcess', appId: 'orka-process', tone: 'ops' },
+  { task: 'Keep contacts and deals organized', app: 'OrkaCRM', appId: 'orka-crm', tone: 'business' },
+  { task: 'Build a campaign from audience to deadline', app: 'OrkaMarketing', appId: 'orka-marketing', tone: 'marketing' }
+];
+
+
 
 const ECOSYSTEM_ORBIT_RINGS = [
   {
@@ -307,7 +323,7 @@ function SectionHeading({ eyebrow, title, body }) {
 function StartHereSection({ onOpenApps, onNavigate }) {
   return (
     <section className="overview-anchor-section" id="overview-start" data-overview-section="start">
-      <section className="story-hero story-ocean-card story-hero-with-art">
+      <section className="story-hero story-ocean-card story-hero-with-art story-grid-hero">
         <div className="story-hero-copy">
           <span className="story-chapter-label light">Start Here · A tech-stack starter kit for a synchronized pod</span>
           <h1>A whale of a project should not require a whale of a tech stack.</h1>
@@ -356,10 +372,10 @@ function StartHereSection({ onOpenApps, onNavigate }) {
         </div>
         <div className="story-beat-grid">
           {[
-            ['01', 'A real problem appears', 'The handoff is messy. The SOP lives in someone’s head. Nobody knows who owns the next step.'],
-            ['02', 'Add one OrkaApp', 'Choose the smallest useful tool for that problem — not a giant suite for problems you do not have.'],
-            ['03', 'The team learns by doing', 'Every app feels familiar, so the process becomes the training instead of another course.'],
-            ['04', 'The pod builds its system', 'Add connected apps as the work grows. After a few, the OrkaOS hub brings the pod together.']
+            ['1', 'A real problem appears', 'The handoff is messy. The SOP lives in someone’s head. Nobody knows who owns the next step.'],
+            ['2', 'Add one OrkaApp', 'Choose the smallest useful tool for that problem — not a giant suite for problems you do not have.'],
+            ['3', 'The team learns by doing', 'Every app feels familiar, so the process becomes the training instead of another course.'],
+            ['4', 'The pod builds its system', 'Add connected apps as the work grows. After a few, the OrkaOS hub brings the pod together.']
           ].map(([number, title, body]) => (
             <article key={number}>
               <span>{number}</span>
@@ -427,10 +443,10 @@ function PhilosophySection() {
           body="The Orka Way is not a promise that every team should use every app. It is a way to keep the system understandable while the work becomes more complex."
         />
         <div className="philosophy-principle-grid">
-          <article><span>01</span><h3>Focused tools over one giant application</h3><p>Choose a clear tool for a clear operating job. The interface can stay calm because the app does not need to solve every possible problem.</p></article>
-          <article><span>02</span><h3>Pod-based work</h3><p>People, ownership, meetings, documents, and tasks should move as a coordinated pod rather than as isolated personal systems.</p></article>
-          <article><span>03</span><h3>Progressive complexity</h3><p>Add structure as the work requires it. A small team should not carry the configuration burden of an enterprise platform before it has enterprise problems.</p></article>
-          <article><span>04</span><h3>Shared operating language</h3><p>Familiar shell patterns and recurring concepts make it easier for people to move between workflows without relearning the system each time.</p></article>
+          <article><span>1</span><h3>Focused tools over one giant application</h3><p>Choose a clear tool for a clear operating job. The interface can stay calm because the app does not need to solve every possible problem.</p></article>
+          <article><span>2</span><h3>Pod-based work</h3><p>People, ownership, meetings, documents, and tasks should move as a coordinated pod rather than as isolated personal systems.</p></article>
+          <article><span>3</span><h3>Progressive complexity</h3><p>Add structure as the work requires it. A small team should not carry the configuration burden of an enterprise platform before it has enterprise problems.</p></article>
+          <article><span>4</span><h3>Shared operating language</h3><p>Familiar shell patterns and recurring concepts make it easier for people to move between workflows without relearning the system each time.</p></article>
         </div>
       </section>
 
@@ -542,11 +558,11 @@ function EcosystemSection({ onOpenApps }) {
 
 function AdoptionSection({ onNavigate }) {
   const steps = [
-    ['01', 'Start with the problem that matters now', 'Choose the workflow creating real friction instead of purchasing a theoretical future stack.'],
-    ['02', 'Add the appropriate Orka capability', 'Introduce one focused tool around that work while keeping Google Workspace as the foundation.'],
-    ['03', 'Establish the operating habit', 'Make ownership, process, and the next action repeatable before adding another layer.'],
-    ['04', 'Connect the adjacent workflow', 'When the next dependency becomes visible, extend the system deliberately instead of inventing a new isolated workaround.'],
-    ['05', 'Grow toward a broader pod', 'The operating environment becomes more connected over time without forcing an all-at-once suite migration.']
+    ['1', 'Start with the problem that matters now', 'Choose the workflow creating real friction instead of purchasing a theoretical future stack.'],
+    ['2', 'Add the appropriate Orka capability', 'Introduce one focused tool around that work while keeping Google Workspace as the foundation.'],
+    ['3', 'Establish the operating habit', 'Make ownership, process, and the next action repeatable before adding another layer.'],
+    ['4', 'Connect the adjacent workflow', 'When the next dependency becomes visible, extend the system deliberately instead of inventing a new isolated workaround.'],
+    ['5', 'Grow toward a broader pod', 'The operating environment becomes more connected over time without forcing an all-at-once suite migration.']
   ];
 
   return (
@@ -594,6 +610,37 @@ function AdoptionSection({ onNavigate }) {
         <span className="story-next-copy"><small>Next</small><b>Recognize your User Journey</b><span>See how adoption changes across four stages of team growth.</span></span>
         <span className="story-next-arrow" aria-hidden="true">→</span>
       </button>
+    </section>
+  );
+}
+
+
+function QuickAnswersLauncher({ onSelectProduct, onOpenApps }) {
+  return (
+    <section className="quick-answers-board" aria-labelledby="quick-answers-title">
+      <div className="quick-answers-heading">
+        <div>
+          <span className="quick-answers-eyebrow">Quick answers</span>
+          <h2 id="quick-answers-title">“I just need to…”</h2>
+          <p>Start with the job in front of you. Each answer opens the Orka app built around that workflow.</p>
+        </div>
+        <button className="quick-answers-all" type="button" onClick={onOpenApps}>See all 20 apps <span aria-hidden="true">→</span></button>
+      </div>
+      <div className="quick-answers-grid" role="list" aria-label="Common tasks and their Orka apps">
+        {QUICK_TASKS.map((item) => (
+          <button
+            className={`quick-answer-card tone-${item.tone}`}
+            type="button"
+            role="listitem"
+            key={item.appId}
+            onClick={() => onSelectProduct(item.appId)}
+            aria-label={`${item.task}. Open ${item.app}.`}
+          >
+            <span className="quick-answer-task">{item.task}</span>
+            <span className="quick-answer-app"><b>{item.app}</b><i aria-hidden="true">→</i></span>
+          </button>
+        ))}
+      </div>
     </section>
   );
 }
@@ -669,7 +716,7 @@ function JourneyDetail({ journey, onOpenApps, onOpenForm }) {
   );
 }
 
-function UserJourneySection({ onOpenApps, onOpenForm }) {
+function UserJourneySection({ onOpenApps, onOpenForm, onSelectProduct }) {
   const [activeJourney, setActiveJourney] = useState(JOURNEYS[0].id);
   const journey = JOURNEYS.find((item) => item.id === activeJourney) || JOURNEYS[0];
 
@@ -764,17 +811,7 @@ function UserJourneySection({ onOpenApps, onOpenForm }) {
         </article>
       </section>
 
-      <section className="starting-points content-surface">
-        <div className="story-section-heading left compact">
-          <span className="eyebrow">Pick the sentence that sounds familiar</span>
-          <h2>Your first app should match the first real pain.</h2>
-        </div>
-        <div className="starting-point-grid">
-          <article><span><Icon name="lock" size={19} /></span><blockquote>“Our credentials and company knowledge are scattered.”</blockquote><b>Start with OrkaVault</b></article>
-          <article><span><Icon name="clipboard" size={19} /></span><blockquote>“Everyone completes the same work a different way.”</blockquote><b>Start with OrkaSOP</b></article>
-          <article><span><Icon name="users" size={19} /></span><blockquote>“New teammates cannot tell who is who or where to go.”</blockquote><b>Start with OrkaHR</b></article>
-        </div>
-      </section>
+      <QuickAnswersLauncher onSelectProduct={onSelectProduct} onOpenApps={onOpenApps} />
 
       <section className="overview-faq">
         <div className="story-section-heading left compact">
@@ -803,7 +840,7 @@ function UserJourneySection({ onOpenApps, onOpenForm }) {
   );
 }
 
-export default function OverviewStory({ chapter = 'start', onOpenForm, onOpenApps, onNavigate, onSectionChange }) {
+export default function OverviewStory({ chapter = 'start', onOpenForm, onOpenApps, onSelectProduct, onNavigate, onSectionChange }) {
   const scrollRef = useRef(null);
   const lastRequestedRef = useRef(null);
 
@@ -872,7 +909,7 @@ export default function OverviewStory({ chapter = 'start', onOpenForm, onOpenApp
       <PhilosophySection />
       <EcosystemSection onOpenApps={onOpenApps} />
       <AdoptionSection onNavigate={onNavigate} />
-      <UserJourneySection onOpenApps={onOpenApps} onOpenForm={onOpenForm} />
+      <UserJourneySection onOpenApps={onOpenApps} onOpenForm={onOpenForm} onSelectProduct={onSelectProduct} />
     </div>
   );
 }

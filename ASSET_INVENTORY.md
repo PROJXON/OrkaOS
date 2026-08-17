@@ -48,3 +48,15 @@ None for this pass. The interactive systems are better expressed as 2–6 reusab
 - `src/assets/shell/google-g-official.png` — cleaned transparent derivative of the Google G artwork supplied in this update. It replaces the former text `G` placeholders in Overview storytelling surfaces.
 - `src/assets/shell/google-workspace-official.png` — the supplied Google Workspace mark retained as a ready-to-use shell/credibility asset. The existing horizontal Workspace lockup remains in the footer for now.
 
+
+
+## Grid storytelling treatment
+
+- No new bitmap background was added. The grid treatment from the supplied `v2-draft.html` is implemented as CSS using two 1px linear-gradient grids with a radial mask.
+- The treatment is applied to the primary Start Here hero and the Orka AI hero so it acts as a deliberate technical-storytelling motif instead of repeating across every surface.
+- The uploaded `grid.png` remains a visual reference only and is not shipped as a production dependency.
+
+## Orka AI content alignment
+
+- Orka AI product copy is aligned to the supplied August 11 internal one-pager and POC Rev 2 materials: Google Workspace-first, read-only/advisory, onboard CTO for small teams, four core functions, and hours-first efficiency framing.
+- Existing `src/assets/shell/google-workspace-official.png`, `aws-logo.webp`, and `rsna-cloud-connect-black-transparent.png` are reused in the Orka AI product story; no speculative product screenshots or generated partner marks were added.

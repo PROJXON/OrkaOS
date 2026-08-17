@@ -835,10 +835,10 @@ export default function IntakeForm({
             onSubmit={handleSubmit(submitForm)}
             noValidate
           >
-            {/* Step 01: identity, intake goal, profile, and Workspace status. */}
+            {/* Step 1: identity, intake goal, profile, and Workspace status. */}
             <section className="intake-form__section" aria-labelledby={`${id}-contact-heading`}>
               <div className="intake-form__section-head">
-                <span className="intake-form__step">01</span>
+                <span className="intake-form__step">1</span>
                 <div>
                   <h3 id={`${id}-contact-heading`}>About you</h3>
                   <p>Start with the basics so we know who is joining the pod.</p>
@@ -970,10 +970,10 @@ export default function IntakeForm({
               </fieldset>
             </section>
 
-            {/* Step 02: professional context; student and team fields are conditional. */}
+            {/* Step 2: professional context; student and team fields are conditional. */}
             <section className="intake-form__section" aria-labelledby={`${id}-background-heading`}>
               <div className="intake-form__section-head">
-                <span className="intake-form__step">02</span>
+                <span className="intake-form__step">2</span>
                 <div>
                   <h3 id={`${id}-background-heading`}>Work and expertise</h3>
                   <p>Help us understand the experience and operating context you bring.</p>
@@ -1083,10 +1083,10 @@ export default function IntakeForm({
               </div>
             </section>
 
-            {/* Step 03: why the person wants OrkaOS and what follow-up they want. */}
+            {/* Step 3: why the person wants OrkaOS and what follow-up they want. */}
             <section className="intake-form__section" aria-labelledby={`${id}-purpose-heading`}>
               <div className="intake-form__section-head">
-                <span className="intake-form__step">03</span>
+                <span className="intake-form__step">3</span>
                 <div>
                   <h3 id={`${id}-purpose-heading`}>Why OrkaOS</h3>
                   <p>Help us understand the friction you want OrkaOS to remove.</p>
@@ -1157,10 +1157,10 @@ export default function IntakeForm({
               </div>
             </section>
 
-            {/* Step 04: product interests organized by Orka app group. */}
+            {/* Step 4: product interests organized by Orka app group. */}
             <section className="intake-form__section" aria-labelledby={`${id}-interests-heading`}>
               <div className="intake-form__section-head">
-                <span className="intake-form__step">04</span>
+                <span className="intake-form__step">4</span>
                 <div>
                   <h3 id={`${id}-interests-heading`}>Orka app interests</h3>
                   <p>Browse by Orka app group, then choose the specific products you want to follow, test, or use.</p>
@@ -1203,10 +1203,10 @@ export default function IntakeForm({
               </fieldset>
             </section>
 
-            {/* Step 05: prior familiarity and discovery-source context. */}
+            {/* Step 5: prior familiarity and discovery-source context. */}
             <section className="intake-form__section" aria-labelledby={`${id}-history-heading`}>
               <div className="intake-form__section-head">
-                <span className="intake-form__step">05</span>
+                <span className="intake-form__step">5</span>
                 <div>
                   <h3 id={`${id}-history-heading`}>Previous connection</h3>
                   <p>Tell us how familiar you are with PROJXON and related programs.</p>
@@ -1359,10 +1359,10 @@ export default function IntakeForm({
               </section>
             )}
 
-            {/* Step 06: timezone and communication preferences; phone is conditional. */}
+            {/* Step 6: timezone and communication preferences; phone is conditional. */}
             <section className="intake-form__section" aria-labelledby={`${id}-contact-preferences-heading`}>
               <div className="intake-form__section-head">
-                <span className="intake-form__step">06</span>
+                <span className="intake-form__step">6</span>
                 <div>
                   <h3 id={`${id}-contact-preferences-heading`}>Contact preferences</h3>
                   <p>Choose the channels and timezone that make coordination easiest.</p>
