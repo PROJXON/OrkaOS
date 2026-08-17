@@ -2597,6 +2597,16 @@
 .adoption-next { margin-top: 0; }
 
 .user-journey-section { gap: 16px; }
+/* Keep the sticky journey chooser scoped to the actual journey explorer.
+   Once the detailed case ends, the chooser reaches the end of this containing
+   block and releases instead of hanging over the restored fit/quick-answer story. */
+.journey-explorer {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 14px;
+}
 .journey-selector-shell {
   position: sticky;
   top: 0;
@@ -2669,7 +2679,7 @@
   .ecosystem-catalog-bridge { align-items: flex-start; flex-direction: column; }
   .adoption-step-list article { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 18px 15px; }
   .adoption-step-list article > span { width: 40px; height: 40px; }
-  .journey-selector-shell { margin-inline: -1px; overflow: hidden; }
+  .journey-selector-shell { top: 2px; margin-inline: -1px; overflow: hidden; }
   .journey-tabs { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; }
   .journey-tabs button { min-width: 170px; scroll-snap-align: start; }
   .journey-narrative-grid { grid-template-columns: 1fr; }

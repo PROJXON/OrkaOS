@@ -743,29 +743,31 @@ function UserJourneySection({ onOpenApps, onOpenForm, onSelectProduct }) {
         <div className="journey-order-card"><small>Intentional order</small><b>Medium → Small → Pre-launch → Solo</b><p>Work backward in organizational scale to see where structure changes.</p></div>
       </section>
 
-      <div className="journey-selector-shell content-surface">
-        <div className="journey-tabs" role="tablist" aria-label="Choose a User Journey">
-          {JOURNEYS.map((item, index) => (
-            <button
-              id={`journey-tab-${item.id}`}
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={activeJourney === item.id}
-              aria-controls={`journey-panel-${item.id}`}
-              tabIndex={activeJourney === item.id ? 0 : -1}
-              className={activeJourney === item.id ? 'active' : ''}
-              onClick={() => setActiveJourney(item.id)}
-              onKeyDown={(event) => onTabKeyDown(event, index)}
-            >
-              <b>{item.tab}</b>
-              <span>{item.range}</span>
-            </button>
-          ))}
+      <div className="journey-explorer">
+        <div className="journey-selector-shell content-surface">
+          <div className="journey-tabs" role="tablist" aria-label="Choose a User Journey">
+            {JOURNEYS.map((item, index) => (
+              <button
+                id={`journey-tab-${item.id}`}
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={activeJourney === item.id}
+                aria-controls={`journey-panel-${item.id}`}
+                tabIndex={activeJourney === item.id ? 0 : -1}
+                className={activeJourney === item.id ? 'active' : ''}
+                onClick={() => setActiveJourney(item.id)}
+                onKeyDown={(event) => onTabKeyDown(event, index)}
+              >
+                <b>{item.tab}</b>
+                <span>{item.range}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <JourneyDetail journey={journey} onOpenApps={onOpenApps} onOpenForm={onOpenForm} />
+        <JourneyDetail journey={journey} onOpenApps={onOpenApps} onOpenForm={onOpenForm} />
+      </div>
 
       <section className="story-page-hero content-surface story-fit-hero restored-fit-intro">
         <div className="story-intro-copy">
