@@ -6,7 +6,7 @@ OrkaOS helps a pod start with one focused app, solve one real collaboration prob
 
 ## Overview
 
-This repository contains the public OrkaOS product website in an OrkaApp-style shell. The Overview folder is a five-chapter guided story for first-time visitors: **Start Here**, **The Story**, **How It Works**, **The Orka Way**, and **Is It for You?** The Orka Apps and Future Plan workspaces remain available in the same interface. The public shell intentionally omits the internal OrkaAnalytics-through-OrkaSheets tool rail.
+This repository contains the public OrkaOS product website in an OrkaApp-style shell. The Overview folder is one continuous five-section experience for first-time visitors: **Start Here**, **Philosophy**, **Ecosystem**, **Adoption**, and **User Journey**. The left sidebar is the chapter control and tracks the section currently in view. The Orka Apps and Future Plan workspaces remain available in the same interface. The public shell intentionally omits the internal OrkaAnalytics-through-OrkaSheets tool rail.
 
 The site is built as a responsive React application using Vite.
 
@@ -18,14 +18,15 @@ The site is built as a responsive React application using Vite.
 * User/Admin demonstration modes
 * Nine-dot Orka app launcher
 * Light and dark themes saved with `localStorage`
-* Gray anonymous profile avatar and profile menu
-* Searchable, filterable three-pane Orka Apps workspace with the latest compact collapse / balanced / expand selector, plus the restored original card explorer in its own child tab
-* A redesigned story-led Overview with a plain-English product definition, origin story, micro-stack model, product principles, audience fit, FAQs, and starting paths
+* Orka profile treatment with **OS User**, Settings, and About OrkaOS; the main theme control remains outside the profile menu
+* Searchable, filterable three-pane Orka Apps workspace plus the restored **All App Cards** tab from the earlier site, alongside Favorites
+* A story-led continuous Overview with substantial Philosophy, Ecosystem, Adoption, and four detailed User Journey operating cases; section focus transitions begin slightly before each chapter reaches the previous trigger point
+* A living Ecosystem visual that keeps OrkaOS fixed as the central hub while the other 19 apps move on four independently rotating currents around it. Clicking an app pins it into a three-step slipstream lane, highlights approved related apps from the catalog pairing data, and activates the OrkaOS control center when a three-app flow is complete. Clicking a pinned app again removes it. The orbit stays intentionally slow, labels stay upright, and reduced-motion preferences disable the animation.
 * Restored original website widgets, including the desktop preview, collaboration flow, white-label demo, mobile mockup, adoption scope, and Gantt roadmap
-* Browser-persisted Favorites tab, public product roadmap, and estimated OrkaApp rollout calendar with Month, Quarter, and List views
-* OrkaAria public guide with transparent prewritten answers for ecosystem, app, pane, and rollout questions
+* Browser-persisted Favorites tab plus public roadmap/planning views based on priority and stage rather than speculative launch dates
+* Separate top-bar **OrkaAria** guide and **Orka AI** product controls: OrkaAria opens the interactive guided Q&A panel with suggested and typed questions, while Orka AI opens the minimal product route
 * Configurable Google Apps Script feedback-form link
-* Persistent CTA footer on every tab for Pod, Alpha, Beta, and PROJXON partnership paths
+* Persistent lower participation area for Join the Pod, Alpha testing, and **Partner with OrkaOS**, plus the PROJXON / Google Workspace / AWS / RSNA credibility hierarchy; the RSNA Cloud Connect mark uses a transparent black-on-light asset sized for clear 100% zoom viewing
 * Responsive desktop sidebar and mobile navigation drawer
 
 ## Technology Stack
@@ -142,7 +143,7 @@ The intake form supports three primary paths:
 
 * Join the Pod
 * Join Alpha Testing
-* Partner with PROJXON
+* Partner with OrkaOS (mapped to the legacy internal `Partner with PROJXON` value for backend compatibility)
 
 The form collects information such as:
 
@@ -324,3 +325,11 @@ Add mobile navigation improvements
 No open-source license is currently included in this repository.
 
 Unless a license is added, the source code and project assets should be treated as proprietary to the project owner.
+
+## Living Ecosystem interaction
+
+The Ecosystem visual keeps OrkaOS fixed in the center and places the other 19 apps in orbit, with an interactive three-app slipstream builder. The flow lane is rendered below the orbit field so it never covers floating apps. Orbit rings are non-interactive visual geometry while each app node owns its own pointer target, keeping apps on all four rings selectable. Selected apps can be removed by clicking them again in the flow lane.
+
+## Latest readability pass
+
+- Increased Overview microcopy to a 12px minimum, converted the team-size range markers to width-safe pills, improved active Slipstream contrast, and allowed compact ecosystem labels to wrap instead of clipping at 100% browser zoom.

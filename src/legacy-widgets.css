@@ -460,7 +460,7 @@
 
 .legacy-widget-scope .side-nav, .legacy-widget-scope .side-section{ display: flex; flex-direction: column; gap: 2px; }
 
-.legacy-widget-scope .side-label{ font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.13em; color: var(--muted); padding: 6px 10px 4px; font-weight: 600; }
+.legacy-widget-scope .side-label{ font-size: 11px; text-transform: uppercase; letter-spacing: 0.13em; color: var(--muted); padding: 6px 10px 4px; font-weight: 600; }
 
 .legacy-widget-scope .nav-item{
   display: flex; align-items: center;
@@ -499,7 +499,7 @@
 .legacy-widget-scope .search input{ flex: 1; border: 0; outline: 0; background: transparent; font-size: 13.5px; color: var(--text); font-family: inherit; }
 
 .legacy-widget-scope .kbd{
-  font-size: 10.5px; color: var(--muted);
+  font-size: 11px; color: var(--muted);
   background: var(--orka-neutral-0); border: 1px solid var(--line);
   padding: 2px 6px; border-radius: 5px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -549,7 +549,7 @@
 
 .legacy-widget-scope .tile-meta.add{ color: var(--blue); font-weight: 600; }
 
-.legacy-widget-scope .app-tile.installed .tile-meta::before{ content: "●"; color: #0FA76C; margin-right: 4px; font-size: 9px; }
+.legacy-widget-scope .app-tile.installed .tile-meta::before{ content: "●"; color: #0FA76C; margin-right: 4px; font-size: 11px; }
 
 .legacy-widget-scope .dock{
   display: flex; align-items: center;
@@ -636,7 +636,7 @@
 
 .legacy-widget-scope .node-label{ font-size: 11px; font-weight: 700; margin-top: 6px; white-space: nowrap; }
 
-.legacy-widget-scope .node-tier{ font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
+.legacy-widget-scope .node-tier{ font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
 
 .legacy-widget-scope .r1 .node-icon{ width: 60px; height: 60px; padding: 9px; border-radius: 16px; }
 
@@ -847,7 +847,7 @@
 
 .legacy-widget-scope .phone-row .pr-text{ font-size: 12px; font-weight: 700; }
 
-.legacy-widget-scope .phone-row .pr-meta{ font-size: 10px; }
+.legacy-widget-scope .phone-row .pr-meta{ font-size: 11px; }
 
 @media (max-width: 800px){
   .legacy-widget-scope .phone-section, .legacy-widget-scope .phone-list{ grid-template-columns: 1fr; }
@@ -957,7 +957,7 @@
 .legacy-widget-scope .gantt-owner{ font-size: 11px; color: var(--muted); margin-top: 1px; }
 
 .legacy-widget-scope .owner-pill{
-  display: inline-block; font-size: 9.5px;
+  display: inline-block; font-size: 11px;
   font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.06em; padding: 2px 6px;
   border-radius: 4px; margin-left: 6px;
@@ -1021,7 +1021,7 @@
   .legacy-widget-scope .gantt-header, .legacy-widget-scope .gantt-row{ grid-template-columns: 160px 1fr; }
   .legacy-widget-scope .gantt-tool{ padding: 12px 10px; gap: 8px; }
   .legacy-widget-scope .gantt-name{ font-size: 13px; }
-  .legacy-widget-scope .gantt-bar{ font-size: 10px; padding: 0 6px; height: 20px; }
+  .legacy-widget-scope .gantt-bar{ font-size: 11px; padding: 0 6px; height: 20px; }
 }
 
 @media (max-width: 640px){
@@ -1167,7 +1167,7 @@
 
 .legacy-widget-scope .rail-brand-mark{ width: 25px; height: 25px; display: inline-flex; }
 
-.legacy-widget-scope .rail-kicker{ margin: 0 6px 12px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.legacy-widget-scope .rail-kicker{ margin: 0 6px 12px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 
 .legacy-widget-scope .rail-nav{ position: relative; display: flex; flex-direction: column; gap: 3px; padding: 1px 0 10px; }
 
@@ -1208,7 +1208,7 @@
   box-shadow: 0 0 0 4px #E7F2FD, 0 0 0 7px rgba(30, 143, 236, .10), 0 4px 12px rgba(30, 143, 236, .22); transform: scale(1.13);
 }
 
-.legacy-widget-scope .rail-note{ color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+.legacy-widget-scope .rail-note{ color: var(--muted); font-size: 11px; line-height: 1.45; }
 
 .legacy-widget-scope .rail-note strong{ color: var(--navy); }
 /* Right action rail. Each `.form-slot` represents one intake path. */
@@ -2075,7 +2075,7 @@
 
 :root[data-theme="dark"] .legacy-widget-scope .phone-screen .phone-row .pr-text{ color: #142C4B !important; font-size: 12px; line-height: 1.18; }
 
-:root[data-theme="dark"] .legacy-widget-scope .phone-screen .phone-row .pr-meta{ color: #4C627E !important; font-size: 10px; font-weight: 600; line-height: 1.2; }
+:root[data-theme="dark"] .legacy-widget-scope .phone-screen .phone-row .pr-meta{ color: #4C627E !important; font-size: 11px; font-weight: 600; line-height: 1.2; }
 
 :root[data-theme="dark"] .legacy-widget-scope .os-window .welcome p, :root[data-theme="dark"] .legacy-widget-scope .os-window .user-role, :root[data-theme="dark"] .legacy-widget-scope .os-window .side-label, :root[data-theme="dark"] .legacy-widget-scope .os-window .tile-meta, :root[data-theme="dark"] .legacy-widget-scope .os-window .address, :root[data-theme="dark"] .legacy-widget-scope .os-window .nav-item, :root[data-theme="dark"] .legacy-widget-scope .os-window .kbd, :root[data-theme="dark"] .legacy-widget-scope .os-window .search input{
   color: #4C627E !important;
@@ -2301,7 +2301,7 @@
 .legacy-widget-scope .scope-modules span{
   padding: 6px 9px; border: 1px solid rgba(124, 192, 245, .22);
   border-radius: 999px; background: rgba(6, 24, 46, .48);
-  color: #E7F2FD; font-size: 10.5px;
+  color: #E7F2FD; font-size: 11px;
   font-weight: 700;
 }
 
@@ -2398,7 +2398,7 @@
 
 .legacy-widget-scope .scope-card{ min-height: 246px; display: flex; flex-direction: column; padding: 24px; }
 
-.legacy-widget-scope .scope-stage{ position: relative; z-index: 1; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.legacy-widget-scope .scope-stage{ position: relative; z-index: 1; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 
 .legacy-widget-scope .scope-card h3{ display: flex; flex-direction: column; gap: 7px; margin: 16px 0 10px; }
 
@@ -2469,7 +2469,7 @@
   border-bottom: 1px solid rgba(124, 192, 245, .16);
 }
 
-.legacy-widget-scope .collab-kicker{ margin: 0 0 5px; font-size: 10px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+.legacy-widget-scope .collab-kicker{ margin: 0 0 5px; font-size: 11px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
 
 .legacy-widget-scope .collab-widget-head h3{ margin: 0; color: var(--orka-neutral-0); font-size: clamp(19px, 2vw, 25px); letter-spacing: -.025em; line-height: 1.15; }
 
@@ -2510,7 +2510,7 @@
   box-shadow: 0 18px 34px rgba(0, 0, 0, .18), 0 0 0 4px rgba(30, 143, 236, .055), inset 0 1px 0 rgba(255, 255, 255, .10);
 }
 
-.legacy-widget-scope .collab-card-label{ margin: 0 0 9px; font-size: 10px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.legacy-widget-scope .collab-card-label{ margin: 0 0 9px; font-size: 11px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
 
 .legacy-widget-scope .collab-card h3{ margin: 0; color: var(--orka-neutral-0); font-size: 18px; line-height: 1.18; letter-spacing: -.02em; }
 
@@ -2531,7 +2531,7 @@
 
 .legacy-widget-scope .collab-tool small{
   grid-column: 2; margin-top: 1px;
-  color: #A7BCD6; font-size: 8.5px;
+  color: #A7BCD6; font-size: 11px;
   font-weight: 700; letter-spacing: .06em;
   text-transform: uppercase;
 }
@@ -2564,7 +2564,7 @@
   top: calc(50% + 16px); transform: translateX(-50%);
   padding: 4px 7px; border: 1px solid rgba(124, 192, 245, .14);
   border-radius: 999px; background: rgba(6, 24, 46, .94);
-  color: #C6E2FA; font-size: 8px;
+  color: #C6E2FA; font-size: 11px;
   font-weight: 850; letter-spacing: .08em;
   text-transform: uppercase; white-space: nowrap;
   box-shadow: 0 5px 12px rgba(0, 0, 0, .13);
@@ -2599,7 +2599,7 @@
   min-height: 35px; padding: 7px 8px;
   border: 1px solid rgba(124, 192, 245, .15); border-radius: 10px;
   background: rgba(15, 36, 64, .38); color: #E7F2FD;
-  font-size: 10.5px; font-weight: 760;
+  font-size: 11px; font-weight: 760;
   line-height: 1.2;
 }
 
@@ -2633,7 +2633,7 @@
 
 .legacy-widget-scope .collab-work-item b{ display: block; color: #F1F8FE; font-size: 11.5px; line-height: 1.25; }
 
-.legacy-widget-scope .collab-work-item small{ display: block; margin-top: 2px; color: #A7BCD6; font-size: 9.5px; font-weight: 650; line-height: 1.3; }
+.legacy-widget-scope .collab-work-item small{ display: block; margin-top: 2px; color: #A7BCD6; font-size: 11px; font-weight: 650; line-height: 1.3; }
 
 .legacy-widget-scope .collab-widget-foot{
   display: flex; align-items: center;
@@ -2875,7 +2875,7 @@
 
 .legacy-widget-scope .form-slot .slot-icon{ margin-top: 1px; }
 
-.legacy-widget-scope .slot-detail{ max-width: 170px; margin-top: 4px; font-size: 10.75px; line-height: 1.35; }
+.legacy-widget-scope .slot-detail{ max-width: 170px; margin-top: 4px; font-size: 11px; line-height: 1.35; }
 
 .legacy-widget-scope .form-slot--soon, .legacy-widget-scope .form-slot--soon:disabled{ color: var(--text-secondary); background: var(--bg-subtle); border-style: dashed; cursor: not-allowed; }
 
@@ -3492,7 +3492,7 @@
   box-shadow: var(--ai-glow) !important;
 }
 
-.legacy-widget-scope .roadmap-chart .gantt-icon--ai{ font-size: 10px; font-weight: 800; letter-spacing: .04em; }
+.legacy-widget-scope .roadmap-chart .gantt-icon--ai{ font-size: 11px; font-weight: 800; letter-spacing: .04em; }
 
 .legacy-widget-scope .roadmap-chart .roadmap-dependency-note{
   margin-left: auto;
@@ -4056,7 +4056,7 @@
   margin-left: 0;
   padding: 2px 7px;
   color: var(--text-secondary);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.35;
   background: var(--bg-muted);
   border: 1px solid var(--border-default);
@@ -4546,4 +4546,15 @@
 .legacy-widget-scope button { color: inherit; }
 @media (max-width: 800px) {
   .legacy-widget-scope .orka-action-footer { margin: 20px 10px 48px; }
+}
+
+
+/* Corrective Aug 13 roadmap: two public stages, no date-like six-column timeline. */
+.legacy-widget-scope .roadmap-chart{ min-width: 760px; }
+.legacy-widget-scope .roadmap-chart .gantt-header{ grid-template-columns: var(--roadmap-label-width) repeat(2, minmax(0, 1fr)); }
+.legacy-widget-scope .roadmap-chart .gantt-track{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 760px){
+  .legacy-widget-scope .roadmap-chart{ --roadmap-label-width: 210px; min-width: 640px; }
+  .legacy-widget-scope .roadmap-chart .gantt-header > div,
+  .legacy-widget-scope .roadmap-chart .gantt-track > div{ display: block !important; }
 }

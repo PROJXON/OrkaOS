@@ -1,23 +1,29 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import IntakeForm from './IntakeForm';
 import Icon from './Icon';
 import LegacyWidgets from './LegacyWidgets';
 import OverviewStory from './OverviewStory';
 import {
   ORKA_PRODUCTS,
+  ORKA_APP_GROUPS,
   PRODUCT_GROUP_FILTERS,
   ROADMAP_PHASES,
   ROADMAP_STATUS_META
 } from './products.js';
 import orkaLogoLight from './assets/brand/orka-logo-on-light.png';
 import orkaLogoDark from './assets/brand/orka-logo-on-dark.png';
+import orkaProfile from './assets/shell/orka-profile.webp';
+import googleWorkspaceLogo from './assets/shell/google-workspace.png';
+import awsLogo from './assets/shell/aws-logo.webp';
+import rsnaLogo from './assets/shell/rsna-cloud-connect-black-transparent.png';
 
 const THEME_STORAGE_KEY = 'orkaos-theme';
 const FEEDBACK_FORM_URL = import.meta.env.VITE_FEEDBACK_FORM_URL || '';
 const VIEW_LABELS = {
   overview: 'Overview',
   apps: 'Orka Apps',
-  future: 'Future Plan'
+  future: 'Future Plan',
+  'orka-ai': 'Orka AI'
 };
 
 const NAV_FOLDERS = {
@@ -26,10 +32,10 @@ const NAV_FOLDERS = {
     icon: 'home',
     tabs: [
       { id: 'start', label: 'Start Here', icon: 'home' },
-      { id: 'why', label: 'The Story', icon: 'help' },
-      { id: 'how', label: 'How It Works', icon: 'route' },
-      { id: 'experience', label: 'The Orka Way', icon: 'grid' },
-      { id: 'fit', label: 'Is It for You?', icon: 'users' }
+      { id: 'philosophy', label: 'Philosophy', icon: 'help' },
+      { id: 'ecosystem', label: 'Ecosystem', icon: 'layers' },
+      { id: 'adoption', label: 'Adoption', icon: 'route' },
+      { id: 'journey', label: 'User Journey', icon: 'users' }
     ]
   },
   apps: {
@@ -46,30 +52,18 @@ const NAV_FOLDERS = {
     icon: 'trending',
     tabs: [
       { id: 'plan', label: 'Plan Overview', icon: 'trending' },
-      { id: 'roadmap', label: 'Product Roadmap', icon: 'chart' },
-      { id: 'calendar', label: 'Rollout Calendar', icon: 'calendar' },
-      { id: 'join', label: 'Get Involved', icon: 'users' }
+      { id: 'calendar', label: 'Rollout Planning', icon: 'calendar' }
     ]
   }
 };
 
-const APP_LAUNCHER_IDS = [
-  'orka-os',
-  'orka-vault',
-  'orka-sop',
-  'orka-task',
-  'orka-hr',
-  'orka-aria',
-  'orka-marketing',
-  'orka-project'
-];
 
 const OVERVIEW_SEARCH_ITEMS = [
-  ['Meet OrkaOS', 'A plain-English introduction to the Google Workspace micro-stack.'],
-  ['The OrkaOS origin story', 'How group-project friction became a pod of focused business apps.'],
-  ['How the micro-stack works', 'Start with one app, follow a useful series, and grow toward the OrkaOS hub.'],
-  ['Pod, flow, slipstream, ecosystem', 'The four ideas behind the OrkaOS product experience.'],
-  ['Is OrkaOS for my team?', 'Who it is built for, who has outgrown it, and where to start.']
+  ['Start Here', 'What OrkaOS is, why it exists, and the Google Workspace micro-stack foundation.', 'start'],
+  ['Philosophy', 'Focused tools, pod-based work, progressive complexity, and shared operating language.', 'philosophy'],
+  ['Ecosystem', 'How the 20 Orka apps, app families, Google Workspace, and the OrkaOS hub fit together.', 'ecosystem'],
+  ['Adoption', 'How a team starts with one workflow and grows toward a broader pod.', 'adoption'],
+  ['User Journey', 'Detailed Medium Team, Small Team, Pre-launch, and Solopreneur operating cases.', 'journey']
 ];
 
 function initialTheme() {
@@ -83,13 +77,10 @@ function initialTheme() {
   }
 }
 
-function AnonymousAvatar({ large = false }) {
+function OrkaAvatar({ large = false }) {
   return (
-    <span className={`anonymous-avatar${large ? ' is-large' : ''}`} aria-hidden="true">
-      <svg viewBox="0 0 40 40" role="img">
-        <circle cx="20" cy="14" r="7" />
-        <path d="M8.5 34c1.4-7.3 5.2-11 11.5-11s10.1 3.7 11.5 11" />
-      </svg>
+    <span className={`orka-profile-avatar${large ? ' is-large' : ''}`} aria-hidden="true">
+      <img src={orkaProfile} alt="" />
     </span>
   );
 }
@@ -110,37 +101,89 @@ function Chevron({ open = false }) {
   );
 }
 
+function MasterSidebarCollapseIcon() {
+  return (
+    <svg className="master-collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="m11 17-5-5 5-5M18 17l-5-5 5-5" />
+    </svg>
+  );
+}
+
 function StatusPill({ status }) {
   const normalized = status.toLowerCase().replace(/\s+/g, '-');
-  return <span className={`status-pill status-${normalized}`}>{status}</span>;
+  const label = status === 'Design' ? 'Design & Testing' : status;
+  return <span className={`status-pill status-${normalized}`}>{label}</span>;
+}
+
+function PaneControlIcon({ state }) {
+  if (state === 'collapsed') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
+        <path d="m11 17-5-5 5-5M18 17l-5-5 5-5" />
+      </svg>
+    );
+  }
+  if (state === 'expanded') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
+        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <rect x="3" y="4" width="5" height="16" rx="1" />
+      <rect x="9.5" y="4" width="5" height="16" rx="1" />
+      <rect x="16" y="4" width="5" height="16" rx="1" />
+    </svg>
+  );
 }
 
 function PaneControls({ state = 'normal', onChange }) {
   const options = [
-    ['collapsed', 'Collapse pane'],
+    ['collapsed', 'Collapse this pane'],
     ['normal', 'Three-pane view'],
-    ['expanded', 'Expand pane']
+    ['expanded', 'Fill the workspace with this pane']
   ];
 
   return (
     <div className="pane-seg" role="group" aria-label="Pane size">
       {options.map(([value, label]) => {
         const active = state === value;
+        const restoreAll = value === 'normal';
         return (
           <button
             key={value}
             className="pane-seg-button"
+            data-state={value}
             type="button"
-            onClick={() => !active && onChange?.(value)}
+            onClick={() => (restoreAll || !active) && onChange?.(value)}
             aria-label={label}
             aria-current={active ? 'true' : undefined}
             aria-disabled={active ? 'true' : undefined}
-            tabIndex={active ? -1 : 0}
+            tabIndex={active && !restoreAll ? -1 : 0}
             title={label}
-          />
+          >
+            <PaneControlIcon state={value} />
+          </button>
         );
       })}
     </div>
+  );
+}
+
+function ThemeGlyph({ theme }) {
+  return (
+    <svg className="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+      {theme === 'dark' ? (
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+      ) : (
+        <>
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" />
+        </>
+      )}
+    </svg>
   );
 }
 
@@ -199,7 +242,7 @@ function FeedbackPlaceholder({ onClose }) {
   );
 }
 
-function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, onOpenAria, favoriteIds, onToggleFavorite }) {
+function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, favoriteIds, onToggleFavorite }) {
   const [groupFilter, setGroupFilter] = useState('all');
   const [stageFilter, setStageFilter] = useState('all');
   const [catalogQuery, setCatalogQuery] = useState('');
@@ -225,22 +268,35 @@ function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, onOpenA
   }, [visibleProducts, selectedProductId, setSelectedProductId]);
 
   const setPaneState = (pane, nextState) => {
+    // Orka Master: the center control is a whole-workspace reset.
     if (nextState === 'normal') {
       setPaneStates({ catalog: 'normal', detail: 'normal', insight: 'normal' });
       return;
     }
-    if (nextState === 'expanded') {
-      setPaneStates({
-        catalog: pane === 'catalog' ? 'expanded' : 'collapsed',
-        detail: pane === 'detail' ? 'expanded' : 'collapsed',
-        insight: pane === 'insight' ? 'expanded' : 'collapsed'
-      });
-      return;
-    }
+
     setPaneStates((current) => {
-      const next = { ...current, [pane]: 'collapsed' };
-      const remaining = Object.values(next).filter((state) => state !== 'collapsed').length;
-      return remaining ? next : { catalog: 'normal', detail: 'normal', insight: 'normal' };
+      const paneOrder = ['catalog', 'detail', 'insight'];
+      const others = paneOrder.filter((item) => item !== pane);
+      const previousState = current[pane];
+      const next = { ...current, [pane]: nextState };
+
+      if (nextState === 'expanded') {
+        others.forEach((item) => { next[item] = 'collapsed'; });
+      } else if (previousState === 'expanded') {
+        // Master behavior: collapsing an expanded pane re-opens its two siblings.
+        others.forEach((item) => { next[item] = 'normal'; });
+      }
+
+      if (nextState === 'normal' && previousState === 'collapsed') {
+        others.forEach((item) => { if (next[item] === 'expanded') next[item] = 'normal'; });
+      }
+
+      const visible = paneOrder.filter((item) => next[item] !== 'collapsed');
+      if (!visible.length) {
+        const promote = others.find((item) => current[item] !== 'collapsed') || others[0];
+        next[promote] = 'normal';
+      }
+      return next;
     });
   };
 
@@ -327,7 +383,7 @@ function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, onOpenA
             </div>
 
             <div className="mini-app-window">
-              <div className="mini-app-top"><span className="mini-app-logo">{selectedProduct.name.slice(0, 1)}</span><b>{selectedProduct.name}</b><span className="mini-app-search"><Icon name="search" size={13} /> Search</span><AnonymousAvatar /></div>
+              <div className="mini-app-top"><span className="mini-app-logo">{selectedProduct.name.slice(0, 1)}</span><b>{selectedProduct.name}</b><span className="mini-app-search"><Icon name="search" size={13} /> Search</span><OrkaAvatar /></div>
               <div className="mini-app-content">
                 <div className="mini-app-nav"><span className="active">Overview</span><span>Workspace</span><span>Activity</span></div>
                 <div className="mini-app-canvas"><small>WELCOME TO {selectedProduct.name.toUpperCase()}</small><h4>One workflow. Clear ownership. Less setup.</h4><div className="mini-card-row"><span /><span /><span /></div></div>
@@ -339,8 +395,8 @@ function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, onOpenA
               <span aria-hidden="true">{favoriteIds.includes(selectedProduct.id) ? '♥' : '♡'}</span> {favoriteIds.includes(selectedProduct.id) ? 'Favorited' : 'Favorite'}
             </button>
             <button className="button secondary" type="button" onClick={() => onOpenForm('Join the Pod')}>Follow this app</button>
-            <button className="button primary" type="button" onClick={() => onOpenForm(selectedProduct.status === 'Live' || selectedProduct.status === 'Production' ? 'Join the Pod' : 'Join Alpha Testing')}>
-              {selectedProduct.status === 'Live' || selectedProduct.status === 'Production' ? 'Request access' : 'Join testing'}
+            <button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>
+              Join Alpha Testing
             </button>
           </footer>
         </article>
@@ -359,15 +415,9 @@ function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, onOpenA
               <div className="dashboard-row"><StatusPill status={selectedProduct.status} /><b>{ROADMAP_STATUS_META[selectedProduct.status].progress}%</b></div>
             </article>
             <article className="dashboard-card rollout-card">
-              <span className="dashboard-label">Estimated rollout</span>
-              <h3>{selectedProduct.rolloutLabel}</h3>
-              <p>{selectedProduct.rolloutDate ? 'Planning estimate · subject to change as testing and feedback progress.' : 'This app is already available to eligible teams.'}</p>
-            </article>
-            <article className="dashboard-card aria-context-card">
-              <span className="dashboard-label">OrkaAria</span>
-              <h3>Ask about this app</h3>
-              <p>Use the public OrkaAria guide for plain-English help with the ecosystem, panes, and rollout plan.</p>
-              <button className="button small aria-button" type="button" onClick={onOpenAria} aria-controls="orka-aria-panel"><Icon name="sparkles" size={14} /> Ask OrkaAria</button>
+              <span className="dashboard-label">Public planning</span>
+              <h3>{selectedProduct.publicStatus}</h3>
+              <p>{selectedProduct.status === 'Production' ? 'Active production/development. This is not a public-launch claim.' : 'Timing remains TBD while the app is in Design & Testing.'}</p>
             </article>
             <article className="dashboard-card">
               <span className="dashboard-label">Google pairing</span>
@@ -379,14 +429,14 @@ function AppsView({ selectedProductId, setSelectedProductId, onOpenForm, onOpenA
               <div className="related-apps">
                 {relatedProducts.map((product) => (
                   <button type="button" key={product.id} onClick={() => setSelectedProductId(product.id)}>
-                    <span>{product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><div><b>{product.name}</b><small>{product.status}</small></div>
+                    <span>{product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><div><b>{product.name}</b><small>{product.publicStatus}</small></div>
                   </button>
                 ))}
               </div>
             </article>
             <article className="dashboard-card catalog-snapshot-card">
               <span className="dashboard-label">Catalog snapshot</span>
-              <p>The card-based explorer from the original website remains available in <b>All App Cards</b>. Use these quick picks without leaving the three-pane catalog.</p>
+              <p>The richer three-pane Catalog is the primary app exploration experience. Use these quick picks to move between apps without duplicating the Catalog in a second card directory.</p>
               <div className="catalog-snapshot-grid">
                 {ORKA_PRODUCTS.slice(0, 6).map((product) => (
                   <button type="button" key={product.id} onClick={() => setSelectedProductId(product.id)} className={product.id === selectedProduct.id ? 'active' : ''}>
@@ -414,8 +464,16 @@ function RoadmapView({ onOpenForm, onOpenApps }) {
     count: ORKA_PRODUCTS.filter((product) => product.status.toLowerCase() === phase.id).length
   }));
 
+  const roadmapPriority = ['orka-aria', 'orka-sop', 'orka-flow', 'orka-os'];
   const orderedProducts = [...ORKA_PRODUCTS].sort((a, b) => {
-    return ROADMAP_STATUS_META[b.status].progress - ROADMAP_STATUS_META[a.status].progress || a.name.localeCompare(b.name);
+    const aPriority = roadmapPriority.indexOf(a.id);
+    const bPriority = roadmapPriority.indexOf(b.id);
+    if (aPriority !== -1 || bPriority !== -1) {
+      if (aPriority === -1) return 1;
+      if (bPriority === -1) return -1;
+      return aPriority - bPriority;
+    }
+    return a.group.localeCompare(b.group) || a.name.localeCompare(b.name);
   });
 
   return (
@@ -424,7 +482,7 @@ function RoadmapView({ onOpenForm, onOpenApps }) {
         <div>
           <span className="eyebrow">Product view</span>
           <h1>What’s next for the Orka ecosystem.</h1>
-          <p>Follow every public OrkaApp from concept through live release. The roadmap is deliberately visible so early users can understand what exists, what is being shaped, and where feedback matters.</p>
+          <p>Follow the public priority sequence and current external stage for all 20 Orka apps. The roadmap communicates direction without turning internal availability or rough planning dates into public launch claims.</p>
           <div className="hero-actions">
             <button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button>
             <button className="button secondary" type="button" onClick={onOpenApps}>Open the catalog</button>
@@ -437,13 +495,13 @@ function RoadmapView({ onOpenForm, onOpenApps }) {
 
       <section className="roadmap-board content-surface">
         <header className="roadmap-board-head">
-          <div><span className="eyebrow">Public build sequence</span><h2>From concept to live, in one view</h2></div>
+          <div><span className="eyebrow">Public build sequence</span><h2>Priority and stage, in one compact view</h2></div>
           <div className="roadmap-legend">
             {ROADMAP_PHASES.map((phase) => <span key={phase.id}><i className={`legend-dot ${phase.id}`} />{phase.label.replace(/^\d+ · /, '')}</span>)}
           </div>
         </header>
         <div className="roadmap-table">
-          <div className="roadmap-table-head"><span>App</span><span>Group</span><span>Progress</span><span>Estimate</span><span>Stage</span></div>
+          <div className="roadmap-table-head"><span>App</span><span>Group</span><span>Progress</span><span>Planning</span><span>Stage</span></div>
           {orderedProducts.map((product) => (
             <div className="roadmap-row" key={product.id}>
               <div className="roadmap-app"><span className="app-mark small">{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><div><b>{product.name}</b><small>{product.priority}</small></div></div>
@@ -459,7 +517,7 @@ function RoadmapView({ onOpenForm, onOpenApps }) {
       <section className="roadmap-principles">
         <article className="content-surface"><span className="step-number">01</span><h3>Validate the problem</h3><p>Concepts stay visible before code is treated as a commitment.</p></article>
         <article className="content-surface"><span className="step-number">02</span><h3>Design with real teams</h3><p>Early access and testing shape the workflow before production.</p></article>
-        <article className="content-surface"><span className="step-number">03</span><h3>Ship one clear job</h3><p>Apps move live only when they solve a focused problem simply.</p></article>
+        <article className="content-surface"><span className="step-number">03</span><h3>Advance one clear job</h3><p>Each app should keep a focused operating purpose as it moves from design and testing into production.</p></article>
         <article className="content-surface"><span className="step-number">04</span><h3>Connect, then graduate</h3><p>Teams can add adjacent apps or move to larger platforms when ready.</p></article>
       </section>
 
@@ -472,36 +530,104 @@ function RoadmapView({ onOpenForm, onOpenApps }) {
 }
 
 
+function RolloutPlanningView({ onOpenForm, onSelectProduct }) {
+  const priorityIds = ['orka-aria', 'orka-sop', 'orka-flow', 'orka-os'];
+  const priorities = priorityIds.map((id) => ORKA_PRODUCTS.find((product) => product.id === id)).filter(Boolean);
+  const remaining = ORKA_PRODUCTS.filter((product) => !priorityIds.includes(product.id));
+
+  return (
+    <div className="view-scroll rollout-view rollout-planning-view">
+      <section className="rollout-hero content-surface">
+        <div>
+          <span className="eyebrow">Public rollout planning</span>
+          <h1>Sequence and stage — without speculative launch dates.</h1>
+          <p>The public plan emphasizes what is being prioritized and which stage each app is in. Timing stays TBD until approved commitments exist.</p>
+          <div className="hero-actions">
+            <button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button>
+            <span className="estimate-disclaimer"><Icon name="calendar" size={15} /> Dates intentionally omitted</span>
+          </div>
+        </div>
+        <div className="rollout-next-card">
+          <span>Current priority</span>
+          <b>Orka AI</b>
+          <strong>Production</strong>
+          <small>Active development · not a public-launch claim</small>
+        </div>
+      </section>
+
+      <section className="content-surface rollout-priority-section">
+        <div className="story-section-heading left compact">
+          <span className="eyebrow">Reviewed priority order</span>
+          <h2>The first four priorities stay visible as a compact production sequence.</h2>
+          <p>The remaining 16 apps are still part of the broader ecosystem and remain visible below.</p>
+        </div>
+        <div className="priority-roadmap-bar" aria-label="First four OrkaOS roadmap priorities">
+          {priorities.map((product, index) => (
+            <button type="button" key={product.id} onClick={() => onSelectProduct(product.id)}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <div><b>{product.name}</b><small>{product.publicStatus}</small></div>
+              <i className={`priority-progress ${product.status.toLowerCase()}`} aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-surface rollout-broader-ecosystem">
+        <div className="story-section-heading left compact">
+          <span className="eyebrow">Broader ecosystem</span>
+          <h2>Sixteen more apps remain in the public 20-app vision.</h2>
+        </div>
+        <div className="rollout-planning-list">
+          {remaining.map((product) => (
+            <button type="button" key={product.id} onClick={() => onSelectProduct(product.id)}>
+              <span className="app-mark small">{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span>
+              <div><b>{product.name}</b><small>{product.group} · {product.publicStatus}</small></div>
+              <span>TBD / planning</span>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+
 const ARIA_STARTERS = [
   'What is OrkaOS?',
   'Which app should I start with?',
   'Explain the three panes',
-  'What is rolling out next?'
+  'What is the current public plan?'
 ];
 
 function ariaGuideAnswer(prompt) {
   const query = prompt.toLowerCase();
   if (query.includes('pane') || query.includes('collapse') || query.includes('expand')) {
-    return 'The workspace uses three panes: Catalog, Workspace, and Dashboard. Use the three-segment control in a pane header to collapse it, return to the balanced three-pane view, or expand it while the other panes become compact rails.';
+    return 'The Catalog uses three panes: Catalog, Workspace, and Dashboard. Use the Orka Master segmented control in a pane header to collapse that pane, restore the balanced three-pane view, or expand it while the other panes become compact rails.';
   }
-  if (query.includes('rollout') || query.includes('calendar') || query.includes('next') || query.includes('release')) {
-    return 'The Rollout Calendar shows public planning estimates, not committed release dates. OrkaATS is the next validation target, followed by OrkaProcess and the OrkaOS hub. Open Future Plan → Rollout Calendar for the full sequence.';
+  if (query.includes('rollout') || query.includes('plan') || query.includes('next') || query.includes('release') || query.includes('roadmap')) {
+    return 'Future Plan shows public priority and stage without publishing speculative dates. The current first-four sequence is Orka AI, OrkaSOP, OrkaFlow, then OrkaOS; timing elsewhere remains TBD / planning.';
   }
   if (query.includes('start') || query.includes('which app') || query.includes('recommend')) {
-    return 'Start with the smallest workflow that is already painful. OrkaVault fits access sharing, OrkaSOP fits repeatable procedures, OrkaHR fits people records, and OrkaATS fits applicant tracking. The catalog shows each app’s current stage and estimate.';
+    return 'Start with the smallest workflow that is already painful. Use the User Journey section to recognize your operating situation, then use the 20-app Catalog or All App Cards view to choose the focused Orka app that fits that workflow.';
   }
-  if (query.includes('aria') || query.includes('ai')) {
-    return 'OrkaAria is the guide layer for the Orka ecosystem. On this public site it provides guided, prewritten answers so visitors can understand apps, navigation, and rollout plans without pretending to be a live production assistant.';
+  if (query.includes('aria')) {
+    return 'OrkaAria is the interactive guide in the OrkaOS shell. It can answer common questions about the story, navigation, apps, pane controls, adoption, and the public plan. Orka AI is the separate product destination beside this guide button.';
+  }
+  if (query.includes('ai')) {
+    return 'Orka AI is the separate AI product destination in the 20-app ecosystem. The OrkaAria control beside it is the website guide you are using now.';
   }
   if (query.includes('what is') || query.includes('orkaos') || query.includes('ecosystem')) {
-    return 'OrkaOS is a modular set of focused business apps designed around Google Workspace. Teams can adopt one useful app first, add adjacent apps later, and use the OrkaOS hub as the ecosystem grows.';
+    return 'OrkaOS is a modular operating system built around focused Orka apps and Google Workspace. Teams can start with one useful workflow, add adjacent capabilities as needs grow, and keep a shared operating language across the pod.';
   }
-  return 'I can guide you through the OrkaOS concept, recommend a starting app, explain the three-pane workspace, or summarize the estimated rollout calendar.';
+  if (query.includes('philosophy') || query.includes('adoption') || query.includes('journey') || query.includes('story')) {
+    return 'The Overview keeps the full OrkaOS origin story while making Philosophy, Ecosystem, Adoption, and User Journey explicit. Adoption is progressive: begin with the workflow that matters now, establish habits, then connect adjacent workflows as the pod grows.';
+  }
+  return 'I can guide you through the OrkaOS story, explain Philosophy / Ecosystem / Adoption, recommend a starting point, explain the three-pane workspace, distinguish OrkaAria from Orka AI, or summarize the current public plan.';
 }
 
 function OrkaAriaPanel({ onClose, onNavigate }) {
   const [messages, setMessages] = useState([
-    { role: 'aria', text: 'Hi — I’m OrkaAria, the public guide to OrkaOS. Ask about the ecosystem, an app, the three-pane workspace, or the rollout plan.' }
+    { role: 'aria', text: 'Hi — I’m OrkaAria, the OrkaOS guide. Ask about the story, ecosystem, a starting app, the three-pane workspace, adoption, or the current public plan.' }
   ]);
   const [draft, setDraft] = useState('');
   const threadRef = useRef(null);
@@ -525,7 +651,7 @@ function OrkaAriaPanel({ onClose, onNavigate }) {
     <section className="aria-panel" id="orka-aria-panel" role="dialog" aria-labelledby="aria-title">
       <header className="aria-panel-head">
         <span className="aria-avatar"><Icon name="sparkles" size={19} /></span>
-        <div><h2 id="aria-title">OrkaAria</h2><p>Public OrkaOS guide</p></div>
+        <div><h2 id="aria-title">OrkaAria</h2><p>OrkaOS guide</p></div>
         <button className="icon-button" type="button" onClick={onClose} aria-label="Close OrkaAria"><Icon name="x" size={17} /></button>
       </header>
       <div className="aria-thread scroll-area" ref={threadRef} aria-live="polite">
@@ -544,156 +670,27 @@ function OrkaAriaPanel({ onClose, onNavigate }) {
         <button type="submit" aria-label="Send question" disabled={!draft.trim()}>Send</button>
       </form>
       <footer className="aria-panel-foot">
-        <span>Guided public preview · not a live AI service</span>
-        <div><button type="button" onClick={() => { onNavigate('apps', 'catalog'); onClose(); }}>Apps</button><button type="button" onClick={() => { onNavigate('future', 'calendar'); onClose(); }}>Calendar</button></div>
+        <span>Guided public preview</span>
+        <div><button type="button" onClick={() => { onNavigate('apps', 'catalog'); onClose(); }}>Apps</button><button type="button" onClick={() => { onNavigate('future', 'plan'); onClose(); }}>Future Plan</button></div>
       </footer>
     </section>
   );
 }
 
-function parseRolloutDate(value) {
-  if (!value) return null;
-  const [year, month, day] = value.split('-').map(Number);
-  return new Date(year, month - 1, day, 12);
-}
-
-function calendarDateKey(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function RolloutCalendarView({ onOpenForm, onSelectProduct }) {
-  const scheduled = useMemo(() => ORKA_PRODUCTS
-    .filter((product) => product.rolloutDate)
-    .sort((a, b) => a.rolloutDate.localeCompare(b.rolloutDate)), []);
-  const available = ORKA_PRODUCTS.filter((product) => !product.rolloutDate && ['Live', 'Production'].includes(product.status));
-  const firstUpcoming = scheduled.find((product) => parseRolloutDate(product.rolloutDate) >= new Date()) || scheduled[0];
-  const [cursor, setCursor] = useState(() => {
-    const date = parseRolloutDate(firstUpcoming?.rolloutDate) || new Date();
-    return new Date(date.getFullYear(), date.getMonth(), 1, 12);
-  });
-  const [mode, setMode] = useState('month');
-
-  const monthTitle = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(cursor);
-  const quarter = Math.floor(cursor.getMonth() / 3);
-  const quarterTitle = `Q${quarter + 1} ${cursor.getFullYear()}`;
-
-  const monthCells = useMemo(() => {
-    const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12);
-    const start = new Date(first);
-    start.setDate(first.getDate() - first.getDay());
-    return Array.from({ length: 42 }, (_, index) => {
-      const date = new Date(start);
-      date.setDate(start.getDate() + index);
-      return date;
-    });
-  }, [cursor]);
-
-  const shift = (direction) => {
-    const step = mode === 'quarter' ? 3 : 1;
-    setCursor((current) => new Date(current.getFullYear(), current.getMonth() + (direction * step), 1, 12));
-  };
-
-  const eventsForDate = (date) => scheduled.filter((product) => product.rolloutDate === calendarDateKey(date));
-  const quarterMonths = Array.from({ length: 3 }, (_, index) => new Date(cursor.getFullYear(), quarter * 3 + index, 1, 12));
-  const todayKey = calendarDateKey(new Date());
-
+function OrkaAIView({ onBack, onOpenForm }) {
   return (
-    <div className="view-scroll rollout-view">
-      <section className="rollout-hero content-surface">
-        <div>
-          <span className="eyebrow">Estimated OrkaApp rollouts</span>
-          <h1>A calendar for what may ship next.</h1>
-          <p>These dates are planning estimates for the public roadmap. They can move as testing, dependencies, and early-user feedback change the sequence.</p>
-          <div className="hero-actions"><button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button><span className="estimate-disclaimer"><Icon name="calendar" size={15} /> Estimates, not commitments</span></div>
+    <div className="view-scroll orka-ai-view">
+      <section className="content-surface orka-ai-minimal">
+        <span className="eyebrow">Orka AI · Production</span>
+        <h1>Orka AI</h1>
+        <p>Orka AI is the consolidated public destination for the onboard AI-agent concept in the Orka ecosystem. It is actively in development; this page intentionally stays minimal until the dedicated product design is approved.</p>
+        <div className="orka-ai-status-row">
+          <span><Icon name="sparkles" size={18} /> Active development</span>
+          <span><Icon name="layers" size={18} /> Part of the 20-app ecosystem</span>
         </div>
-        <div className="rollout-next-card">
-          <span>Next estimated rollout</span>
-          <b>{firstUpcoming?.name}</b>
-          <strong>{firstUpcoming?.rolloutLabel}</strong>
-          <small>{firstUpcoming?.status} · subject to change</small>
-        </div>
-      </section>
-
-      <section className="rollout-calendar content-surface">
-        <header className="rollout-calendar-head">
-          <div><span className="eyebrow">Planning calendar</span><h2>{mode === 'quarter' ? quarterTitle : mode === 'list' ? 'Upcoming estimates' : monthTitle}</h2></div>
-          <div className="rollout-calendar-actions">
-            <div className="calendar-mode" role="tablist" aria-label="Calendar view">
-              {[
-                ['month', 'Month'],
-                ['quarter', 'Quarter'],
-                ['list', 'List']
-              ].map(([id, label]) => <button type="button" role="tab" aria-selected={mode === id} className={mode === id ? 'active' : ''} key={id} onClick={() => setMode(id)}>{label}</button>)}
-            </div>
-            {mode !== 'list' ? <div className="calendar-nav"><button type="button" onClick={() => shift(-1)} aria-label="Previous period">‹</button><button type="button" onClick={() => setCursor(new Date(new Date().getFullYear(), new Date().getMonth(), 1, 12))}>Today</button><button type="button" onClick={() => shift(1)} aria-label="Next period">›</button></div> : null}
-          </div>
-        </header>
-
-        {mode === 'month' && (
-          <div className="month-calendar">
-            <div className="calendar-weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div>
-            <div className="calendar-grid">
-              {monthCells.map((date) => {
-                const events = eventsForDate(date);
-                const key = calendarDateKey(date);
-                return (
-                  <div className={`calendar-day${date.getMonth() !== cursor.getMonth() ? ' outside' : ''}${key === todayKey ? ' today' : ''}${events.length ? ' has-event' : ''}`} key={key}>
-                    <span className="calendar-day-number">{date.getDate()}</span>
-                    {events.map((product) => (
-                      <button type="button" className={`calendar-event ${product.ai ? 'ai' : ''}`} key={product.id} onClick={() => onSelectProduct(product.id)} title={`Open ${product.name}`}>
-                        <span>{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><b>{product.name}</b>
-                      </button>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {mode === 'quarter' && (
-          <div className="quarter-grid">
-            {quarterMonths.map((month) => {
-              const products = scheduled.filter((product) => {
-                const date = parseRolloutDate(product.rolloutDate);
-                return date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth();
-              });
-              return (
-                <article className="quarter-month" key={`${month.getFullYear()}-${month.getMonth()}`}>
-                  <header><b>{new Intl.DateTimeFormat('en-US', { month: 'long' }).format(month)}</b><span>{products.length} estimate{products.length === 1 ? '' : 's'}</span></header>
-                  {products.length ? products.map((product) => (
-                    <button type="button" key={product.id} onClick={() => onSelectProduct(product.id)}>
-                      <span className="app-mark small">{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span>
-                      <div><b>{product.name}</b><small>{product.rolloutLabel} · {product.status}</small></div>
-                    </button>
-                  )) : <p>No rollout estimate in this month.</p>}
-                </article>
-              );
-            })}
-          </div>
-        )}
-
-        {mode === 'list' && (
-          <div className="rollout-list">
-            {scheduled.map((product) => (
-              <button type="button" className={product.ai ? 'ai' : ''} key={product.id} onClick={() => onSelectProduct(product.id)}>
-                <time dateTime={product.rolloutDate}><b>{parseRolloutDate(product.rolloutDate).getDate()}</b><span>{new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(parseRolloutDate(product.rolloutDate))}</span></time>
-                <span className="app-mark">{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span>
-                <div><b>{product.name}</b><small>{product.group} · {product.priority}</small></div>
-                <StatusPill status={product.status} />
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="available-now content-surface">
-        <div><span className="eyebrow">Available now</span><h2>Apps already beyond an estimate.</h2><p>Live and production apps appear here instead of receiving a speculative future date.</p></div>
-        <div className="available-now-grid">
-          {available.map((product) => <button type="button" key={product.id} onClick={() => onSelectProduct(product.id)}><span className="app-mark">{product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><div><b>{product.name}</b><small>{product.status}</small></div><Icon name="checkCircle" size={18} /></button>)}
+        <div className="hero-actions">
+          <button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Join Alpha Testing</button>
+          <button className="button secondary" type="button" onClick={onBack}>Back to OrkaOS</button>
         </div>
       </section>
     </div>
@@ -737,7 +734,7 @@ function AdminView({ activeView, setActiveView, setFeedbackOpen }) {
           <div className="admin-stat-row"><article><span>Total apps</span><b>{ORKA_PRODUCTS.length}</b></article><article><span>Published</span><b>{publishedCount}</b></article><article><span>Active design</span><b>{ORKA_PRODUCTS.filter((p) => p.status === 'Design').length}</b></article><article><span>Concepts</span><b>{ORKA_PRODUCTS.filter((p) => p.status === 'Concept').length}</b></article></div>
           <div className="admin-catalog-table">
             <div className="admin-catalog-head"><span>App</span><span>Group</span><span>Stage</span><span>Public action</span></div>
-            {ORKA_PRODUCTS.map((product) => <div key={product.id}><b>{product.name}</b><span>{product.group}</span><StatusPill status={product.status} /><span>{product.status === 'Live' || product.status === 'Production' ? 'Request access' : 'Follow / test'}</span></div>)}
+            {ORKA_PRODUCTS.map((product) => <div key={product.id}><b>{product.name}</b><span>{product.group}</span><StatusPill status={product.status} /><span>Follow / test</span></div>)}
           </div>
         </section>
       )}
@@ -780,7 +777,7 @@ function FavoritesView({ favoriteIds, onToggleFavorite, onSelectProduct, onOpenC
               <div className="favorite-meta"><span>{product.group}</span><span>{product.google}</span></div>
               <div className="favorite-actions">
                 <button className="button secondary" type="button" onClick={() => onSelectProduct(product.id)}>Open details</button>
-                <button className="button primary" type="button" onClick={() => onOpenForm(product.status === 'Live' || product.status === 'Production' ? 'Join the Pod' : 'Join Alpha Testing')}>Follow app</button>
+                <button className="button primary" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>Follow app</button>
               </div>
             </article>
           ))}
@@ -797,36 +794,48 @@ function FavoritesView({ favoriteIds, onToggleFavorite, onSelectProduct, onOpenC
   );
 }
 
-function PersistentCtaFooter({ onOpenForm, onNavigate }) {
-  const actions = [
-    ['Join the Pod', 'Early-access previews and demos', 'userPlus', false],
-    ['Join Alpha Testing', 'Test incomplete builds and shape what ships', 'flask', false],
-    ['Join Beta Testing', 'Near-release validation · enrollment coming soon', 'badgeCheck', true],
-    ['Partner with PROJXON', 'Pilots, integrations, or co-building', 'handshake', false]
-  ];
-
+function EcosystemFooter({ onOpenForm, onNavigate }) {
   return (
-    <footer className="persistent-cta-footer" aria-label="Join OrkaOS options">
-      <div className="persistent-cta-intro">
-        <div className="persistent-cta-brand"><span className="site-footer-mark"><span className="official-orka-logo" /></span><span><b>Build your pod.</b><small>OrkaOS · by PROJXON</small></span></div>
-        <div className="persistent-footer-links">
-          <button type="button" onClick={() => onNavigate('overview', 'start')}>Overview</button>
-          <a href="https://www.linkedin.com/company/orkaos/about/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+    <footer className="ecosystem-footer" aria-label="OrkaOS participation and credibility links">
+      <div className="partner-hierarchy" aria-label="OrkaOS ecosystem relationships">
+        <div className="partner-zone partner-zone-left">
+          <b className="projxon-wordmark">PROJXON</b>
+        </div>
+        <div className="partner-zone partner-zone-center">
+          <div className="partner-lockup partner-lockup-google">
+            <div className="partner-mark"><img src={googleWorkspaceLogo} alt="Google Workspace" /></div>
+            <small className="partner-relationship">Built for Google Workspace</small>
+          </div>
+          <div className="partner-lockup partner-lockup-aws">
+            <div className="partner-mark"><img src={awsLogo} alt="AWS" /></div>
+            <small className="partner-relationship">Powered by AWS</small>
+          </div>
+        </div>
+        <div className="partner-zone partner-zone-right">
+          <div className="partner-lockup partner-lockup-rsna">
+            <div className="partner-mark"><img src={rsnaLogo} alt="RSNA" /></div>
+            <small className="partner-relationship">Built by RSNA</small>
+          </div>
         </div>
       </div>
-      <div className="persistent-cta-actions">
-        {actions.map(([intent, detail, icon, disabled]) => (
-          <button
-            className={`persistent-cta-card${intent === 'Join the Pod' ? ' primary' : ''}${disabled ? ' soon' : ''}`}
-            type="button"
-            key={intent}
-            disabled={disabled}
-            onClick={() => !disabled && onOpenForm(intent)}
-          >
-            <span className="persistent-cta-icon"><Icon name={icon} size={18} /></span>
-            <span><b>{intent}</b><small>{detail}</small></span>
-          </button>
-        ))}
+
+      <div className="participation-row">
+        <button className="participation-action primary" type="button" onClick={() => onOpenForm('Join the Pod')}>
+          <span><Icon name="userPlus" size={18} /></span><div><b>Join the Pod</b><small>Explore OrkaOS with the team</small></div>
+        </button>
+        <button className="participation-action" type="button" onClick={() => onOpenForm('Join Alpha Testing')}>
+          <span><Icon name="flask" size={18} /></span><div><b>Test New Apps Early</b><small>Join Alpha Testing</small></div>
+        </button>
+        <button className="participation-action" type="button" onClick={() => onOpenForm('Partner with OrkaOS')}>
+          <span><Icon name="handshake" size={18} /></span><div><b>Partner with OrkaOS</b><small>Explore a pilot or partnership</small></div>
+        </button>
+      </div>
+
+      <div className="ecosystem-utility-row">
+        <button type="button" onClick={() => onNavigate('overview', 'start')}>Overview</button>
+        <button type="button" onClick={() => onNavigate('apps', 'catalog')}>20-app Catalog</button>
+        <a href="https://www.linkedin.com/company/orkaos/about/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+        <span>OrkaOS · BUILD YOUR POD</span>
       </div>
     </footer>
   );
@@ -838,7 +847,7 @@ export default function App() {
   const [activeView, setActiveView] = useState('overview');
   const [activeTab, setActiveTab] = useState('start');
   const [openFolders, setOpenFolders] = useState({ overview: true, apps: true, future: true });
-  const [selectedProductId, setSelectedProductId] = useState('orka-os');
+  const [selectedProductId, setSelectedProductId] = useState('orka-aria');
   const [favoriteIds, setFavoriteIds] = useState(() => {
     try {
       const saved = JSON.parse(window.localStorage.getItem('orkaos-favorites') || 'null');
@@ -850,12 +859,13 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
+  const [launcherFilter, setLauncherFilter] = useState('');
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [ariaOpen, setAriaOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formIntent, setFormIntent] = useState('Join the Pod');
   const searchRef = useRef(null);
@@ -919,10 +929,16 @@ export default function App() {
     const destinationTab = tab || NAV_FOLDERS[view]?.tabs[0]?.id || null;
     setActiveView(view);
     setActiveTab(destinationTab);
-    setOpenFolders((current) => ({ ...current, [view]: true }));
+    if (NAV_FOLDERS[view]) setOpenFolders((current) => ({ ...current, [view]: true }));
     setSidebarOpen(false);
     setSearchOpen(false);
   };
+
+  // Keep this callback stable so Overview's scroll tracker is not torn down and
+  // recreated every time activeTab changes during a smooth chapter navigation.
+  const handleOverviewSectionChange = useCallback((section) => {
+    setActiveTab(section);
+  }, []);
 
   const toggleFavorite = (productId) => {
     setFavoriteIds((current) => current.includes(productId)
@@ -942,18 +958,18 @@ export default function App() {
 
     const overviewResults = OVERVIEW_SEARCH_ITEMS
       .filter(([title, description]) => `${title} ${description}`.toLowerCase().includes(query))
-      .map(([title, description]) => ({
+      .map(([title, description, tab]) => ({
         type: 'destination',
         id: 'overview',
-        tab: /meet/i.test(title) ? 'start' : /origin|story/i.test(title) ? 'why' : /micro-stack|works/i.test(title) ? 'how' : /pod|flow|slipstream|ecosystem/i.test(title) ? 'experience' : 'fit',
+        tab,
         title,
         meta: description
       }));
 
     const appResults = ORKA_PRODUCTS
-      .filter((product) => `${product.name} ${product.summary} ${product.group} ${product.status} ${product.rolloutLabel} rollout estimate`.toLowerCase().includes(query))
+      .filter((product) => `${product.name} ${product.summary} ${product.group} ${product.publicStatus} ${product.priority}`.toLowerCase().includes(query))
       .slice(0, 7)
-      .map((product) => ({ type: 'app', id: product.id, title: product.name, meta: `${product.group} · ${product.status} · ${product.rolloutLabel}` }));
+      .map((product) => ({ type: 'app', id: product.id, title: product.name, meta: `${product.group} · ${product.publicStatus} · ${product.rolloutLabel}` }));
 
     return [...folderResults, ...overviewResults, ...appResults].slice(0, 10);
   }, [searchQuery]);
@@ -968,12 +984,20 @@ export default function App() {
     setSearchQuery('');
   };
 
-  const launcherProducts = APP_LAUNCHER_IDS.map((id) => ORKA_PRODUCTS.find((product) => product.id === id)).filter(Boolean);
+  const launcherProducts = ORKA_PRODUCTS.filter((product) => product.name.toLowerCase().includes(launcherFilter.trim().toLowerCase()));
+  const launcherGroups = ORKA_APP_GROUPS.map((group) => ({
+    ...group,
+    products: launcherProducts.filter((product) => product.groupId === group.id)
+  })).filter((group) => group.products.length);
   const logo = theme === 'dark' ? orkaLogoDark : orkaLogoLight;
   const currentFolder = NAV_FOLDERS[activeView];
   const currentTab = currentFolder?.tabs.find((tab) => tab.id === activeTab);
 
   const renderUserView = () => {
+    if (activeView === 'orka-ai') {
+      return <OrkaAIView onBack={() => navigate('overview', 'start')} onOpenForm={openIntake} />;
+    }
+
     if (activeView === 'overview') {
       return (
         <OverviewStory
@@ -981,12 +1005,13 @@ export default function App() {
           onOpenForm={openIntake}
           onOpenApps={() => navigate('apps', 'catalog')}
           onNavigate={navigate}
+          onSectionChange={handleOverviewSectionChange}
         />
       );
     }
 
     if (activeView === 'apps') {
-      if (activeTab === 'catalog') return <AppsView selectedProductId={selectedProductId} setSelectedProductId={setSelectedProductId} onOpenForm={openIntake} onOpenAria={() => setAriaOpen(true)} favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} />;
+      if (activeTab === 'catalog') return <AppsView selectedProductId={selectedProductId} setSelectedProductId={setSelectedProductId} onOpenForm={openIntake} favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} />;
       if (activeTab === 'directory') return <div className="view-scroll legacy-view"><LegacyWidgets panel="apps-catalog" onOpenForm={openIntake} onNavigate={navigate} /></div>;
       if (activeTab === 'favorites') return (
         <FavoritesView
@@ -1001,9 +1026,7 @@ export default function App() {
     }
 
     if (activeTab === 'plan') return <RoadmapView onOpenForm={openIntake} onOpenApps={() => navigate('apps', 'catalog')} />;
-    if (activeTab === 'roadmap') return <div className="view-scroll legacy-view"><LegacyWidgets panel="future-roadmap" onOpenForm={openIntake} onNavigate={navigate} /></div>;
-    if (activeTab === 'calendar') return <RolloutCalendarView onOpenForm={openIntake} onSelectProduct={(id) => { setSelectedProductId(id); navigate('apps', 'catalog'); }} />;
-    if (activeTab === 'join') return <div className="view-scroll legacy-view"><LegacyWidgets panel="future-join" onOpenForm={openIntake} onNavigate={navigate} /></div>;
+    if (activeTab === 'calendar') return <RolloutPlanningView onOpenForm={openIntake} onSelectProduct={(id) => { setSelectedProductId(id); navigate('apps', 'catalog'); }} />;
     return null;
   };
 
@@ -1017,8 +1040,9 @@ export default function App() {
           <button className="brand-mark" type="button" onClick={() => navigate('overview')} aria-label="Go to OrkaOS overview">
             <img src={logo} alt="" />
             <span className="brand-word"><b>Orka</b><strong>OS</strong></span>
-            <span className="version-chip">v1</span>
+            <span className="version-chip">V1.5</span>
           </button>
+          <span className="brand-build-pod">BUILD YOUR POD</span>
         </div>
 
         <div className="top-center">
@@ -1051,25 +1075,43 @@ export default function App() {
             <button type="button" className={role === 'admin' ? 'active admin' : ''} onClick={() => setRole('admin')}><Icon name="settings" size={14} /> Admin</button>
           </div>
 
-          <div className="menu-anchor">
+          <div className="menu-anchor launcher-anchor">
             <button className="icon-button" type="button" aria-label="Open Orka app launcher" onClick={() => { setAppsOpen((open) => !open); setAlertsOpen(false); setProfileOpen(false); }}><NineDotIcon /></button>
             {appsOpen && (
               <div className="apps-popover popover right-popover">
-                <div className="popover-title"><b>Orka Apps</b><small>Explore the ecosystem</small></div>
-                <div className="app-launcher-grid">
-                  {launcherProducts.map((product) => (
-                    <button type="button" key={product.id} onClick={() => { setSelectedProductId(product.id); navigate('apps', 'catalog'); setAppsOpen(false); }}>
-                      <span>{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span><b>{product.name.replace('Orka', '') || 'OS'}</b>
-                    </button>
+                <div className="launcher-title-row"><span>App series</span><span>{launcherProducts.length} of {ORKA_PRODUCTS.length} apps</span></div>
+                <input
+                  className="apps-filter"
+                  type="search"
+                  value={launcherFilter}
+                  onChange={(event) => setLauncherFilter(event.target.value)}
+                  placeholder="Filter apps…"
+                  aria-label="Filter apps"
+                  autoComplete="off"
+                />
+                <div className="apps-scroll scroll-area">
+                  {launcherGroups.map((group) => (
+                    <section className="launcher-group" key={group.id} aria-label={`${group.label} apps`}>
+                      <div className="launcher-group-head"><span className="launcher-group-bar" aria-hidden="true" /><b>{group.label}</b><small>{group.products.length}</small></div>
+                      <div className="app-launcher-grid">
+                        {group.products.map((product) => (
+                          <button type="button" key={product.id} onClick={() => { setSelectedProductId(product.id); navigate('apps', 'catalog'); setAppsOpen(false); }}>
+                            <span className={product.ai ? 'is-ai' : ''}>{product.ai ? 'AI' : product.name.replace('Orka', '').slice(0, 2).toUpperCase()}</span>
+                            <b>{product.name.replace('Orka', '') || 'OS'}</b>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
                   ))}
+                  {!launcherGroups.length && <div className="launcher-empty">No apps match “{launcherFilter}”.</div>}
                 </div>
                 <button className="popover-footer-action" type="button" onClick={() => { navigate('apps', 'catalog'); setAppsOpen(false); }}>View full catalog →</button>
               </div>
             )}
           </div>
 
-          <button className="theme-switch" type="button" onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
-            <span className="theme-track"><span className="theme-knob" /><Icon name="sun" size={13} /></span>
+          <button className="theme-switch" type="button" onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title="Toggle light / dark">
+            <span className="theme-track"><ThemeGlyph theme={theme} /><span className="theme-knob" /></span>
           </button>
 
           <div className="menu-anchor alerts-anchor">
@@ -1077,21 +1119,21 @@ export default function App() {
             {alertsOpen && (
               <div className="alerts-popover popover right-popover">
                 <div className="popover-title"><b>What’s new</b><small>Website preview</small></div>
-                <div className="alert-item"><span className="alert-dot purple" /><div><b>Meet OrkaAria</b><p>The public guide now explains apps, pane controls, and the rollout plan.</p></div></div>
-                <div className="alert-item"><span className="alert-dot blue" /><div><b>Rollout calendar added</b><p>Future Plan now includes estimated OrkaApp rollout months, clearly marked as subject to change.</p></div></div>
-                <div className="alert-item"><span className="alert-dot green" /><div><b>OrkaVault is live</b><p>Secure access management and credential sharing for small teams is now available.</p></div></div>
+                <div className="alert-item"><span className="alert-dot purple" /><div><b>Orka AI is in Production</b><p>The public AI product is consolidated under Orka AI; detailed product-page design remains intentionally deferred.</p></div></div>
+                <div className="alert-item"><span className="alert-dot blue" /><div><b>Overview rebuilt around five concepts</b><p>Philosophy, Ecosystem, Adoption, and User Journey now sit beside Start Here in one continuous experience.</p></div></div>
+                <div className="alert-item"><span className="alert-dot green" /><div><b>Public dates removed</b><p>Future Plan now communicates priority, stage, and TBD planning instead of speculative rollout dates.</p></div></div>
               </div>
             )}
           </div>
 
           <div className="menu-anchor">
-            <button className="profile-button" type="button" aria-label="Open profile menu" onClick={() => { setProfileOpen((open) => !open); setAppsOpen(false); setAlertsOpen(false); }}><AnonymousAvatar /></button>
+            <button className="profile-button" type="button" aria-label="Open profile menu" onClick={() => { setProfileOpen((open) => !open); setAppsOpen(false); setAlertsOpen(false); }}><OrkaAvatar /></button>
             {profileOpen && (
               <div className="profile-popover popover right-popover">
-                <div className="profile-summary"><AnonymousAvatar large /><div><b>Anonymous visitor</b><small>Public OrkaOS preview</small></div></div>
+                <div className="profile-summary"><OrkaAvatar large /><div><b>OS User</b><small>Public OrkaOS preview</small></div></div>
                 <div className="menu-separator" />
-                <button type="button" onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}><Icon name="sun" size={16} /> Toggle theme</button>
-                <button type="button" onClick={() => { navigate('overview'); setProfileOpen(false); }}><Icon name="help" size={16} /> About OrkaOS</button>
+                <button type="button" onClick={() => setProfileOpen(false)} aria-label="Settings, demo only"><Icon name="settings" size={16} /> <span>Settings</span><small className="menu-item-note">Demo</small></button>
+                <button type="button" onClick={() => { navigate('overview'); setProfileOpen(false); }}><Icon name="help" size={16} /> <span>About OrkaOS</span></button>
               </div>
             )}
           </div>
@@ -1130,8 +1172,7 @@ export default function App() {
             ))}
           </div>
           <div className="gas-sidenav-foot">
-            <a className="gas-foot-button" href="https://www.linkedin.com/company/orkaos/about/" target="_blank" rel="noopener noreferrer" title="OrkaOS on LinkedIn"><Icon name="users" size={18} /><span className="gas-nav-label">LinkedIn</span></a>
-            <button className="gas-foot-button" type="button" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}><Chevron open={sidebarCollapsed} /><span className="gas-nav-label">Collapse sidebar</span></button>
+            <button className="collapse-btn" type="button" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}><MasterSidebarCollapseIcon /><span className="gas-nav-label">Collapse</span></button>
           </div>
         </aside>
 
@@ -1140,17 +1181,19 @@ export default function App() {
             <nav className="breadcrumb" aria-label="Breadcrumb">
               {role === 'admin' ? (
                 <b aria-current="page">Admin Console</b>
+              ) : activeView === 'orka-ai' ? (
+                <b aria-current="page">Orka AI</b>
               ) : (
                 <>
-                  <span className="breadcrumb-folder">{currentFolder.label}</span>
+                  <span className="breadcrumb-folder">{currentFolder?.label}</span>
                   <span className="breadcrumb-separator">/</span>
                   <b aria-current="page">{currentTab?.label}</b>
                 </>
               )}
             </nav>
             <div className="guide-actions">
-              <button className="button small aria-button" type="button" onClick={() => setAriaOpen(true)} aria-expanded={ariaOpen} aria-controls="orka-aria-panel"><Icon name="sparkles" size={15} /> OrkaAria</button>
-              <button className="button small secondary" type="button" onClick={() => openIntake('Join the Pod')}>Get early access</button>
+              <button className="button small aria-button" type="button" onClick={() => { setRole('user'); setAriaOpen(true); }} aria-label="Open OrkaAria" aria-expanded={ariaOpen} aria-controls="orka-aria-panel"><Icon name="sparkles" size={15} /> OrkaAria</button>
+              <button className="button small orka-ai-entry" type="button" onClick={() => { setRole('user'); setAriaOpen(false); navigate('orka-ai'); }} aria-label="Open Orka AI"><Icon name="sparkles" size={15} /> Orka AI</button>
             </div>
           </div>
 
@@ -1163,7 +1206,7 @@ export default function App() {
         </main>
       </div>
 
-      <PersistentCtaFooter onOpenForm={openIntake} onNavigate={navigate} />
+      <EcosystemFooter onOpenForm={openIntake} onNavigate={navigate} />
 
       {ariaOpen && <OrkaAriaPanel onClose={() => setAriaOpen(false)} onNavigate={navigate} />}
       {feedbackOpen && <FeedbackPlaceholder onClose={() => setFeedbackOpen(false)} />}

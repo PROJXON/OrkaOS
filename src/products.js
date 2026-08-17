@@ -1,41 +1,13 @@
 /**
  * Public OrkaOS product catalog
  * -----------------------------
- * This list mirrors the public OrkaOS Product Roadmap. Every app is assigned
- * to one of the published groups: IT, OPS, HR, Business, or Marketing.
+ * The public ecosystem stays at exactly 20 apps. Public roadmap language is
+ * intentionally external-facing: Orka AI is in Production (active development),
+ * while the remaining apps are presented as Design & Testing unless newer
+ * approved public status information is supplied.
  *
- * `rolloutDate` values are public planning estimates used by the website's
- * rollout calendar. They are not committed release dates and are intentionally
- * kept separate from the roadmap stage.
+ * No speculative rollout dates are published in this pass.
  */
-
-const ESTIMATED_ROLLOUTS = {
-  'orka-ats': '2026-09-15',
-  'orka-process': '2026-10-15',
-  'orka-os': '2026-11-15',
-  'orka-task': '2026-12-15',
-  'orka-aria': '2027-01-15',
-  'orka-prompt': '2027-02-15',
-  'orka-project': '2027-03-15',
-  'orka-goals': '2027-04-15',
-  'orka-flow': '2027-05-15',
-  'orka-legal': '2027-06-15',
-  'orka-finance': '2027-07-15',
-  'orka-marketing': '2027-08-15',
-  'orka-social': '2027-09-15',
-  'orka-content': '2027-11-15',
-  'orka-crm': '2027-12-15',
-  'orka-sales': '2028-01-15',
-  'orka-chat': '2028-02-15'
-};
-
-function formatRolloutLabel(date, status) {
-  if (status === 'Live' || status === 'Production') return 'Available now';
-  if (!date) return 'Estimate pending';
-  return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-    .format(new Date(`${date}T12:00:00Z`));
-}
-
 
 export const ORKA_APP_GROUPS = [
   {
@@ -74,134 +46,126 @@ const ORKA_GROUP_BY_ID = Object.fromEntries(
   ORKA_APP_GROUPS.map((group) => [group.id, group])
 );
 
+const PUBLIC_DEFAULT_STATUS = 'Design';
+
 export const ORKA_PRODUCTS = [
   {
-    id: 'orka-vault', name: 'OrkaVault', status: 'Live', priority: 'Available',
-    lane: 'current', groupId: 'it',
+    // Keep the legacy internal id for compatibility while consolidating the public product under Orka AI.
+    // Orka AI intentionally leads the public catalog.
+    id: 'orka-aria', name: 'Orka AI', status: 'Production', publicStatus: 'Production', priority: 'Priority 1 · Production', groupId: 'it',
+    summary: 'An onboard AI-agent concept for tech-stack visibility, AI adoption, and tool governance.',
+    google: 'Google Workspace + AWS foundation', pairs: ['OrkaPrompt', 'OrkaOS'], featured: true, ai: true
+  },
+  {
+    id: 'orka-vault', name: 'OrkaVault', groupId: 'it',
     summary: 'Secure access management and credential sharing for small teams.',
     google: 'Google Workspace + secure app layer', pairs: ['OrkaSOP', 'OrkaOS'], featured: true
   },
   {
-    id: 'orka-aria', name: 'OrkaAria', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'it',
-    summary: 'An onboard CTO for tech-stack visibility, AI adoption, and tool governance.',
-    google: 'Gemini + AWS', pairs: ['OrkaPrompt', 'OrkaOS'], featured: true, ai: true
-  },
-  {
-    id: 'orka-prompt', name: 'OrkaPrompt', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'it',
+    id: 'orka-prompt', name: 'OrkaPrompt', groupId: 'it',
     summary: 'A version-controlled prompt catalog for reusable, stage-based AI workflows.',
-    google: 'Google Docs + Drive', pairs: ['OrkaAria', 'OrkaTask'], ai: true
+    google: 'Google Docs + Drive', pairs: ['Orka AI', 'OrkaTask'], ai: true
   },
   {
-    id: 'orka-os', name: 'OrkaOS', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'ops',
+    id: 'orka-os', name: 'OrkaOS', publicStatus: 'Design & Testing', priority: 'Priority 4 · Design & Testing', groupId: 'ops',
     summary: 'The modular operating-system hub connecting Google Workspace and Orka apps.',
-    google: 'Google Workspace + AWS', pairs: ['OrkaVault', 'OrkaAria'], featured: true
+    google: 'Google Workspace + AWS', pairs: ['OrkaVault', 'Orka AI'], featured: true
   },
   {
-    id: 'orka-chat', name: 'OrkaChat', status: 'Concept', priority: 'Planned',
-    lane: 'later', groupId: 'ops',
+    id: 'orka-chat', name: 'OrkaChat', groupId: 'ops',
     summary: 'Team communication that keeps shared Google Drive context connected to conversation.',
     google: 'Google Drive + communication layer', pairs: ['OrkaProject', 'OrkaFlow']
   },
   {
-    id: 'orka-sop', name: 'OrkaSOP', status: 'Production', priority: 'Available',
-    lane: 'current', groupId: 'ops',
+    id: 'orka-sop', name: 'OrkaSOP', publicStatus: 'Design & Testing', priority: 'Priority 2 · Design & Testing', groupId: 'ops',
     summary: 'Living standard operating procedures with ownership and review-health signals.',
     google: 'Google Docs + company index', pairs: ['OrkaProcess', 'OrkaFlow'], featured: true
   },
   {
-    id: 'orka-task', name: 'OrkaTask', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'ops',
+    id: 'orka-task', name: 'OrkaTask', groupId: 'ops',
     summary: 'Kanban-style task management built for clear ownership and fast handoffs.',
     google: 'Google Workspace + task app layer', pairs: ['OrkaProject', 'OrkaFlow'], featured: true
   },
   {
-    id: 'orka-goals', name: 'OrkaGoals', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'ops',
+    id: 'orka-goals', name: 'OrkaGoals', groupId: 'ops',
     summary: 'Personal and team goal planning with visible progress and accountability.',
     google: 'Google Workspace', pairs: ['OrkaTask', 'OrkaHR']
   },
   {
-    id: 'orka-legal', name: 'OrkaLegal', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'ops',
+    id: 'orka-legal', name: 'OrkaLegal', groupId: 'ops',
     summary: 'Contracts, agreements, compliance records, and renewal visibility.',
     google: 'Google Docs + Drive', pairs: ['OrkaFinance', 'OrkaVault']
   },
   {
-    id: 'orka-finance', name: 'OrkaFinance', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'ops',
+    id: 'orka-finance', name: 'OrkaFinance', groupId: 'ops',
     summary: 'Budgeting, expenses, revenue tracking, and financial reporting.',
     google: 'Google Sheets + web app', pairs: ['OrkaLegal', 'OrkaSales']
   },
   {
-    id: 'orka-flow', name: 'OrkaFlow', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'ops',
+    id: 'orka-flow', name: 'OrkaFlow', publicStatus: 'Design & Testing', priority: 'Priority 3 · Design & Testing', groupId: 'ops',
     summary: 'Meeting facilitation, decisions, action items, and structured handoffs.',
     google: 'Google Docs + Calendar', pairs: ['OrkaTask', 'OrkaProcess']
   },
   {
-    id: 'orka-process', name: 'OrkaProcess', status: 'Next', priority: 'Up next',
-    lane: 'queued', groupId: 'ops',
+    id: 'orka-process', name: 'OrkaProcess', groupId: 'ops',
     summary: 'Process mapping and improvement workflows that connect policies, SOPs, and repeatable execution.',
     google: 'Google Workspace', pairs: ['OrkaSOP', 'OrkaFlow']
   },
   {
-    id: 'orka-project', name: 'OrkaProject', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'ops',
+    id: 'orka-project', name: 'OrkaProject', groupId: 'ops',
     summary: 'Structured project planning with drafts, ownership, deadlines, and health signals.',
     google: 'Google Sheets + project-tool integration', pairs: ['OrkaTask', 'OrkaGoals'], featured: true
   },
   {
-    id: 'orka-ats', name: 'OrkaATS', status: 'Testing', priority: 'In validation',
-    lane: 'current', groupId: 'hr',
+    id: 'orka-ats', name: 'OrkaATS', groupId: 'hr',
     summary: 'Applicant pipeline tracking from pre-screening through onboarding.',
     google: 'Google Apps Script + Sheets', pairs: ['OrkaHR', 'OrkaPrompt'], featured: true
   },
   {
-    id: 'orka-hr', name: 'OrkaHR', status: 'Production', priority: 'Available',
-    lane: 'current', groupId: 'hr',
+    id: 'orka-hr', name: 'OrkaHR', groupId: 'hr',
     summary: 'Employee records, contact cards, roles, and team identity in one workspace.',
     google: 'Google Forms + Sheets', pairs: ['OrkaATS', 'OrkaProcess'], featured: true
   },
   {
-    id: 'orka-crm', name: 'OrkaCRM', status: 'Concept', priority: 'Planned',
-    lane: 'later', groupId: 'business',
+    id: 'orka-crm', name: 'OrkaCRM', groupId: 'business',
     summary: 'Contact, relationship, and deal-pipeline management for growing teams.',
     google: 'Google Sheets + web intake', pairs: ['OrkaSales', 'OrkaMarketing'], featured: true
   },
   {
-    id: 'orka-sales', name: 'OrkaSales', status: 'Concept', priority: 'Planned',
-    lane: 'later', groupId: 'business',
+    id: 'orka-sales', name: 'OrkaSales', groupId: 'business',
     summary: 'Sales intake, qualification, pipeline health, and opportunity triage.',
     google: 'Google Sheets + web intake', pairs: ['OrkaCRM', 'OrkaMarketing']
   },
   {
-    id: 'orka-content', name: 'OrkaContent', status: 'Concept', priority: 'Planned',
-    lane: 'later', groupId: 'marketing',
+    id: 'orka-content', name: 'OrkaContent', groupId: 'marketing',
     summary: 'Content planning, production, approvals, and reusable messaging assets.',
     google: 'Google Docs + Drive', pairs: ['OrkaMarketing', 'OrkaSocial']
   },
   {
-    id: 'orka-social', name: 'OrkaSocial', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'marketing',
+    id: 'orka-social', name: 'OrkaSocial', groupId: 'marketing',
     summary: 'Guided social-account setup, optimization, activity logs, and analytics links.',
     google: 'Google Sheets + Drive', pairs: ['OrkaContent', 'OrkaMarketing']
   },
   {
-    id: 'orka-marketing', name: 'OrkaMarketing', status: 'Design', priority: 'In design',
-    lane: 'building', groupId: 'marketing',
+    id: 'orka-marketing', name: 'OrkaMarketing', groupId: 'marketing',
     summary: 'A guided campaign builder for audiences, journeys, channels, and deadlines.',
     google: 'Google Sheets + Docs + creative tools', pairs: ['OrkaSocial', 'OrkaCRM'], featured: true
   }
 ].map((product) => {
-  const rolloutDate = ESTIMATED_ROLLOUTS[product.id] || null;
+  const status = product.status || PUBLIC_DEFAULT_STATUS;
+  const priority = product.priority || (status === 'Production' ? 'Production' : 'Design & Testing');
+  const publicStatus = product.publicStatus || (status === 'Production' ? 'Production' : 'Design & Testing');
   return {
     ...product,
+    // Reserved for the approved three-letter identifier mapping. Null keeps current icon treatment until supplied.
+    shortCode: product.shortCode || null,
+    status,
+    publicStatus,
+    priority,
+    lane: status === 'Production' ? 'current' : 'building',
     group: ORKA_GROUP_BY_ID[product.groupId].label,
-    rolloutDate,
-    rolloutLabel: formatRolloutLabel(rolloutDate, product.status)
+    rolloutDate: null,
+    rolloutLabel: status === 'Production' ? 'Active development' : 'TBD / planning'
   };
 });
 
@@ -211,36 +175,27 @@ export const PRODUCT_GROUP_FILTERS = [
 ];
 
 export const ROADMAP_PHASES = [
-  { id: 'concept', label: '01 · Concept' },
-  { id: 'next', label: '02 · Next' },
-  { id: 'design', label: '03 · Design' },
-  { id: 'testing', label: '04 · Testing' },
-  { id: 'production', label: '05 · Production' },
-  { id: 'live', label: '06 · Live' }
+  { id: 'design', label: '01 · Design & Testing' },
+  { id: 'production', label: '02 · Production' }
 ];
 
 export const ROADMAP_STATUS_META = {
-  Concept: { barLabel: 'Concept', barClass: 'concept', pillClass: 'status-concept', progress: 15 },
-  Next: { barLabel: 'Next', barClass: 'next', pillClass: 'status-next', progress: 32 },
-  Design: { barLabel: 'Design', barClass: 'design', pillClass: 'status-design', progress: 49 },
-  Testing: { barLabel: 'Testing', barClass: 'testing', pillClass: 'status-testing', progress: 66 },
-  Production: { barLabel: 'Production', barClass: 'production', pillClass: 'status-production', progress: 83 },
-  Live: { barLabel: 'Live', barClass: 'live', pillClass: 'status-live', progress: 97 }
+  Design: { barLabel: 'Design & Testing', barClass: 'design', pillClass: 'status-design', progress: 55 },
+  Production: { barLabel: 'Production', barClass: 'production', pillClass: 'status-production', progress: 82 }
 };
 
-const ROADMAP_SORT_ORDER = {
-  Live: 0,
-  Production: 1,
-  Testing: 2,
-  Design: 3,
-  Next: 4,
-  Concept: 5
-};
+const ROADMAP_PRIORITY = ['orka-aria', 'orka-sop', 'orka-flow', 'orka-os'];
 
 export const ROADMAP_SEQUENCE = [...ORKA_PRODUCTS]
   .sort((a, b) => {
-    const stageDifference = ROADMAP_SORT_ORDER[a.status] - ROADMAP_SORT_ORDER[b.status];
-    return stageDifference || a.group.localeCompare(b.group) || a.name.localeCompare(b.name);
+    const aPriority = ROADMAP_PRIORITY.indexOf(a.id);
+    const bPriority = ROADMAP_PRIORITY.indexOf(b.id);
+    if (aPriority !== -1 || bPriority !== -1) {
+      if (aPriority === -1) return 1;
+      if (bPriority === -1) return -1;
+      return aPriority - bPriority;
+    }
+    return a.group.localeCompare(b.group) || a.name.localeCompare(b.name);
   })
   .map((product) => ({
     id: product.id,

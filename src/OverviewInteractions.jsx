@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Icon from './Icon';
 import { ORKA_PRODUCTS, ORKA_PRODUCTS_BY_ID } from './products.js';
 import orkaLogoLight from './assets/brand/orka-logo-on-light.png';
+import googleGLogo from './assets/shell/google-g-official.png';
 import podFormationArt from './assets/story/orka-pod-formation.webp';
 import topologyField from './assets/system/topology-field.svg';
 import currentRibbon from './assets/system/current-ribbon.svg';
@@ -355,7 +356,7 @@ export function MicroStackExplorer({ onOpenApps }) {
         </div>
 
         <div className="ecosystem-google-foundation-v4" aria-label="Google Workspace remains the foundation">
-          <span className="google-mark" aria-hidden="true">G</span>
+          <span className="google-mark" aria-hidden="true"><img src={googleGLogo} alt="" /></span>
           <span><small>Foundation stays yours</small><b>Google Workspace</b></span>
         </div>
       </div>
@@ -491,7 +492,7 @@ export function FragmentedToFlow() {
         </figcaption>
       </figure>
       <div className="friction-foundation-note">
-        <span className="google-mark" aria-hidden="true">G</span>
+        <span className="google-mark" aria-hidden="true"><img src={googleGLogo} alt="" /></span>
         <p><b>Google Workspace stays foundational.</b> OrkaOS coordinates the operating layer around it.</p>
       </div>
     </div>

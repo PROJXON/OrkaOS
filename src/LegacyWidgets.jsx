@@ -29,8 +29,8 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
     ...phase,
     count: ORKA_PRODUCTS.filter((product) => product.status.toLowerCase() === phase.id).length
   })), []);
-  const availableProductCount = useMemo(() => ORKA_PRODUCTS.filter((product) =>
-    product.status === 'Live' || product.status === 'Production'
+  const productionProductCount = useMemo(() => ORKA_PRODUCTS.filter((product) =>
+    product.publicStatus === 'Production'
   ).length, []);
 
   return (
@@ -648,7 +648,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
             </div>
             <div className="app-tile app-tile--ai">
               <div className="tile-icon tile-icon--ai" aria-hidden="true">AI</div>
-              <div className="tile-name">OrkaAria</div>
+              <div className="tile-name">Orka AI</div>
             </div>
           </div>
         </main>
@@ -668,7 +668,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
           <span className="official-orka-logo" aria-hidden="true" />
         </div>
         <div className="dock-divider" />
-        <div className="dock-icon ai" title="OrkaAria · AI Agent">
+        <div className="dock-icon ai" title="Orka AI · AI Agent">
           AI
         </div>
       </div>
@@ -755,7 +755,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
           <div className="phone-row phone-row--ai">
             <div className="pr-icon pr-icon--ai" aria-hidden="true">AI</div>
             <div>
-              <div className="pr-text">OrkaAria</div>
+              <div className="pr-text">Orka AI</div>
               <div className="pr-meta">Summary ready</div>
             </div>
           </div>
@@ -903,7 +903,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
             </span>
             <span className="product-selector__copy">
               <strong>{product.name}</strong>
-              <small>{product.status} · {product.priority}</small>
+              <small>{product.publicStatus} · {product.priority}</small>
             </span>
           </button>
         ))}
@@ -919,7 +919,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
             <h3>{selectedProduct.name}</h3>
           </div>
           <span className={`product-status product-status--${selectedProduct.status.toLowerCase()}`}>
-            {selectedProduct.status}
+            {selectedProduct.publicStatus}
           </span>
         </div>
 
@@ -972,7 +972,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
       {visibleCatalogProducts.map((product) => (
         <article className={`catalog-card${product.ai ? ' is-ai' : ''}`} key={product.id}>
           <div className="catalog-card-top">
-            <span className={`catalog-status catalog-status--${product.status.toLowerCase()}`}>{product.status}</span>
+            <span className={`catalog-status catalog-status--${product.status.toLowerCase()}`}>{product.publicStatus}</span>
             <span className="catalog-orbit">{product.priority}</span>
           </div>
           <h3>{product.name}</h3>
@@ -1007,9 +1007,9 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
   <div className="wrap">
     <div className="section-head">
       <span className="eyebrow">Product roadmap</span>
-      <h2 className="h2">From concept to live, in one view</h2>
+      <h2 className="h2">Priority and public stage, in one view</h2>
       <p className="lead">
-        The public roadmap includes only apps assigned to a public Orka app group. Each bar shows how far an included app has moved through the shared delivery path.
+        The public roadmap keeps all 20 apps visible while separating reviewed priority from public stage. Bars communicate planning maturity, not launch timing.
       </p>
     </div>
 
@@ -1017,7 +1017,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
       <div className="roadmap-overview__total">
         <span>Public roadmap</span>
         <strong>{ORKA_PRODUCTS.length} apps</strong>
-        <small>{availableProductCount} live or in production</small>
+        <small>{productionProductCount} in Production · active development</small>
       </div>
       <div className="roadmap-overview__stages">
         {roadmapStageCounts.map((phase) => (
@@ -1030,7 +1030,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
     </div>
 
     <div className="roadmap-scroll" tabIndex={0} aria-label="Scrollable OrkaOS product-stage roadmap">
-      <div className="gantt roadmap-chart" role="table" aria-label="OrkaOS products progressing from concept to live">
+      <div className="gantt roadmap-chart" role="table" aria-label="OrkaOS products by public planning stage">
         <div className="gantt-header" role="rowgroup">
           <div className="corner" role="columnheader">App &amp; current stage</div>
           {ROADMAP_PHASES.map((phase) => (
@@ -1051,19 +1051,19 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
                 <div>
                   <div className="gantt-name">
                     {product.name}
-                    <span className={`owner-pill ${status.pillClass}`}>{product.status}</span>
+                    <span className={`owner-pill ${status.pillClass}`}>{product.publicStatus}</span>
                   </div>
                   <div className="gantt-owner">{product.group} group</div>
                 </div>
               </div>
-              <div className="gantt-track" role="cell" aria-label={`${product.name} is currently in ${product.status}`}>
+              <div className="gantt-track" role="cell" aria-label={`${product.name} is currently in ${product.publicStatus}`}>
                 {ROADMAP_PHASES.map((phase) => (
                   <div key={`${product.id}-${phase.id}`} aria-hidden="true" />
                 ))}
                 <div
                   className={`gantt-bar ${status.barClass}${product.ai ? ' gantt-bar--ai' : ''}`}
                   style={{ left: `${roadmapItem.start}%`, width: `${roadmapItem.width}%` }}
-                  title={`${product.name} · ${product.status}`}
+                  title={`${product.name} · ${product.publicStatus}`}
                 >
                   <span>{status.barLabel}</span>
                 </div>
@@ -1087,38 +1087,7 @@ export default function LegacyWidgets({ panel, onOpenForm, onNavigate }) {
 </section>
       </>}
 
-      {panel === 'future-join' && <>
-<section id="cta">
-  <div className="wrap">
-    <div className="cta">
-      <h2>Start building your business the right way</h2>
-      <p>Pick one module. Solve one problem. Let the system grow with you.</p>
-      <div className="cta-buttons">
-        <button type="button" className="btn btn-primary" onClick={() => openForm('Join the Pod')}>
-          Join the Pod →
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={() => onNavigate('apps', 'catalog')}>
-          Explore catalog
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={() => openForm('Join Alpha Testing')}>
-          Join Alpha Testing
-        </button>
-      </div>
-    </div>
-    <div className="closing">
-      <p className="closing-line">
-        <span>Start with what you need.</span>
-        <span>Scale with confidence.</span>
-        <span className="accent">Outgrow us on purpose.</span>
-      </p>
-      <p className="closing-sub">
-        OrkaOS is temporary by design — a launchpad into HubSpot, Slack,
-        ClickUp, QuickBooks &amp; beyond.
-      </p>
-    </div>
-  </div>
-</section>
-      </>}
+
     </div>
   );
 }

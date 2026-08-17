@@ -34,3 +34,17 @@ The following generated cinematic scene assets were removed from production beca
 ## Large illustrations required
 
 None for this pass. The interactive systems are better expressed as 2–6 reusable visual parts plus HTML/SVG interaction and motion/state logic. The existing supplied pod artwork remains the only full illustrative story asset in these Overview sections.
+
+## Footer credibility asset update
+
+- `src/assets/shell/rsna-cloud-connect-black-transparent.png` — exact derivative of the supplied RSNA Cloud Connect footer mark. The original black background has been removed to transparency and the original white artwork is rendered black for clear use on the light footer. The same asset is CSS-inverted in dark mode.
+## Living ecosystem visual
+
+- The living Ecosystem story keeps OrkaOS fixed at the center and uses the existing `src/assets/brand/orka-logo-on-light.png` mark for the hub and the 19 orbiting app nodes.
+- No additional generated illustration or copied screenshot is shipped. The supplied orbital reference was used as a composition/motion reference only; the production visual is HTML/CSS/React and is populated from the canonical 20-app catalog.
+- Four rings rotate independently at deliberately long durations, with a small secondary float on each node. `prefers-reduced-motion` disables the movement.
+## Supplied Google assets
+
+- `src/assets/shell/google-g-official.png` — cleaned transparent derivative of the Google G artwork supplied in this update. It replaces the former text `G` placeholders in Overview storytelling surfaces.
+- `src/assets/shell/google-workspace-official.png` — the supplied Google Workspace mark retained as a ready-to-use shell/credibility asset. The existing horizontal Workspace lockup remains in the footer for now.
+

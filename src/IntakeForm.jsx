@@ -30,6 +30,8 @@ const ENABLED_GOALS = [
 const INTENT_MAPPING = {
   'Join the Pod': 'Join the Pod',
   'Join Alpha Testing': 'Join Alpha Testing',
+  'Test New Apps Early': 'Join Alpha Testing',
+  'Partner with OrkaOS': 'Partner with PROJXON',
   'Partner with PROJXON': 'Partner with PROJXON'
 };
 
@@ -46,7 +48,7 @@ const INTENT_COPY = {
       'Test active work-in-progress builds, expect rough edges, and help shape what ships next.'
   },
   'Partner with PROJXON': {
-    title: 'Partner with PROJXON',
+    title: 'Partner with OrkaOS',
     description:
       'Explore a pilot, integration, strategic partnership, or co-building opportunity.'
   }
@@ -76,7 +78,7 @@ const ORKA_USE_REASONS = [
 ];
 
 const PURPOSE_OPTIONS = [
-  'Get early access as apps reach preview or demo stage',
+  'Explore apps as they become ready to demonstrate',
   'Test work-in-progress product builds',
   'See a guided product demo',
   'Use Orka apps in my own work or organization',
@@ -915,15 +917,12 @@ export default function IntakeForm({
                     >
                       <option value="">Select a path…</option>
                       <option value="Join the Pod">Join the Pod</option>
-                      <option value="Join Alpha Testing">Join Alpha Testing</option>
-                      <option value="beta-coming-soon" disabled>
-                        Join Beta Testing — coming soon
-                      </option>
-                      <option value="Partner with PROJXON">Partner with PROJXON</option>
+                      <option value="Join Alpha Testing">Join Alpha Testing · Test New Apps Early</option>
+                      <option value="Partner with PROJXON">Partner with OrkaOS</option>
                     </select>
                   </div>
                   <p className="intake-field__hint">
-                    Beta testing is later-stage, near-release validation. Enrollment is not open yet.
+                    Choose Alpha Testing if you want to help shape work-in-progress apps.
                   </p>
                   {errors.primaryGoal && <p className="intake-field__error">{errors.primaryGoal.message}</p>}
                 </div>
